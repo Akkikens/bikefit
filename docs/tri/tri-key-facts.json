@@ -1,0 +1,372 @@
+[
+ {
+  "id": "f01",
+  "fact": "US App Store rating counts (iTunes Search API, 2026-11-06): Runna 35,585; TrainerRoad 21,439; Zwift 21,480; TrainingPeaks 12,770; TriDot new app 34 plus Legacy TriDot 263; MOTTIV 71; Humango 21; Athletica 41. All tri-specific plan apps combined have under 450 US ratings.",
+  "source_url": "https://itunes.apple.com/search?term=mottiv&entity=software&country=us"
+ },
+ {
+  "id": "f02",
+  "fact": "Runna's triathlon plans cover only the running leg, with no swimming or cycling sessions, and Runna offers no duathlon plans as of Nov 2026.",
+  "source_url": "https://support.runna.com/en/articles/15443877-how-to-create-a-training-plan-in-runna"
+ },
+ {
+  "id": "f03",
+  "fact": "Strava acquired Runna in April 2025 for an undisclosed sum; Runna continues as a separate app.",
+  "source_url": "https://dcrainmaker.com/2025/04/strava-acquires-runna-thoughts-forward.html"
+ },
+ {
+  "id": "f04",
+  "fact": "The joint Strava+Runna subscription is $149.99 per year, annual only.",
+  "source_url": "https://marathonhandbook.com/strava-and-runna-launch-joint-subscription/"
+ },
+ {
+  "id": "f05",
+  "fact": "Runna grew subscriptions 30x between December 2022 and December 2023 per RevenueCat's case study.",
+  "source_url": "https://www.casestudies.com/company/revenuecat/case-study/how-revenuecat-helped-runna-reach-30x-year-over-year-growth"
+ },
+ {
+  "id": "f06",
+  "fact": "Runna had a team of more than 120 people across London and Boston around the acquisition and had raised over 8m GBP, so it was a venture-scale company, not a tiny team.",
+  "source_url": "https://startups.co.uk/news/runna-acquired-by-strava/"
+ },
+ {
+  "id": "f07",
+  "fact": "TriDot pricing (vendor page, fetched 2026-11-06): Lifestyle $14.99/mo for one sprint or Olympic race, Essentials $39/mo, Complete $99/mo, Premium Coached typically $249/mo; FitLogic marketed as the first AI-native endurance platform.",
+  "source_url": "https://www.tridot.com/pricing"
+ },
+ {
+  "id": "f08",
+  "fact": "TriDot ended its Ironman 'Official Training Platform' sponsorship in early August 2025 citing unresolved business matters, stopped operating IRONMAN U, and launched its own ESCI certification; Ironman said the announcement came as a surprise.",
+  "source_url": "https://slowtwitch.com/industry/lessons-from-the-ironman-x-tridot-break-up/"
+ },
+ {
+  "id": "f09",
+  "fact": "MOTTIV pricing (vendor page, fetched 2026-11-06): free plan with one race, workout ads and no device/app connections; Premium $19.99/mo or $179.99/yr with a 30 day money back guarantee.",
+  "source_url": "https://www.mymottiv.com/pricing"
+ },
+ {
+  "id": "f10",
+  "fact": "MOTTIV was founded in 2020 in Calgary by Taren Gesell (Triathlon Taren) and is reported at roughly 9-10 employees, seed stage.",
+  "source_url": "https://builtincalgary.org/company/mottiv"
+ },
+ {
+  "id": "f11",
+  "fact": "Athletica.ai pricing (vendor page, fetched 2026-11-06): $19.90/mo, $99 per 6 months, $189/yr, 2 week trial with no credit card; supports triathlon, duathlon, running, cycling, rowing and HYROX.",
+  "source_url": "https://athletica.ai/pricing/"
+ },
+ {
+  "id": "f12",
+  "fact": "Humango's App Store listing shows annual in-app purchases of $169.99 (Endurance) and $79.99 (Fitness); a 2024 review puts its top All-Star tier at about $29/mo with Olympic, half and full distance triathlon plans.",
+  "source_url": "https://fueledbylolz.com/2024/08/28/humango-review/"
+ },
+ {
+  "id": "f13",
+  "fact": "Humango signed a multi-year partnership with the Challenge Family race series.",
+  "source_url": "https://www.challenge-family.com/challenge-family/news/humango-challenge-family-announce-multi-year-agreement/"
+ },
+ {
+  "id": "f14",
+  "fact": "80/20 Endurance individual triathlon plans start at $54.95 (Sprint), $64.95 (Olympic), $89.95 (Half) and $99.95 (Full); Team 80/20 membership is $16.58/mo paid annually and includes TrainingPeaks Premium.",
+  "source_url": "https://www.8020endurance.com/training-plans/full-distance-triathlon/"
+ },
+ {
+  "id": "f15",
+  "fact": "TrainingPeaks raised annual Premium from $124.99 to $134.99 USD effective April 2, 2025 (official help center).",
+  "source_url": "https://help.trainingpeaks.com/hc/en-us/articles/12916774026765-TrainingPeaks-Annual-Premium-Subscription-Pricing-Update"
+ },
+ {
+  "id": "f16",
+  "fact": "JOIN Cycling's official help center states it does not yet offer full triathlon training plans; swimming can only be logged and counts less toward training load; JOIN Running launched January 2025.",
+  "source_url": "https://help.join.cc/hc/en-150/articles/6543382552593-Triathlons-JOIN"
+ },
+ {
+  "id": "f17",
+  "fact": "Zwift costs $19.99/mo and $199.99/yr after its 2024 price increase; TrainerRoad costs $21.99/mo or $209.99/yr.",
+  "source_url": "https://dcrainmaker.com/2024/05/increases-prices-hardware.html"
+ },
+ {
+  "id": "f18",
+  "fact": "watchOS 9 (2022) added the Multisport workout type with automatic swim/bike/run transition detection and a manual transitions option; the setting persists in current watchOS per Apple's user guide. Apple offers no triathlon training plan layer.",
+  "source_url": "https://support.apple.com/en-mn/guide/watch/combine-multiple-workouts-apdf42f22a41/11.0/watchos/11.0"
+ },
+ {
+  "id": "f19",
+  "fact": "Per a Garmin forum report, Garmin Coach triathlon plans (free with a Garmin watch) top out at Olympic distance; no free Garmin 70.3 plan was found (user-generated source, verify in Garmin Connect).",
+  "source_url": "https://forums.garmin.com/outdoor-recreation/outdoor-recreation/f/descent-mk3-series/422830/triathlon-training-program"
+ },
+ {
+  "id": "f20",
+  "fact": "Forum sentiment: TriDot Reddit feedback described as a mixed bag with ambassador-heavy advocacy; Humango's Hugo AI assistant called 'laughably bad'; Athletica praised for scientific transparency but called expensive for what it offers.",
+  "source_url": "https://forum.slowtwitch.com/t/triathlon-ai-training-thoughts-tridot-humango-athletica-2peaks-triq/831893"
+ },
+ {
+  "id": "f21",
+  "fact": "A 2024 Sports Medicine systematic review found polarized training superior to other intensity distributions only for VO2peak, with no superiority on other endurance performance outcomes",
+  "source_url": "https://link.springer.com/content/pdf/10.1007/s40279-024-02034-z.pdf"
+ },
+ {
+  "id": "f22",
+  "fact": "CSS test: all out 400m and 200m same day, CSS pace per 100m = (400m time minus 200m time)/2; test is invalid if the 200m pace is not faster than the 400m pace",
+  "source_url": "https://support.myprocoach.net/hc/en-us/articles/360040593392-How-Does-The-CSS-Swim-Test-Work"
+ },
+ {
+  "id": "f23",
+  "fact": "FTP is estimated as 95 percent of maximal 20 minute average power (Coggan protocol); retest every 4 to 8 weeks",
+  "source_url": "https://biketips.com/ftp-testing-training-zones-explained-2/"
+ },
+ {
+  "id": "f24",
+  "fact": "CTL and ATL are exponentially weighted moving averages of daily load with time constants 42 and 7 days; TSB = CTL minus ATL (Coggan Performance Management model built on Banister)",
+  "source_url": "https://fasttalklabs.com/articles/an-introduction-to-training-metrics-part-2"
+ },
+ {
+  "id": "f25",
+  "fact": "TSS is a live registered US trademark of TrainingPeaks, LLC (registered January 21, 2014); the portfolio also covers IF, NP, TP, TPU",
+  "source_url": "https://trademarks.justia.com/owners/trainingpeaks-llc-4253944"
+ },
+ {
+  "id": "f26",
+  "fact": "intervals.icu names its TSS equivalent metric 'Load' specifically because TrainingPeaks trademarked TSS; the formula (1 hour at threshold = 100) is the same",
+  "source_url": "https://forum.intervals.icu/t/show-tss-in-intervals-icu/24435"
+ },
+ {
+  "id": "f27",
+  "fact": "GoldenCheetah (GPLv3) renamed TSS to BikeStress, IF to BikeIntensity, and NP to IsoPower in version 3.5",
+  "source_url": "https://groups.google.com/g/golden-cheetah-users/c/Qjn4Xe8ShQ0/m/FmOLo_PXAAAJ"
+ },
+ {
+  "id": "f28",
+  "fact": "Runna shows a Plan Realignment prompt after more than 3 missed workouts or a missed week; single missed sessions are skipped or moved within the week and later workouts shift automatically",
+  "source_url": "https://support.runna.com/en/articles/15012850-how-and-when-to-skip-a-run-managing-missed-sessions-in-your-training-plan"
+ },
+ {
+  "id": "f29",
+  "fact": "Runna's 'Not Feeling 100%' illness mode reduces plan difficulty or keeps only easy and long runs for up to 14 days",
+  "source_url": "https://intercom.help/runna/en/articles/12809806-feeling-unwell-how-to-adapt-your-training-plan"
+ },
+ {
+  "id": "f30",
+  "fact": "TriDot describes a four phase loop (Assess, Prescribe, Evaluate with TrainX score 1 to 100, Predict with RaceX) with FitLogic analyzing every logged workout and EnviroNorm normalizing for temperature, humidity, elevation, wind and terrain",
+  "source_url": "https://tridot.com/faq"
+ },
+ {
+  "id": "f31",
+  "fact": "Buist et al. GRONORUN RCT (N=532 novice runners): a 13 week graded program based on the 10 percent rule produced the same injury rate as a standard 8 week program (20.8 vs 20.3 percent)",
+  "source_url": "https://research.rug.nl/en/publications/no-effect-of-a-graded-training-program-on-the-number-of-running-r"
+ },
+ {
+  "id": "f32",
+  "fact": "Hottenrott et al. 2016 RCT (42 non elite marathoners): run/walk produced similar finish times to continuous running (about 4:14 vs 4:08, p=0.377) and less post race muscle pain and fatigue (p=0.006), with no reduction in cardiac stress markers",
+  "source_url": "https://pubmed.ncbi.nlm.nih.gov/25467199/"
+ },
+ {
+  "id": "f33",
+  "fact": "Hulin and Gabbett conceded their use of 'predict' for ACWR created a misconception; ACWR flags periods of risk rather than predicting injuries, and its validity has been formally challenged",
+  "source_url": "https://bjsm.bmj.com/content/53/3/144"
+ },
+ {
+  "id": "f34",
+  "fact": "Jeukendrup's triathlon nutrition guidance: 60 to 70 g carbohydrate per hour (up to 90 g/h if tolerable) at 5 to 8 percent concentration; glucose absorption via SGLT1 caps near 60 g/h and adding fructose raises the ceiling to about 90 g/h",
+  "source_url": "https://www.triathlete.com/nutrition/triathletes-guide-to-race-fueling/"
+ },
+ {
+  "id": "f35",
+  "fact": "Coaching heuristic weekly hour ranges: sprint 4 to 7, Olympic 6 to 10, 70.3 8 to 14, full distance 12 to 20, with peak weeks 20 to 30 percent above average and recovery weeks 30 to 40 percent below",
+  "source_url": "https://tri-alliance.com/tools/training-hours/"
+ },
+ {
+  "id": "f36",
+  "fact": "Apple Guideline 1.2 requires UGC apps to ship content filtering, reporting, user blocking and published contact info, with removal until compliance",
+  "source_url": "https://developer.apple.com/app-store/review/guidelines/#user-generated-content"
+ },
+ {
+  "id": "f37",
+  "fact": "US providers hosting user content must report apparent CSAM to the NCMEC CyberTipline with evidence packaging and retention; obligations attach on actual knowledge",
+  "source_url": "https://dev.to/sentinelsafety/ncmec-mandatory-reporting-for-online-platforms-what-developers-need-to-know-4k74"
+ },
+ {
+  "id": "f38",
+  "fact": "DSA exempts micro and small enterprises from online-platform-specific duties (Articles 20-22, transparency reports) but baseline hosting duties still apply",
+  "source_url": "https://presencis.com/regulations/dsa/article-19/"
+ },
+ {
+  "id": "f39",
+  "fact": "Supabase free tier: 500 MB database, 50,000 auth MAU, 1 GB file storage, 5 GB egress, projects pause after 7 idle days; Pro $25 per month",
+  "source_url": "https://www.jetadmin.io/blog/supabase-pricing-2026-guide-to-plans-limits-and-real-world-costs/"
+ },
+ {
+  "id": "f40",
+  "fact": "CloudKit public database free quota scales with users up to 10 TB storage and 200 TB monthly transfer (official 2015 figures; Apple publishes no current pricing page)",
+  "source_url": "https://nonstrict.eu/wwdcindex/wwdc2015/704/"
+ },
+ {
+  "id": "f41",
+  "fact": "Chorus, Dick Costolo's funded social fitness app, shut down about 8 months after launch, blamed on hard-wired human behavior, not features",
+  "source_url": "https://www.businessinsider.in/dick-costolo-explains-why-he-shut-down-his-fitness-startup-after-8-months-we-were-up-against-hard-wired-human-behavior/articleshow/63102989.cms"
+ },
+ {
+  "id": "f42",
+  "fact": "Strava's community, not tracking, is the moat: free users (over 95 percent of base) generate the engagement content and segments create direct network effects",
+  "source_url": "https://insider.fitt.co/issue-no-158-tracking-stravas-rise/"
+ },
+ {
+  "id": "f43",
+  "fact": "Strava announced acquisition of Runna on April 17, 2025, undisclosed terms, keeping it standalone",
+  "source_url": "https://persportaal.anp.nl/artikel/CSN-170425027/-strava-to-acquire-runna-a-leading-running-training-app"
+ },
+ {
+  "id": "f44",
+  "fact": "Nov 2024 Strava API agreement bans displaying a user's Strava data to other users, AI/ML training, and analytics processing; users' own data display stays allowed; partners got 30 days",
+  "source_url": "https://www.dcrainmaker.com/2024/11/stravas-changes-to-kill-off-apps.html"
+ },
+ {
+  "id": "f45",
+  "fact": "Strava upload API remains available: POST /api/v3/uploads accepts FIT, TCX, GPX (gzip ok) with activity:write scope",
+  "source_url": "https://developers.strava.com/docs/uploads/"
+ },
+ {
+  "id": "f46",
+  "fact": "A copyright holder can relicense code they solely authored, but code combined with AGPL code cannot be relicensed, and modifications to AGPL components stay AGPL",
+  "source_url": "https://lwn.net/Articles/819101"
+ },
+ {
+  "id": "f47",
+  "fact": "4.3(b) spam rejections cite apps with the same feature set as existing App Store apps varying only in content; phone appeals have succeeded",
+  "source_url": "https://developer.apple.com/forums/thread/774834"
+ },
+ {
+  "id": "f48",
+  "fact": "FDA's General Wellness guidance (updated January 6, 2026) keeps exercise, aerobic fitness and endurance software outside medical device regulation if claims avoid disease references",
+  "source_url": "https://www.agg.com/news-insights/publications/dont-fear-the-regulator-fda-clarifies-when-software-and-wellness-products-are-not-medical-devices/"
+ },
+ {
+  "id": "f49",
+  "fact": "Garmin Coach triathlon training plans are free in Garmin Connect for compatible watch owners",
+  "source_url": "https://www.garmin.com/en-US/blog/?p=35760"
+ },
+ {
+  "id": "f50",
+  "fact": "MOTTIV offers a $0 per month free plan covering sprint through full distance triathlon, paid upgrades from $14.99 per month billed annually",
+  "source_url": "https://www.mymottiv.com/pricing"
+ },
+ {
+  "id": "f51",
+  "fact": "80/20 Endurance offers free 12-week triathlon maintenance plans on TrainingPeaks with code TRY8020",
+  "source_url": "https://www.trainingpeaks.com/training-plans/triathlon/tp-113637/free-triathlon-maintenance-training-plan-12-weeks-80-20-pace-power-free-with-cod"
+ },
+ {
+  "id": "f52",
+  "fact": "Runna costs $19.99 per month or $119.99 per year as of October 2026, with only week 1 of plans free; Strava bundle $149.99 per year",
+  "source_url": "https://the5krunner.com/2026/10/14/is-runna-free/"
+ },
+ {
+  "id": "f53",
+  "fact": "Removed from the public copy",
+  "source_url": ""
+ },
+ {
+  "id": "f54",
+  "fact": "iTunes Search API (US storefront, 2026-11-06): Taperline and Tricadence return zero software results; TriPace is taken by two existing triathlon apps",
+  "source_url": "https://itunes.apple.com/search?term=Taperline&country=US&entity=software&limit=5"
+ },
+ {
+  "id": "f55",
+  "fact": "WorkoutKit (iOS 17+, watchOS 10+) lets third party apps create, preview, and sync scheduled workouts into the stock Apple Watch Workout app, where they appear in a dedicated space with the app's icon and name; four plan types: CustomWorkout, SingleGoalWorkout, PacerWorkout, SwimBikeRunWorkout",
+  "source_url": "https://developer.apple.com/documentation/workoutkit"
+ },
+ {
+  "id": "f56",
+  "fact": "Custom pool swimming workouts (steps, goals, alerts) came to WorkoutKit in watchOS 11, with a new poolSwimDistanceWithTime goal and automatic pool-length distance conversion; open water custom workouts not included",
+  "source_url": "https://developer.apple.com/videos/play/wwdc2024/10084/"
+ },
+ {
+  "id": "f57",
+  "fact": "SwimBikeRunWorkout init takes only an ordered activities list and displayName: no per-leg intervals, goals, or alerts in multisport plans",
+  "source_url": "https://developer.apple.com/documentation/workoutkit/swimbikerunworkout"
+ },
+ {
+  "id": "f58",
+  "fact": "WorkoutScheduler has a maxAllowedScheduledWorkoutCount limit whose numeric value is not published in the docs",
+  "source_url": "https://developer.apple.com/documentation/workoutkit/workoutscheduler/maxallowedscheduledworkoutcount"
+ },
+ {
+  "id": "f59",
+  "fact": "HealthKit multisport: HKWorkoutActivityType.swimBikeRun with transition activities and per-leg HKWorkoutActivity statistics, available iOS 16 / watchOS 9",
+  "source_url": "https://developer.apple.com/documentation/healthkit/hkworkoutactivity"
+ },
+ {
+  "id": "f60",
+  "fact": "HKWorkoutSwimmingLocationType distinguishes pool vs openWater swims (since iOS 10 / watchOS 3); per-lap stroke style via HKMetadataKeySwimmingStrokeStyle on lap events",
+  "source_url": "https://developer.apple.com/documentation/healthkit/hkworkoutswimminglocationtype"
+ },
+ {
+  "id": "f61",
+  "fact": "Open water swim routes are readable via HKWorkoutRoute, but pool workouts expose no location; forum-reported DTS answer says no public API for indoor workout locations",
+  "source_url": "https://developer.apple.com/forums/thread/849272"
+ },
+ {
+  "id": "f62",
+  "fact": "Garmin Connect Developer Program has Personal (self-serve key, own data, pull only), Starter (apply, push only, includes Training API for pushing workouts to devices, limited capacity, no historical data), and Enterprise (negotiated) tiers; page says it supports individual developers to large companies",
+  "source_url": "https://developer.garmin.com/gc-developer-program/overview"
+ },
+ {
+  "id": "f63",
+  "fact": "Garmin paused new developer program applications from around March 2026 with applicants left pending for 6+ months, following the 2025 Strava lawsuit and the July 2026 TrainingPeaks/TrainHeroic acquisitions",
+  "source_url": "https://the5krunner.com/2026/09/14/garmin-developer-api-access-paused/"
+ },
+ {
+  "id": "f64",
+  "fact": "Strava API Agreement: 'Strava Data provided by a specific user can only be displayed or disclosed in your Developer Application to that user' and 'You may not create applications that compete with or replicate Strava functionality'",
+  "source_url": "https://www.strava.com/legal/api"
+ },
+ {
+  "id": "f65",
+  "fact": "Strava default rate limits: 100 read requests per 15 minutes and 1,000 per day (200/2,000 overall); new apps start in Single Player Mode with athlete capacity of 1; increased access is not guaranteed",
+  "source_url": "https://developers.strava.com/docs/rate-limits/"
+ },
+ {
+  "id": "f66",
+  "fact": "Wahoo Cloud API is OAuth 2.0 with workouts/plans/routes read-write scopes; access limited to approved requesters via developer portal application; Sandbox and Production are separate applications",
+  "source_url": "https://developers.wahooligan.com/cloud"
+ },
+ {
+  "id": "f67",
+  "fact": "COROS Partner API requires a registered company and an established user base, applied for via api@coros.com",
+  "source_url": "https://support.coros.com/hc/en-us/articles/17085887816340-Submit-an-API-Application"
+ },
+ {
+  "id": "f68",
+  "fact": "CKShare limits shares to 100 participants, each needing an active iCloud account, and provides built-in access-request and user-blocking APIs (blockRequesters, blockedIdentities)",
+  "source_url": "https://developer.apple.com/documentation/cloudkit/ckshare"
+ },
+ {
+  "id": "f69",
+  "fact": "App Review 1.2 requires UGC apps to have content filtering, offensive-content reporting with timely responses, the ability to block abusive users, and published contact information",
+  "source_url": "https://developer.apple.com/app-store/review/guidelines/"
+ },
+ {
+  "id": "f70",
+  "fact": "Guideline 5.1.1(v) requires in-app account deletion for any app that supports account creation, and guideline 5.1.3(ii) says apps may not store personal health information in iCloud",
+  "source_url": "https://developer.apple.com/app-store/review/guidelines/"
+ },
+ {
+  "id": "f71",
+  "fact": "Apple defines 'collect' for privacy labels as transmitting data off device in a way that allows the developer or partners to access it beyond real-time request servicing; on-device-only data is not collected",
+  "source_url": "https://developer.apple.com/app-store/app-privacy-details/"
+ },
+ {
+  "id": "f72",
+  "fact": "CloudKit offers up to 1PB of public database storage, but Apple publishes no current request quota numbers; developers report throttling with retryAfter errors",
+  "source_url": "https://developer.apple.com/icloud/cloudkit/"
+ },
+ {
+  "id": "f73",
+  "fact": "Garmin program reportedly relaunched around October 2026 with a free instant Personal tier (own data, pull only, FIT files omitting VO2 max and recovery metrics) and a free Starter tier up to 1,000 users requiring approval",
+  "source_url": "https://byteiota.com/garmin-connect-api-revamp-personal-access-free/"
+ },
+ {
+  "id": "f74",
+  "fact": "Suunto Cloud API access is reportedly granted only to companies/organizations, with the base Developer API tier limited to 10 calls/minute and 200 calls/week (third party summary, unverified against Suunto's own terms)",
+  "source_url": "https://openwearables.io/docs/providers/suunto-api-integration"
+ }
+]
