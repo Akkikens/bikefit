@@ -62,7 +62,7 @@ Not legal advice. Sources: https://medium.com/swlh/understanding-the-agpl-the-mo
 ## 5. App Store Guideline 4.3 spam risk
 
 - 4.3(b) rejects apps that are hard to distinguish from many existing apps in a saturated category; fitness and training is template-heavy, and rejection notes cite "the same feature set as other apps submitted to the App Store; it simply varies in content". Guideline text: https://developer.apple.com/app-store/review/guidelines/#spam . Developer threads with the rejection language and appeal outcomes: https://developer.apple.com/forums/thread/775597 , https://developer.apple.com/forums/thread/774834 , https://developer.apple.com/forums/thread/850731 . Third-party guide on the two clauses: https://newly.app/guides/guideline-4-3-spam-rejection
-- Mitigation consistent with his CLAUDE.md rule: lead the metadata with what is unique (the camera bike fit module is a genuine differentiator no template app has; triathlon-specific brick scheduling is another), original art and names, and be ready to appeal by phone, which worked in the threads above.
+- Mitigation consistent with his CLAUDE.md rule: lead the metadata with what is unique (the camera bike fit module is a genuine differentiator no template app has; triathlon-specific brick scheduling is another), original art and names, and be ready to reply in Resolution Center with the differentiation case; the threads above show approvals after differentiation changes, not successful appeals as such.
 
 ## 6. Liability and FDA framing
 

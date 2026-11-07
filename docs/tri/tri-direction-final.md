@@ -32,13 +32,13 @@ The caution: 430 combined ratings may mean the niche is small. Zwift (21,480) an
 
 - **f20, unsupported, dropped.** The forum sentiment summary (TriDot ambassador-heavy, Hugo "laughably bad," Athletica overpriced) is not in the cited thread, which in places says the opposite. The synthesis did not rest a claim on it; competitor sentiment is treated as unknown.
 - **f22, CSS.** Same session, 5 to 10 minutes active recovery; a 200 not faster than the 400 is an error condition prompting a retest, not an "invalid test."
-- **f23, FTP.** Retest every 4 to 6 weeks, not 4 to 8; the plan's 4 week cadence sits inside the supported range.
+- **f23, FTP.** Retest every 4 to 6 weeks, not 4 to 8 (BikeRadar, fetched 2026-11-06, Moninger: every four to six weeks during the season, https://www.bikeradar.com/advice/fitness-and-training/what-is-ftp-and-why-it-matters-for-cyclists); the spec's rotating test weeks retest each sport about every 6 weeks.
 - **f26, intervals.icu.** The trademark rationale for "Load" is a forum user claim and the formula is not on the cited page; the original-names rule stands anyway on f25 (TSS registered 2014, live, renewed 2024, with IF, NP, TP, TPU) and f27 (GoldenCheetah renames).
 - **f30, TriDot.** TrainX has no stated 1 to 100 scale; EnviroNorm's factors are temperature, humidity, wind, elevation and elevation gain. Nothing strategic changes.
 - **f34, fueling.** No Jeukendrup attribution; 60 to 90 g/h bike and 50 to 70 g/h run for legs over 2.5 hours; the 5 to 8 percent concentration claim is unsourced.
 - **f40, CloudKit.** The 2015 ceiling is 1 PB asset storage plus 10 TB database storage (the two were conflated) and 200 TB monthly transfer; current quotas remain unpublished.
 - **f42, Strava.** Over 95 percent free users powering engagement is confirmed; the source credits global reach and device integrations, not community network effects.
-- **f47, 4.3(b).** Written appeals demonstrating differentiation have succeeded; no documented phone appeal has. If a spam rejection comes, appeal in writing.
+- **f47, 4.3(b).** The cited threads document no successful appeal by any channel; approvals followed differentiation changes. If a spam rejection comes, reply in Resolution Center with the differentiation case and, if needed, ship a differentiating change and resubmit.
 - **f54, names.** Taperline: zero US results. Tricadence: four fuzzy matches, none named Tricadence, so the exact name is unused but "zero results" was wrong. TriPace: taken by two triathlon apps.
 
 The adversarial review's remaining fixes (Runna's scale as reported ranges, TriDot's own August 2025 walk-away from Ironman, 1.2's "timely responses" wording, the DSA micro exemption's bounds) are folded into sections 1, 5 and 7.
