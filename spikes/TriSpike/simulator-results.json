@@ -1,0 +1,978 @@
+[
+  {
+    "check" : "CustomWorkout.supportsActivity(running)",
+    "id" : "E62EB0ED-66AD-4590-8658-D7DAF09087A6",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "SingleGoalWorkout.supportsActivity(running)",
+    "id" : "00B4C84C-5408-4CA3-8BEA-2C3FE97D4B8F",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "CustomWorkout.supportsActivity(cycling)",
+    "id" : "0B8C9ED8-4EAD-453B-A3DD-BF4F6C64DE40",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "SingleGoalWorkout.supportsActivity(cycling)",
+    "id" : "4F5D8C64-8A91-47DD-8E89-3B235296DBAE",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "CustomWorkout.supportsActivity(swimming)",
+    "id" : "DB9764AD-75C4-4BEC-92FD-6932479E67A9",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "SingleGoalWorkout.supportsActivity(swimming)",
+    "id" : "2D998584-AEE5-429B-A657-F0BC1A19350B",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "CustomWorkout.supportsActivity(swimBikeRun)",
+    "id" : "2A22D638-DF88-4B92-BC92-1120114EA1B6",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "SingleGoalWorkout.supportsActivity(swimBikeRun)",
+    "id" : "F4822FFE-3E46-4284-8F30-D3EFA16D4812",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "CustomWorkout.supportsActivity(walking)",
+    "id" : "F3FFB208-1A9B-4979-A1FF-66833E1C75DA",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "SingleGoalWorkout.supportsActivity(walking)",
+    "id" : "0F31B6CD-608A-4EF1-8F7D-532C6E683206",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal time running indoor",
+    "id" : "878E8E56-EE6F-4411-A8FD-B30B98A8E021",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal distance running indoor",
+    "id" : "5656FA48-67DD-4C71-AA56-44F922DB0452",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal energy running indoor",
+    "id" : "0DB05546-B8C3-4CBE-A530-BE45DEBDBB3B",
+    "result" : "custom=false single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal poolSwimDistanceWithTime running indoor",
+    "id" : "942CD9B3-074D-4101-9C2E-348A810B2D55",
+    "result" : "custom=false single=false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal time running outdoor",
+    "id" : "30906CDD-E617-41FD-A03D-468F85A8F109",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal distance running outdoor",
+    "id" : "D9BBE188-D8D6-4D9D-8AD7-4E80A96A1008",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal energy running outdoor",
+    "id" : "E44AEA29-16CE-4373-964F-A7BF1719D264",
+    "result" : "custom=false single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal poolSwimDistanceWithTime running outdoor",
+    "id" : "F5B682D4-D3F5-4620-9A82-6303A835D75D",
+    "result" : "custom=false single=false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal time running unknown",
+    "id" : "9F7161A2-9CAD-437F-9993-C8B1E5814851",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal distance running unknown",
+    "id" : "857059B0-3DC0-4CE7-99E2-DF41B2278312",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal energy running unknown",
+    "id" : "4346E601-2ABE-4F84-A188-90A0696AFEAD",
+    "result" : "custom=false single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal poolSwimDistanceWithTime running unknown",
+    "id" : "E8CCD75C-039A-4D61-B515-7B98176D364E",
+    "result" : "custom=false single=false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal time cycling indoor",
+    "id" : "FC39F991-AA6B-4550-842A-E782CCC8E4A9",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal distance cycling indoor",
+    "id" : "9AE718B4-5309-4F71-834B-69B2E0FBD00D",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal energy cycling indoor",
+    "id" : "6AB8F6B2-AD34-4680-894B-E5B8219747EF",
+    "result" : "custom=false single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal poolSwimDistanceWithTime cycling indoor",
+    "id" : "24D30A05-39ED-4A3C-AA1D-448C6F59E6FF",
+    "result" : "custom=false single=false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal time cycling outdoor",
+    "id" : "1EB9BC8E-8C04-432B-8AAB-7A5C8C6B51A7",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal distance cycling outdoor",
+    "id" : "7105C714-9A83-4272-8C7A-0A2C032C79CD",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal energy cycling outdoor",
+    "id" : "D845659D-30C8-482A-87B5-1E4F017F0BD1",
+    "result" : "custom=false single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal poolSwimDistanceWithTime cycling outdoor",
+    "id" : "2757EE49-B97B-4E07-B1DD-F7ED492FE306",
+    "result" : "custom=false single=false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal time cycling unknown",
+    "id" : "453DA7F7-C63F-44F6-B0B1-CE7CA6678A59",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal distance cycling unknown",
+    "id" : "3E704468-BD8C-40DA-8BBB-FDC09183EC72",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal energy cycling unknown",
+    "id" : "AB178013-268A-4000-BBDB-6A68AE7AC4AA",
+    "result" : "custom=false single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal poolSwimDistanceWithTime cycling unknown",
+    "id" : "F48F3F0A-5BFC-4E5C-AB1B-28FC5F17E7CA",
+    "result" : "custom=false single=false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal time swimming indoor",
+    "id" : "9C500CAB-7883-4D3D-A50E-25DF1C3629BA",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal distance swimming indoor",
+    "id" : "1360D15B-177D-4AD1-82D2-F9EA164514A6",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal energy swimming indoor",
+    "id" : "C9B8CC43-FF6F-474C-BB2F-56B99A0691DC",
+    "result" : "custom=false single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal poolSwimDistanceWithTime swimming indoor",
+    "id" : "3A64FF57-A703-4951-8C56-4E9747218E24",
+    "result" : "custom=true single=false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal time swimming outdoor",
+    "id" : "5AE96898-F4BE-4F99-BD09-92EB2CD33EBA",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal distance swimming outdoor",
+    "id" : "89216EEF-E92A-4B0F-945F-1AE24C1DB6E6",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal energy swimming outdoor",
+    "id" : "9E0B0058-1A51-410E-929C-0494838CA6BC",
+    "result" : "custom=false single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal poolSwimDistanceWithTime swimming outdoor",
+    "id" : "1EA24F2D-6EE6-4EA7-96C4-DD28F907FFA8",
+    "result" : "custom=true single=false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal time swimming unknown",
+    "id" : "70F9D9C8-F646-4560-90A6-07D7D33188CB",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal distance swimming unknown",
+    "id" : "3010D6AC-1815-497C-A019-384D3D60D731",
+    "result" : "custom=true single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal energy swimming unknown",
+    "id" : "429A4550-3228-4440-9B08-9FAF0A7258E6",
+    "result" : "custom=false single=true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "goal poolSwimDistanceWithTime swimming unknown",
+    "id" : "C1E0C44F-DD4F-477A-B70B-B19A8D353B98",
+    "result" : "custom=true single=false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedRange running indoor",
+    "id" : "40A5D8E0-3EE8-42F8-ABE3-C98F90462101",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedThreshold running indoor",
+    "id" : "B9D7BDB3-0246-4DF1-AB7A-232B376EC53C",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange current running indoor",
+    "id" : "8284544C-671A-400C-97DE-A2E5EF3C5C9B",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange average running indoor",
+    "id" : "B8553156-88FB-494B-A3CC-9C8B492352CE",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerZone running indoor",
+    "id" : "4D9D459E-7B3B-4CC1-8429-4031A7012CE2",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateRange running indoor",
+    "id" : "F626787D-EDB7-4ED8-B223-4F1A1B7A58F0",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateZone running indoor",
+    "id" : "A1FD5E66-CACF-4D57-AC3F-758256F5E845",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert cadenceRange running indoor",
+    "id" : "944D26C5-B7A5-4627-A33C-667A368D3457",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedRange running outdoor",
+    "id" : "D26F7F3F-7755-4167-9758-842367246BBE",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedThreshold running outdoor",
+    "id" : "21C562D9-753A-4F54-9316-76614BE3C4DB",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange current running outdoor",
+    "id" : "38C2445A-4B08-4D27-A8E9-FE9F3FFCFE5C",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange average running outdoor",
+    "id" : "EAC30904-0D0E-41F2-8B5F-C179C5506B0B",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerZone running outdoor",
+    "id" : "E6F1D949-7A2B-4733-BD05-F098E4C35E09",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateRange running outdoor",
+    "id" : "476D9A6C-55E3-4EEB-8B37-A28B3E61BD3D",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateZone running outdoor",
+    "id" : "77D57ABB-1A6A-4ADC-9AA7-BE6FB20AE86E",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert cadenceRange running outdoor",
+    "id" : "6371B14E-D219-4B25-B7D9-E2D51C115C42",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedRange running unknown",
+    "id" : "AE3F3FC4-50CE-4F48-9DD9-0933B620B5D5",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedThreshold running unknown",
+    "id" : "FCB96E14-696D-4122-A01F-2464DC8AC4D0",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange current running unknown",
+    "id" : "6EE559B2-5019-4209-8C6A-1556F03BED17",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange average running unknown",
+    "id" : "979F1B80-38A8-4579-B64D-BD75AC33661F",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerZone running unknown",
+    "id" : "AF494AEB-B4A6-4ED6-9E8F-0E8AB0B3A401",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateRange running unknown",
+    "id" : "D6930D87-007A-4296-987E-85D9A81039FE",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateZone running unknown",
+    "id" : "E7A5E1D7-A135-4C44-B7DA-76737B04941E",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert cadenceRange running unknown",
+    "id" : "41D0397E-6C2F-447D-9AFC-63029E657263",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedRange cycling indoor",
+    "id" : "192B6BF8-538D-49C9-93C1-239562366986",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedThreshold cycling indoor",
+    "id" : "E9F6F239-E265-42BA-8528-574AFD6DA7AF",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange current cycling indoor",
+    "id" : "A1C5FF3F-AA64-4BE3-9435-16D1A65DCD7B",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange average cycling indoor",
+    "id" : "DF22C4B4-8A12-4F0C-B44C-412EAC220E2C",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerZone cycling indoor",
+    "id" : "A413AC1F-D2AE-497B-B1E1-968B42947609",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateRange cycling indoor",
+    "id" : "C4B14BE0-2942-41C8-B95D-3D79A186C348",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateZone cycling indoor",
+    "id" : "B07C83D4-E678-4CE3-BA18-AEC00828B171",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert cadenceRange cycling indoor",
+    "id" : "1D94E93A-C440-4126-98AE-011ED0D57E43",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedRange cycling outdoor",
+    "id" : "20D52E3C-0E2E-4803-B6AB-411333A17BE4",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedThreshold cycling outdoor",
+    "id" : "66BB6C5D-D22E-47C5-B061-A871466E85CA",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange current cycling outdoor",
+    "id" : "ECFDF604-72B7-450A-828D-CEDF6A66859E",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange average cycling outdoor",
+    "id" : "DF364C25-966B-4DED-B5AF-4DB92CF2E985",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerZone cycling outdoor",
+    "id" : "BC38D9E5-C832-4F42-89CB-6D550E163D20",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateRange cycling outdoor",
+    "id" : "BC3B20B0-79C1-4E29-B23B-61BC16648B0D",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateZone cycling outdoor",
+    "id" : "56F0A71C-8A67-4F75-8B1E-2D3FD460D47B",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert cadenceRange cycling outdoor",
+    "id" : "8A9E2048-2957-4E4D-A5C3-6EB9F208AC31",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedRange cycling unknown",
+    "id" : "8629116C-405B-4B56-B3DC-58B7B91CB4AD",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedThreshold cycling unknown",
+    "id" : "6A46DD2B-5227-4F1C-8639-D92B2BCA47BD",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange current cycling unknown",
+    "id" : "45F5C139-2D53-4768-805B-4EE129640E91",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange average cycling unknown",
+    "id" : "00ACB6BB-293F-4EB4-B8C7-E2F0CDBD7786",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerZone cycling unknown",
+    "id" : "AC0526FD-272E-429D-88A1-F75C61FBA752",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateRange cycling unknown",
+    "id" : "FE232817-CAAD-4885-9230-F1B544E305EC",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateZone cycling unknown",
+    "id" : "0F7E5967-99AD-4D3E-BEE3-2DF2ECA7C642",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert cadenceRange cycling unknown",
+    "id" : "37D1AE8B-4CBC-46CC-82A1-6ADF8A6F9CC8",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedRange swimming indoor",
+    "id" : "B9C861A5-045B-4903-89DC-CAF402F08E5D",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedThreshold swimming indoor",
+    "id" : "2B43C40C-7FE3-4D94-BD8A-01A0316ADA69",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange current swimming indoor",
+    "id" : "1A42B441-ABE2-44BB-A702-DD0708F36550",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange average swimming indoor",
+    "id" : "B84D8FFE-1616-486B-9B8C-9AF89C45B5BA",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerZone swimming indoor",
+    "id" : "44EBB668-3AE2-49F0-84A1-FB3F99F12D08",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateRange swimming indoor",
+    "id" : "85A4BB54-A78F-48AE-A4DA-4A526EAD995C",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateZone swimming indoor",
+    "id" : "D824E6E9-6DD9-4F34-89A6-7E377A8B01C2",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert cadenceRange swimming indoor",
+    "id" : "032125F1-1F60-4A6C-9EB5-F7BE0C4D91B9",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedRange swimming outdoor",
+    "id" : "266B3D23-A545-4974-8AF4-6C4E83CAD534",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedThreshold swimming outdoor",
+    "id" : "B8DC6FD3-4EB5-436E-AB1E-FEEF7284A870",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange current swimming outdoor",
+    "id" : "13F58E7B-1B8C-4B92-A3D6-782E03801A96",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange average swimming outdoor",
+    "id" : "58F06BEE-8FED-42FC-AD0F-6CF764933099",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerZone swimming outdoor",
+    "id" : "51476D45-5B12-424F-AC50-8ABC05E1D5DB",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateRange swimming outdoor",
+    "id" : "2B387CD1-24D1-4F96-974D-D84A37E50483",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateZone swimming outdoor",
+    "id" : "25656733-660C-4400-BEB7-8A65A92562D3",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert cadenceRange swimming outdoor",
+    "id" : "52993E2C-37B3-4C18-83AE-EF4751E5EB8F",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedRange swimming unknown",
+    "id" : "32C7AA4E-FB9B-4595-AB68-F8278ABF0625",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert speedThreshold swimming unknown",
+    "id" : "8710C49A-E641-48CC-8985-D7E35E4CE79D",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange current swimming unknown",
+    "id" : "E8A4CE3E-6FF3-4E04-B240-0D5CEAE5BFE1",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerRange average swimming unknown",
+    "id" : "6A91A3F3-A6CE-46E5-9E33-E1A378A0B9EE",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert powerZone swimming unknown",
+    "id" : "95677EE2-2AD0-4BE1-838E-11D439AFA58C",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateRange swimming unknown",
+    "id" : "D2DDF87B-093A-471C-BF7B-3ECB8B484A9A",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert heartRateZone swimming unknown",
+    "id" : "8C145201-C836-4E02-A7BA-235778094297",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "alert cadenceRange swimming unknown",
+    "id" : "CB525E90-900F-486B-8A44-9643B5A10F48",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "SwimBikeRun.supportsActivityOrdering(open water, outdoor, outdoor)",
+    "id" : "1BC9EE3F-1CA0-45B0-B1A7-E4D632788A87",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "SwimBikeRun.supportsActivityOrdering(pool, indoor, indoor)",
+    "id" : "F158C761-0295-45D5-BD69-B70755F9FC67",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "SwimBikeRun.supportsActivityOrdering(duathlon run, bike, run)",
+    "id" : "04883B45-029A-487E-8FA3-7FC444CCF878",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "SwimBikeRun.supportsActivityOrdering(aquathlon swim, run)",
+    "id" : "6983B1E0-DA69-424B-A754-E77337BEF6AF",
+    "result" : "true",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "SwimBikeRun.supportsActivityOrdering(single leg)",
+    "id" : "2E00E98F-7464-45B6-89EF-6F53DC9AAA1D",
+    "result" : "false",
+    "spike" : "capability",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "round trip threshold run",
+    "id" : "B429172C-522D-4936-B3B1-1E9385F1020C",
+    "pass" : true,
+    "result" : "272 bytes, equal=true",
+    "spike" : "composition",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "round trip sweet spot bike",
+    "id" : "91AD37EC-E57C-4B6F-8532-1221BAF92E6B",
+    "pass" : true,
+    "result" : "235 bytes, equal=true",
+    "spike" : "composition",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "round trip HR bike",
+    "id" : "3BBE2F6F-9CFD-47BD-BB29-EE67516B1651",
+    "pass" : true,
+    "result" : "141 bytes, equal=true",
+    "spike" : "composition",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "round trip pool swim sets",
+    "id" : "EA0FD35E-61B9-4557-B25E-608BBF2B21F1",
+    "pass" : true,
+    "result" : "175 bytes, equal=true",
+    "spike" : "composition",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "round trip goal only pool swim",
+    "id" : "680830D0-8310-49A5-8232-FD495B8B1324",
+    "pass" : true,
+    "result" : "69 bytes, equal=true",
+    "spike" : "composition",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "round trip race day multisport",
+    "id" : "04B66DB3-0B03-4FA3-ACDB-07DF8FD37506",
+    "pass" : true,
+    "result" : "89 bytes, equal=true",
+    "spike" : "composition",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "round trip brick part 1",
+    "id" : "3E88E8F8-9B73-4718-B869-2E0B09668C8D",
+    "pass" : true,
+    "result" : "235 bytes, equal=true",
+    "spike" : "composition",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "round trip brick part 2",
+    "id" : "36AA245F-C704-48D5-A86D-7AECD0CDAA0A",
+    "pass" : true,
+    "result" : "120 bytes, equal=true",
+    "spike" : "composition",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "step display names survive",
+    "id" : "8F73702D-DDAF-4A5B-8B5E-E5901ECE26E2",
+    "pass" : true,
+    "result" : "Easy warm up, Threshold, Jog, Easy cool down",
+    "spike" : "composition",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "threshold 4:30\/km band to speed",
+    "id" : "45116A1F-D6F7-4F60-8053-BFC54097EEEA",
+    "pass" : true,
+    "result" : "260 to 280 s\/km = 3.571 to 3.846 m\/s",
+    "spike" : "composition",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "isSupported",
+    "id" : "D8698AD5-CC9D-4698-A5EF-64D358DFD7A2",
+    "result" : "true",
+    "spike" : "scheduler",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "maxAllowedScheduledWorkoutCount",
+    "id" : "6C095FC7-6389-4941-9744-A6F70E4E6D9E",
+    "result" : "50",
+    "spike" : "scheduler",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "scene",
+    "id" : "ACB014BD-03F8-49CF-9673-D81085E36E68",
+    "result" : "active",
+    "spike" : "lifecycle",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "authorizationState",
+    "id" : "2F91339F-717A-4F15-A616-BE3FC3E68CA1",
+    "result" : "notDetermined",
+    "spike" : "scheduler",
+    "time" : "2026-11-07T00:36:46Z"
+  },
+  {
+    "check" : "done",
+    "id" : "C12B0699-CE8D-42D4-8646-EFCFEF3E6DE3",
+    "result" : "137 entries",
+    "spike" : "selftest",
+    "time" : "2026-11-07T00:36:46Z"
+  }
+]

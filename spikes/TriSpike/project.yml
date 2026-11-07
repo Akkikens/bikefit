@@ -1,0 +1,77 @@
+name: TriSpike
+options:
+  bundleIdPrefix: com.akkikens
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: JFNPZ2JF6V
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "0.1"
+    CURRENT_PROJECT_VERSION: "1"
+    TARGETED_DEVICE_FAMILY: "1"
+targets:
+  TriSpike:
+    type: application
+    platform: iOS
+    sources:
+      - App
+      - Shared
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: TriSpike
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIBackgroundModes: [audio]
+        NSSupportsLiveActivities: true
+        NSHealthShareUsageDescription: "TriSpike reads your workouts to test how completed sessions match the plan that scheduled them."
+        NSHealthUpdateUsageDescription: "TriSpike saves workouts recorded by its phone interval player so they appear in Health."
+    entitlements:
+      path: App/TriSpike.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.akkikens.trispike
+    dependencies:
+      - target: TriSpikeWidget
+  TriSpikeWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Widget
+      - Shared/PlayerActivity.swift
+    info:
+      path: Widget/Info.plist
+      properties:
+        CFBundleDisplayName: TriSpike Player
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.akkikens.trispike.widget
+  TriSpikeTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - Tests
+    dependencies:
+      - target: TriSpike
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.akkikens.trispike.tests
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  TriSpike:
+    build:
+      targets:
+        TriSpike: all
+        TriSpikeTests: [test]
+    test:
+      targets:
+        - TriSpikeTests
