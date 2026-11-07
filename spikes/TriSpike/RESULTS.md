@@ -40,6 +40,14 @@ Steps, in the app, on a real iPhone:
 
 What to watch for in the player log: "in process cue N" entries with large "late by" values or app "background" mean iOS suspended the app and the notification carried the cue, which is the designed fallback. Missing dings would fail the gate. Also check whether the Live Activity countdown froze at a step end while the phone stayed locked: if so, the spec should switch it to a whole session countdown.
 
+## Device run 1, 2026-11-06, iPhone 18 Pro Max (iOS 26)
+
+Raw log: device-results.json (161 entries). Capability matrix and composition matched the simulator exactly.
+
+- **Scheduler authorization returned notDetermined** without a decision. No Apple Watch appears among the phone's devices, and none of the 20 most recent Health workouts came from an Apple Watch (all from third party apps). `WorkoutScheduler.isSupported` is true regardless, so it is a static capability flag, not a paired watch check. The scheduler, watch, pool swim and threshold run checks cannot run until a paired Apple Watch is available.
+- **`HKWorkout.workoutPlan` throws `WorkoutKit.ImportError` code 3** for every workout not started from a WorkoutKit plan (all 20 here). The completion matcher must treat that error as "no plan, use the heuristic", never as a failure. Annex E updated.
+- **Health read works on device:** authorization completed and 20 workouts read, including third party sources, which is the path Garmin and other non Apple Watch athletes take.
+
 ## Go or no go rule (unchanged from the spec)
 
 Stop if scheduling is unreliable (sessions missing or duplicated on the watch in normal use) or pool swim sets cannot be expressed. Either would drop the watch wedge from all positioning before any product code is written.

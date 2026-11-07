@@ -34,6 +34,17 @@ struct TriSpikeApp: App {
                         await Probes.schedulerStatus()
                         SpikeLog.shared.record("selftest", "done", "\(SpikeLog.shared.entries.count) entries")
                     }
+                    // Device run: everything except the real workouts and the locked player test, in one launch.
+                    // Needs two taps on Allow (WorkoutKit scheduling, then Health).
+                    if ProcessInfo.processInfo.arguments.contains("-spikeDeviceRun") {
+                        SpikeLog.shared.clear()
+                        Probes.capabilityMatrix()
+                        Probes.composition()
+                        await Probes.schedulerStatus()
+                        await Probes.schedulerFullRun()
+                        await Probes.healthReadBack()
+                        SpikeLog.shared.record("selftest", "device run done", "\(SpikeLog.shared.entries.count) entries")
+                    }
                     // Unattended 15 second player run: timing loop, cues, audio session, Live Activity.
                     if ProcessInfo.processInfo.arguments.contains("-spikePlayerSmoke") {
                         SpikeLog.shared.clear()
