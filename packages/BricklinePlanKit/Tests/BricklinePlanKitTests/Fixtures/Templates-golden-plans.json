@@ -1,0 +1,592 @@
+{
+  "half-experienced-14.0h-24w" : {
+    "digest" : "12e60986b8e4e36a",
+    "phases" : "bbbbbbbbbbbbbbbbbppppttt",
+    "rampProfile" : [
+      1.03,
+      1.03,
+      1.03,
+      1.02,
+      1.01,
+      1.04,
+      1.01,
+      1.01,
+      1.03,
+      1.02,
+      1.04,
+      1.04,
+      1.05,
+      1.04,
+      1.02
+    ],
+    "recoveryWeeks" : [
+      3,
+      7,
+      11,
+      15,
+      19
+    ],
+    "sessionsPerSport" : {
+      "bike" : 71,
+      "run" : 71,
+      "swim" : 70
+    },
+    "taperHours" : [
+      12.05,
+      9.2,
+      3.24
+    ],
+    "testWeeks" : [
+      3,
+      7,
+      11,
+      15,
+      19
+    ],
+    "weekCount" : 24,
+    "weeklyHours" : [
+      11.94,
+      12.28,
+      12.62,
+      9.19,
+      12.95,
+      13.26,
+      13.45,
+      9.24,
+      14.01,
+      14.11,
+      14.32,
+      9.25,
+      14.74,
+      14.99,
+      15.59,
+      9.19,
+      16.25,
+      17.03,
+      17.63,
+      9.24,
+      17.95,
+      12.05,
+      9.2,
+      3.24
+    ]
+  },
+  "half-firstTimer-8.0h-16w" : {
+    "digest" : "3f2e2f620054b7cd",
+    "phases" : "bbbbbbbbbbbbpptt",
+    "rampProfile" : [
+      1.04,
+      1.05,
+      1.03,
+      1.03,
+      1.06,
+      1.03,
+      1.05,
+      1.04,
+      1.06,
+      1.04
+    ],
+    "recoveryWeeks" : [
+      3,
+      7,
+      11
+    ],
+    "sessionsPerSport" : {
+      "bike" : 32,
+      "run" : 32,
+      "swim" : 31
+    },
+    "taperHours" : [
+      6.1,
+      2.88
+    ],
+    "testWeeks" : [
+      3,
+      7,
+      11
+    ],
+    "weekCount" : 16,
+    "weeklyHours" : [
+      6.85,
+      7.09,
+      7.45,
+      5.3,
+      7.69,
+      7.91,
+      8.35,
+      5.27,
+      8.6,
+      9.05,
+      9.39,
+      5.29,
+      9.92,
+      10.34,
+      6.1,
+      2.88
+    ]
+  },
+  "half-intermediate-10.0h-20w" : {
+    "digest" : "3fad9eeef2520467",
+    "phases" : "bbbbbbbbbbbbbbbppptt",
+    "rampProfile" : [
+      1.04,
+      1.03,
+      1.03,
+      1.03,
+      1.03,
+      1.03,
+      1.02,
+      1.02,
+      1.01,
+      1.03,
+      1.05,
+      1.04,
+      1.06
+    ],
+    "recoveryWeeks" : [
+      3,
+      7,
+      11,
+      15
+    ],
+    "sessionsPerSport" : {
+      "bike" : 59,
+      "run" : 40,
+      "swim" : 39
+    },
+    "taperHours" : [
+      7.57,
+      3.34
+    ],
+    "testWeeks" : [
+      3,
+      7,
+      11,
+      15
+    ],
+    "weekCount" : 20,
+    "weeklyHours" : [
+      8.49,
+      8.82,
+      9.06,
+      6.52,
+      9.31,
+      9.56,
+      9.81,
+      6.53,
+      10.06,
+      10.3,
+      10.55,
+      6.55,
+      10.7,
+      11.04,
+      11.63,
+      6.52,
+      12.13,
+      12.89,
+      7.57,
+      3.34
+    ]
+  },
+  "half-intermediate-12.0h-14w" : {
+    "digest" : "6d0ceaa6816b7811",
+    "phases" : "bbbbbbbbbbpptt",
+    "rampProfile" : [
+      1.05,
+      1.06,
+      1.04,
+      1.04,
+      1.05,
+      1.05,
+      1.06,
+      1.05
+    ],
+    "recoveryWeeks" : [
+      3,
+      7,
+      10
+    ],
+    "sessionsPerSport" : {
+      "bike" : 41,
+      "run" : 41,
+      "swim" : 40
+    },
+    "taperHours" : [
+      9.15,
+      3.34
+    ],
+    "testWeeks" : [
+      3,
+      7,
+      10
+    ],
+    "weekCount" : 14,
+    "weeklyHours" : [
+      10.2,
+      10.7,
+      11.31,
+      8,
+      11.72,
+      12.14,
+      12.7,
+      7.88,
+      13.38,
+      14.13,
+      8.02,
+      14.78,
+      9.15,
+      3.34
+    ]
+  },
+  "olympic-experienced-10.0h-16w" : {
+    "digest" : "1887654440adf479",
+    "phases" : "bbbbbbbbbbbbpptt",
+    "rampProfile" : [
+      1.02,
+      1.05,
+      1.04,
+      1.03,
+      1.03,
+      0.99,
+      1.08,
+      1.07,
+      1.04,
+      1.06
+    ],
+    "recoveryWeeks" : [
+      3,
+      7,
+      11
+    ],
+    "sessionsPerSport" : {
+      "bike" : 47,
+      "run" : 32,
+      "swim" : 31
+    },
+    "taperHours" : [
+      7.7,
+      3.51
+    ],
+    "testWeeks" : [
+      3,
+      7,
+      11
+    ],
+    "weekCount" : 16,
+    "weeklyHours" : [
+      8.59,
+      8.8,
+      9.22,
+      6.54,
+      9.55,
+      9.88,
+      10.14,
+      6.51,
+      10.03,
+      10.86,
+      11.62,
+      6.54,
+      12.14,
+      12.88,
+      7.7,
+      3.51
+    ]
+  },
+  "olympic-firstTimer-6.0h-12w" : {
+    "digest" : "3e4dc691f472fb53",
+    "phases" : "bbbbbbbbbppt",
+    "rampProfile" : [
+      1.05,
+      1.04,
+      1.04,
+      1.06,
+      1.04,
+      1.04,
+      1.07,
+      1.05
+    ],
+    "recoveryWeeks" : [
+      3,
+      7
+    ],
+    "sessionsPerSport" : {
+      "bike" : 24,
+      "run" : 13,
+      "swim" : 23
+    },
+    "taperHours" : [
+      2.63
+    ],
+    "testWeeks" : [
+      3,
+      7
+    ],
+    "weekCount" : 12,
+    "weeklyHours" : [
+      5.36,
+      5.61,
+      5.85,
+      3.94,
+      6.09,
+      6.48,
+      6.74,
+      3.91,
+      6.99,
+      7.47,
+      7.86,
+      2.63
+    ]
+  },
+  "olympic-intermediate-7.0h-10w" : {
+    "digest" : "29a91bb3a883fa7",
+    "phases" : "bbbbbbbppt",
+    "rampProfile" : [
+      1.07,
+      1.04,
+      1.04,
+      1.07,
+      1.04,
+      1.05
+    ],
+    "recoveryWeeks" : [
+      3,
+      7
+    ],
+    "sessionsPerSport" : {
+      "bike" : 20,
+      "run" : 20,
+      "swim" : 19
+    },
+    "taperHours" : [
+      3.59
+    ],
+    "testWeeks" : [
+      3,
+      7
+    ],
+    "weekCount" : 10,
+    "weeklyHours" : [
+      6.4,
+      6.82,
+      7.07,
+      4.6,
+      7.34,
+      7.83,
+      8.16,
+      4.57,
+      8.55,
+      3.59
+    ]
+  },
+  "olympic-intermediate-8.0h-14w" : {
+    "digest" : "89c70724c99a5664",
+    "phases" : "bbbbbbbbbbpptt",
+    "rampProfile" : [
+      1.04,
+      1.04,
+      1.06,
+      1.03,
+      1.03,
+      1.06,
+      1.05,
+      1.05
+    ],
+    "recoveryWeeks" : [
+      3,
+      7,
+      10
+    ],
+    "sessionsPerSport" : {
+      "bike" : 41,
+      "run" : 28,
+      "swim" : 27
+    },
+    "taperHours" : [
+      6.15,
+      3.34
+    ],
+    "testWeeks" : [
+      3,
+      7,
+      10
+    ],
+    "weekCount" : 14,
+    "weeklyHours" : [
+      6.9,
+      7.15,
+      7.47,
+      5.28,
+      7.89,
+      8.14,
+      8.42,
+      5.25,
+      8.9,
+      9.33,
+      5.3,
+      9.79,
+      6.15,
+      3.34
+    ]
+  },
+  "sprint-experienced-7.0h-8w" : {
+    "digest" : "ab74ad5e9d417f62",
+    "phases" : "bbbbbbpt",
+    "rampProfile" : [
+      1.03,
+      1.06,
+      1.02,
+      1.07,
+      1.04
+    ],
+    "recoveryWeeks" : [
+      3
+    ],
+    "sessionsPerSport" : {
+      "bike" : 16,
+      "run" : 16,
+      "swim" : 15
+    },
+    "taperHours" : [
+      3.61
+    ],
+    "testWeeks" : [
+      0
+    ],
+    "weekCount" : 8,
+    "weeklyHours" : [
+      6.73,
+      6.96,
+      7.37,
+      4.64,
+      7.49,
+      8,
+      8.33,
+      3.61
+    ]
+  },
+  "sprint-firstTimer-5.0h-9w" : {
+    "digest" : "eae7216734cccddc",
+    "phases" : "bbbbbbbpt",
+    "rampProfile" : [
+      1.07,
+      1.05,
+      1.05,
+      1.05,
+      1.05
+    ],
+    "recoveryWeeks" : [
+      3,
+      6
+    ],
+    "sessionsPerSport" : {
+      "bike" : 18,
+      "run" : 10,
+      "swim" : 10
+    },
+    "taperHours" : [
+      2.54
+    ],
+    "testWeeks" : [
+      0,
+      1
+    ],
+    "weekCount" : 9,
+    "weeklyHours" : [
+      4.81,
+      5.14,
+      5.4,
+      3.28,
+      5.65,
+      5.93,
+      3.28,
+      6.2,
+      2.54
+    ]
+  },
+  "sprint-intermediate-4.5h-10w" : {
+    "digest" : "e61e15472d7d9101",
+    "phases" : "bbbbbbbppt",
+    "rampProfile" : [
+      1.06,
+      1.04,
+      1.05,
+      1.05,
+      1.05,
+      1.05
+    ],
+    "recoveryWeeks" : [
+      3,
+      7
+    ],
+    "sessionsPerSport" : {
+      "bike" : 20,
+      "run" : 11,
+      "swim" : 19
+    },
+    "taperHours" : [
+      2.32
+    ],
+    "testWeeks" : [
+      0,
+      7
+    ],
+    "weekCount" : 10,
+    "weeklyHours" : [
+      4.15,
+      4.39,
+      4.56,
+      3,
+      4.8,
+      5.05,
+      5.31,
+      3.27,
+      5.59,
+      2.32
+    ]
+  },
+  "sprint-intermediate-6.0h-12w" : {
+    "digest" : "529b61bddf1c06ef",
+    "phases" : "bbbbbbbbbppt",
+    "rampProfile" : [
+      1.06,
+      1.04,
+      1.06,
+      1.04,
+      1.06,
+      1.04,
+      1.05,
+      1.04
+    ],
+    "recoveryWeeks" : [
+      3,
+      7
+    ],
+    "sessionsPerSport" : {
+      "bike" : 24,
+      "run" : 24,
+      "swim" : 23
+    },
+    "taperHours" : [
+      3.08
+    ],
+    "testWeeks" : [
+      0,
+      7
+    ],
+    "weekCount" : 12,
+    "weeklyHours" : [
+      5.24,
+      5.53,
+      5.73,
+      3.91,
+      6.07,
+      6.31,
+      6.71,
+      3.85,
+      6.96,
+      7.34,
+      7.66,
+      3.08
+    ]
+  }
+}
