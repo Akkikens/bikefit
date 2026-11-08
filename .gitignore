@@ -8,3 +8,4 @@ build/
 *.dSYM.zip
 spikes/*/build/
 spikes/*/*.xcodeproj/
+spikes/TriSpike/device-results.json
