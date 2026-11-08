@@ -48,6 +48,10 @@ Raw log: device-results.json (161 entries). Capability matrix and composition ma
 - **`HKWorkout.workoutPlan` throws `WorkoutKit.ImportError` code 3** for every workout not started from a WorkoutKit plan (all 20 here). The completion matcher must treat that error as "no plan, use the heuristic", never as a failure. Annex E updated.
 - **Health read works on device:** authorization completed and 20 workouts read, including third party sources, which is the path Garmin and other non Apple Watch athletes take.
 
+## Device run 2, 2026-11-08: no Apple Watch is paired to this iPhone
+
+A WatchConnectivity probe (WatchProbe.swift) reads the pairing state from the phone itself: `WCSession.isPaired` is false and `isWatchAppInstalled` is false, with the session activated normally. That settles why `WorkoutScheduler.requestAuthorization()` returns notDetermined with no prompt: there is no watch to schedule to. The scheduler, pool swim, threshold run and exact plan matching checks remain open until an Apple Watch is paired to the phone running the spike. The phone player, Health read and codec checks are unaffected.
+
 ## Go or no go rule (unchanged from the spec)
 
 Stop if scheduling is unreliable (sessions missing or duplicated on the watch in normal use) or pool swim sets cannot be expressed. Either would drop the watch wedge from all positioning before any product code is written.

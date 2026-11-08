@@ -92,6 +92,11 @@ enum Probes {
 
     static func schedulerStatus() async {
         let s = "scheduler"
+        let probe = WatchProbe()
+        let w = await probe.read()
+        log.record("watch", "WCSession isPaired", "\(w.paired)", pass: w.paired)
+        log.record("watch", "WCSession isWatchAppInstalled", "\(w.appInstalled)")
+        log.record("watch", "WCSession detail", w.detail)
         log.record(s, "isSupported", "\(WorkoutScheduler.isSupported)")
         log.record(s, "maxAllowedScheduledWorkoutCount", "\(WorkoutScheduler.maxAllowedScheduledWorkoutCount)")
         let state = await WorkoutScheduler.shared.authorizationState
