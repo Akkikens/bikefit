@@ -2,15 +2,32 @@ import SwiftUI
 
 struct WeekView: View {
     @Binding var playerSession: Session?
+    @ScaledMetric(relativeTo: .body) private var dayColumn: CGFloat = 56
+    @State private var path: [Session] = []
     private let days = Demo.week
     private static let weekday: DateFormatter = { let f = DateFormatter(); f.dateFormat = "EEE d"; return f }()
 
+    // Footer totals come from the plan, so they always agree with the rows above them.
+    private var allSessions: [Session] { days.flatMap(\.sessions) }
+    private var plannedMinutes: Int { allSessions.filter { $0.state != .skipped }.reduce(0) { $0 + $1.minutes } }
+    private var doneSessions: [Session] { allSessions.filter { $0.state == .done } }
+    private var doneMinutes: Int { doneSessions.reduce(0) { $0 + ($1.doneMinutes ?? $1.minutes) } }
+    /// Sum of the per session placeholder load, so this screen and Session detail agree.
+    private var loadSoFar: Int { doneSessions.reduce(0) { $0 + $1.estimatedLoad } }
+    private func hours(_ minutes: Int) -> String { String(format: "%.1f", Double(minutes) / 60) }
+
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ScrollView {
+                VStack(alignment: .leading, spacing: BL.Space.m) {
+                Text("Week \(Demo.currentWeek) of \(Demo.totalWeeks)")
+                    .font(.largeTitle.weight(.bold))
+                    .accessibilityAddTraits(.isHeader)
                 VStack(alignment: .leading, spacing: BL.Space.sectionGap) {
                     ArcBar()
-                    WeekStrip(days: days)
+                    WeekStrip(days: days) { day in
+                        if let s = day.sessions.first { path.append(s) }
+                    }
                     VStack(spacing: 0) {
                         ForEach(days) { day in
                             if day.sessions.isEmpty {
@@ -24,33 +41,36 @@ struct WeekView: View {
                         }
                     }
                     .card()
-                    HStack {
-                        Readout(label: "planned", value: "7.4", unit: "h")
-                        Spacer()
-                        Readout(label: "done so far", value: "1.1", unit: "h")
-                        Spacer()
-                        Readout(label: "load", value: "118")
-                    }
+                    ReadoutGrid(items: [
+                        Readout(label: "planned", value: hours(plannedMinutes), unit: "h"),
+                        Readout(label: "done so far", value: hours(doneMinutes), unit: "h"),
+                        Readout(label: "load", value: "\(loadSoFar)", estimated: true),
+                    ])
                     .card()
                 }
+                }
                 .padding(.horizontal, BL.Space.gutter)
-                .padding(.vertical, BL.Space.l)
+                .padding(.top, BL.Space.s)
+                .padding(.bottom, BL.Space.l)
             }
             .background(BL.background.ignoresSafeArea())
-            .navigationTitle("Week \(Demo.currentWeek) of \(Demo.totalWeeks)")
+            .bottomEdgeSolid()
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: Session.self) { SessionDetailView(session: $0, playerSession: $playerSession) }
         }
     }
 
     private func dayRow(_ day: PlanDay, _ s: Session) -> some View {
-        HStack(alignment: .center, spacing: BL.Space.m) {
+        HStack(alignment: .firstTextBaseline, spacing: BL.Space.m) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(Self.weekday.string(from: day.date))
                     .font(.body.weight(.medium))
-                    .foregroundStyle(day.isToday ? BL.textPrimary : BL.textSecondary)
+                    .foregroundStyle(BL.textPrimary)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
                 if day.isToday { Text("today").font(BLFont.label).foregroundStyle(BL.textPrimary) }
             }
-            .frame(width: 56, alignment: .leading)
+            .frame(minWidth: dayColumn, alignment: .leading)
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 6) {
                     Image(systemName: s.sport.symbol()).foregroundStyle(s.sport.ink)
@@ -71,18 +91,34 @@ struct WeekView: View {
             }
             Spacer(minLength: 4)
             Image(systemName: stateSymbol(s.state))
-                .font(.system(size: 17))
+                .font(.body)
                 .foregroundStyle(BL.textPrimary)
-                .accessibilityLabel(s.state == .done ? "done" : s.state == .skipped ? "skipped" : "planned")
         }
-        .padding(.vertical, BL.Space.m)
+        .padding(.vertical, 10)
         .contentShape(Rectangle())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(rowLabel(day, s))
+        .accessibilityHint("Opens the session")
+    }
+
+    private func rowLabel(_ day: PlanDay, _ s: Session) -> String {
+        let sport = s.brickSecond.map { "Brick, \(s.sport.word) then \($0.word)" } ?? s.sport.word
+        let dayText = Self.weekday.string(from: day.date) + (day.isToday ? ", today" : "")
+        let state: String
+        switch s.state {
+        case .done: state = s.doneMinutes.map { "done, \($0) minutes of \(s.minutes) planned" } ?? "done"
+        case .skipped: state = "skipped, dropped from the week"
+        case .planned: state = "planned, \(s.minutes) minutes"
+        }
+        return "\(dayText), \(sport), \(s.name), \(state)"
     }
 
     private func restRow(_ day: PlanDay) -> some View {
         HStack(spacing: BL.Space.m) {
             Text(Self.weekday.string(from: day.date)).font(.body.weight(.medium)).foregroundStyle(BL.textSecondary)
-                .frame(width: 56, alignment: .leading)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+                .frame(minWidth: dayColumn, alignment: .leading)
             Image(systemName: "moon.zzz").foregroundStyle(BL.textSecondary)
             Text("Rest").foregroundStyle(BL.textSecondary)
             Spacer()

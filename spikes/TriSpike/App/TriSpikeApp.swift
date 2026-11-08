@@ -48,7 +48,7 @@ struct TriSpikeApp: App {
                     // Unattended 15 second player run: timing loop, cues, audio session, Live Activity.
                     if ProcessInfo.processInfo.arguments.contains("-spikePlayerSmoke") {
                         SpikeLog.shared.clear()
-                        await player.start(name: "Smoke", steps: PhonePlayer.smokeTest, smoke: true)
+                        await player.start(name: "Smoke", sport: .run, steps: PhonePlayer.smokeTest, smoke: true)
                         try? await Task.sleep(for: .seconds(18))
                         SpikeLog.shared.record("selftest", "player smoke done", "running=\(player.isRunning)", pass: !player.isRunning)
                     }

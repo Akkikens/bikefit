@@ -6,7 +6,7 @@ struct ContentView: View {
 
     @State private var tab: Tab = ContentView.launchTab
     @State private var playerSession: Session? = ContentView.launchPlayer
-    @State private var playerSmoke = ProcessInfo.processInfo.arguments.contains("-screenPlayer")
+    @State private var playerSmoke = ContentView.hasFlag("-screenPlayer")
 
     var body: some View {
         TabView(selection: $tab) {
@@ -29,14 +29,26 @@ struct ContentView: View {
         }
     }
 
-    /// Launch arguments for screenshots: -screen today|week|race|methods, -screenPlayer.
+    /// Launch arguments for screenshots: -screen today|week|race|methods (any case), -screenPlayer.
+    /// Read once at process start, so a screenshot run must be a cold launch per frame.
+    /// Also accepts the value from UserDefaults, which registers `-screen week` from the launch arguments.
     private static var launchTab: Tab {
         let args = ProcessInfo.processInfo.arguments
-        if let i = args.firstIndex(of: "-screen"), i + 1 < args.count, let t = Tab(rawValue: args[i + 1]) { return t }
-        return .today
+        var raw: String?
+        if let i = args.firstIndex(where: { $0.lowercased() == "-screen" }), i + 1 < args.count { raw = args[i + 1] }
+        raw = raw ?? UserDefaults.standard.string(forKey: "screen")
+        let value = raw?.trimmingCharacters(in: .whitespaces).lowercased() ?? ""
+        return Tab(rawValue: value) ?? .today
+    }
+
+    /// Case insensitive presence check for a flag argument such as -screenPlayer.
+    static func hasFlag(_ name: String) -> Bool {
+        let wanted = name.lowercased()
+        return ProcessInfo.processInfo.arguments.contains { $0.lowercased() == wanted }
+            || UserDefaults.standard.bool(forKey: String(name.drop(while: { $0 == "-" })))
     }
 
     private static var launchPlayer: Session? {
-        ProcessInfo.processInfo.arguments.contains("-screenPlayer") ? Demo.thresholdRun : nil
+        hasFlag("-screenPlayer") ? Demo.thresholdRun : nil
     }
 }

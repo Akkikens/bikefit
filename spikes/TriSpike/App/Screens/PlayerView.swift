@@ -7,27 +7,35 @@ struct PlayerView: View {
     @EnvironmentObject private var player: PhonePlayer
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
     @ScaledMetric(relativeTo: .largeTitle) private var hero: CGFloat = 112
+    @ScaledMetric(relativeTo: .body) private var profileHeight: CGFloat = 150
     @State private var confirmEnd = false
     @State private var started = false
 
     private var heroSize: CGFloat { min(160, max(72, hero)) }
+    private var compact: Bool { typeSize.isAccessibilitySize }
     private var index: Int { min(player.stepIndex, max(0, session.steps.count - 1)) }
     private var current: PlanStep? { session.steps.indices.contains(index) ? session.steps[index] : nil }
     private var next: PlanStep? { session.steps.indices.contains(index + 1) ? session.steps[index + 1] : nil }
+    /// Paused dim. textPrimary survives 0.55 on black (5.61:1); textSecondary and sport ink need 0.8 to stay above 4.5:1 (5.03, 7.37, 8.08).
     private var dim: Double { player.isPaused ? 0.55 : 1 }
+    private var dimSecondary: Double { player.isPaused ? 0.8 : 1 }
+    private var sessionRemaining: TimeInterval { max(0, player.totalSeconds - player.elapsed) }
 
     var body: some View {
         TimelineView(.animation(minimumInterval: reduceMotion ? 1 : 1.0 / 20, paused: player.isPaused || !player.isRunning)) { _ in
             VStack(spacing: 0) {
-                topBar.opacity(dim)
+                topBar.opacity(dimSecondary)
                 Spacer(minLength: 12)
                 centre
                 Spacer(minLength: 12)
-                ProfileView(steps: session.steps, mode: .player(progress: player.elapsed), height: 120, ruler: true, onBlack: true)
-                    .opacity(dim)
+                // The ruler numerals are text, so the Profile dims with the secondary rows, not the primary ones.
+                ProfileView(steps: session.steps, mode: .player(progress: player.elapsed),
+                            height: compact ? 56 : min(profileHeight, 160), ruler: !compact, onBlack: true)
+                    .opacity(dimSecondary)
                     .padding(.bottom, 16)
-                nextRow.opacity(dim)
+                nextRow.opacity(dimSecondary)
                     .padding(.bottom, 20)
                 plate
             }
@@ -40,8 +48,15 @@ struct PlayerView: View {
         .persistentSystemOverlays(.hidden)
         .sensoryFeedback(.impact(weight: .medium), trigger: player.stepIndex)
         .onChange(of: player.stepIndex) { _, i in
+            // Voice cues already speak the step; only announce when they are off so VoiceOver users hear it once.
+            guard !player.voiceOn else { return }
             if session.steps.indices.contains(i) {
-                AccessibilityNotification.Announcement("\(session.steps[i].name), \(duration(session.steps[i].seconds))").post()
+                let step = session.steps[i]
+                let place = cue(at: i) ?? "\(step.name), step \(i + 1) of \(session.steps.count)"
+                let target = step.target.map { ", \($0)" } ?? ""
+                AccessibilityNotification.Announcement("\(place), \(duration(step.seconds))\(target)").post()
+            } else if i >= session.steps.count {
+                AccessibilityNotification.Announcement("Session complete").post()
             }
         }
         .onChange(of: player.isRunning) { _, running in
@@ -51,7 +66,10 @@ struct PlayerView: View {
             guard !started else { return }
             started = true
             await player.start(name: session.name,
-                               steps: session.steps.map { .init(name: $0.name, seconds: $0.seconds, target: $0.target) },
+                               sport: session.sport,
+                               steps: session.steps.enumerated().map { i, s in
+                                   PhonePlayer.Step(name: s.name, seconds: s.seconds, target: s.target, sport: s.sport, cue: cue(at: i))
+                               },
                                smoke: smoke)
         }
         .confirmationDialog("End this session?", isPresented: $confirmEnd, titleVisibility: .visible) {
@@ -68,12 +86,14 @@ struct PlayerView: View {
             .accessibilityLabel("End session")
             Spacer()
             HStack(spacing: 6) {
-                Image(systemName: session.sport.symbol())
+                Image(systemName: (current?.sport ?? session.sport).symbol())
                 Text(session.name)
             }
             .font(.subheadline.weight(.medium))
             .foregroundStyle(BL.Player.textSecondary)
-            .accessibilityElement(children: .combine)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(session.brickSecond.map { "Brick, \(session.sport.word) then \($0.word), \(session.name)" }
+                                ?? "\(session.sport.word), \(session.name)")
             Spacer()
             Button { player.voiceOn.toggle() } label: {
                 Image(systemName: player.voiceOn ? "speaker.wave.2" : "speaker.slash")
@@ -94,17 +114,23 @@ struct PlayerView: View {
                 .minimumScaleFactor(0.5)
                 .foregroundStyle(BL.Player.textPrimary)
                 .contentTransition(reduceMotion ? .identity : .numericText(countsDown: true))
-                .accessibilityLabel("\(Int(player.stepRemaining)) seconds left in this step")
+                .accessibilityLabel("Time left in step")
+                .accessibilityValue(spokenRemaining)
+                .accessibilityAddTraits(.updatesFrequently)
             if let c = current {
                 Text(c.name).font(BLFont.sessionName).foregroundStyle(BL.Player.textPrimary).opacity(dim)
                 if let t = c.target {
-                    Text(t).font(BLFont.largeValue).foregroundStyle(c.sport.playerInk).opacity(dim)
+                    Text(t).font(BLFont.largeValue).foregroundStyle(c.sport.playerInk).opacity(dimSecondary)
                 }
             }
-            Text("step \(index + 1) of \(session.steps.count)")
-                .font(BLFont.label)
+            Text("\(placeText), \(clock(sessionRemaining)) left")
+                .font(Font.subheadline.weight(.semibold).lowercaseSmallCaps())
+                .monospacedDigit()
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
                 .foregroundStyle(BL.Player.textSecondary)
-                .opacity(dim)
+                .opacity(dimSecondary)
+                .accessibilityLabel("\(placeText), \(spokenSessionLeft) left in the session")
             if player.isPaused {
                 Text("paused").font(BLFont.label).foregroundStyle(BL.Player.textPrimary)
             }
@@ -112,21 +138,39 @@ struct PlayerView: View {
         .frame(maxWidth: .infinity)
     }
 
+    /// Where the athlete is: the rep inside a set when there is one, otherwise the step count.
+    private var placeText: String {
+        repLabel(at: index) ?? "step \(index + 1) of \(session.steps.count)"
+    }
+
     @ViewBuilder private var nextRow: some View {
         if let n = next {
-            HStack(spacing: 10) {
-                Image(systemName: "arrow.right")
-                Text(n.name)
-                Spacer()
-                Text(duration(n.seconds)).monospacedDigit()
-                if let t = n.target { Text(t).monospacedDigit().foregroundStyle(n.sport.playerInk) }
+            let name = cue(at: index + 1) ?? n.name
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) {
+                    Image(systemName: "arrow.right")
+                    Text(name)
+                    Spacer(minLength: 10)
+                    Text(duration(n.seconds)).monospacedDigit()
+                    if let t = n.target { Text("\u{00B7}"); Text(t).monospacedDigit() }
+                }
+                .lineLimit(1)
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "arrow.right")
+                        Text(name)
+                    }
+                    HStack(spacing: 10) {
+                        Text(duration(n.seconds)).monospacedDigit()
+                        if let t = n.target { Text("\u{00B7}"); Text(t).monospacedDigit() }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .font(.title3)
             .foregroundStyle(BL.Player.textSecondary)
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("Next, \(n.name), \(duration(n.seconds))")
+            .accessibilityLabel(["Next", name, duration(n.seconds), n.target].compactMap { $0 }.joined(separator: ", "))
         } else {
             Text("Last step").font(.title3).foregroundStyle(BL.Player.textSecondary)
         }
@@ -135,7 +179,11 @@ struct PlayerView: View {
     private var plate: some View {
         HStack(spacing: 28) {
             Button { Task { await player.skip(by: -1) } } label: {
-                Image(systemName: "backward.end.fill").font(.title2).frame(width: 64, height: 64)
+                Image(systemName: "backward.end.fill")
+                    .font(.title2)
+                    .frame(width: 64, height: 64)
+                    .foregroundStyle(index == 0 ? BL.Player.textSecondary.opacity(0.5) : BL.Player.textPrimary)
+                    .animation(Motion(reduce: reduceMotion).animation(.easeInOut(duration: 0.2)), value: index == 0)
             }
             .accessibilityLabel("Previous step")
             .disabled(index == 0)
@@ -151,20 +199,68 @@ struct PlayerView: View {
             }
             .accessibilityLabel(player.isPaused ? "Resume" : "Pause")
             Button { Task { await player.skip(by: 1) } } label: {
-                Image(systemName: "forward.end.fill").font(.title2).frame(width: 64, height: 64)
+                Image(systemName: "forward.end.fill")
+                    .font(.title2)
+                    .frame(width: 64, height: 64)
+                    .foregroundStyle(next == nil ? BL.Player.textSecondary.opacity(0.5) : BL.Player.textPrimary)
+                    .animation(Motion(reduce: reduceMotion).animation(.easeInOut(duration: 0.2)), value: next == nil)
             }
             .accessibilityLabel("Next step")
             .disabled(next == nil)
         }
-        .foregroundStyle(BL.Player.textPrimary)
         .frame(maxWidth: .infinity, minHeight: 88)
         .modifier(PlateBackground())
     }
+
+    // MARK: Rep context
+
+    /// Rep context for a step inside a repeat set, the way an athlete counts it.
+    private struct Rep { var number: Int; var total: Int; var isRest: Bool }
+
+    private func rep(at i: Int) -> Rep? {
+        let steps = session.steps
+        guard steps.indices.contains(i), let g = steps[i].group else { return nil }
+        let works = steps.indices.filter { steps[$0].group == g && steps[$0].kind == .work }
+        guard let first = works.first else { return nil }
+        let total = steps[first].repeatCount ?? works.count
+        let done = works.filter { $0 < i }.count
+        if steps[i].kind == .work { return Rep(number: done + 1, total: total, isRest: false) }
+        return done < total ? Rep(number: done + 1, total: total, isRest: true) : nil
+    }
+
+    /// Display line: "rep 3 of 8", or "rest, then rep 4 of 8" between reps. Nil outside a set.
+    private func repLabel(at i: Int) -> String? {
+        guard let r = rep(at: i) else { return nil }
+        return r.isRest ? "rest, then rep \(r.number) of \(r.total)" : "rep \(r.number) of \(r.total)"
+    }
+
+    /// Phrase for voice, notifications and announcements: "Threshold, rep 2 of 2", "Rest, then rep 4 of 8". Nil outside a set.
+    private func cue(at i: Int) -> String? {
+        guard let r = rep(at: i), session.steps.indices.contains(i) else { return nil }
+        let name = session.steps[i].name
+        return r.isRest ? "\(name), then rep \(r.number) of \(r.total)" : "\(name), rep \(r.number) of \(r.total)"
+    }
+
+    // MARK: Formatting
 
     private func clock(_ s: TimeInterval) -> String {
         let total = Int(s.rounded(.up))
         return total >= 3600 ? String(format: "%d:%02d:%02d", total / 3600, total % 3600 / 60, total % 60)
                              : String(format: "%d:%02d", total / 60, total % 60)
+    }
+
+    /// Same rounding as the numeral, so the spoken value matches what is on screen.
+    private var spokenRemaining: String {
+        let seconds = Int(player.stepRemaining.rounded(.up))
+        let spoken = Duration.seconds(seconds)
+            .formatted(.units(allowed: [.hours, .minutes, .seconds], width: .wide))
+        return player.isPaused ? "\(spoken), paused" : spoken
+    }
+
+    private var spokenSessionLeft: String {
+        let minutes = Int((sessionRemaining / 60).rounded(.up))
+        guard minutes > 0 else { return "less than a minute" }
+        return Duration.seconds(minutes * 60).formatted(.units(allowed: [.hours, .minutes], width: .wide))
     }
 }
 

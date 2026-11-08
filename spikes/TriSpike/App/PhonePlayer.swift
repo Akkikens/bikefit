@@ -15,7 +15,33 @@ import UserNotifications
 /// Every in process cue logs its actual versus expected time, so missing or late entries show when iOS suspended us.
 @MainActor
 final class PhonePlayer: ObservableObject {
-    struct Step { var name: String; var seconds: TimeInterval; var target: String? = nil }
+    /// One player step. `sport` drives the Health workout type; `cue` is the prebuilt phrase ("Threshold, rep 2 of 2")
+    /// that every voice, notification and announcement path uses, so they all say the same thing.
+    struct Step {
+        var name: String
+        var seconds: TimeInterval
+        var target: String? = nil
+        var sport: Sport = .run
+        var cue: String? = nil
+        var spokenName: String { cue ?? name }
+    }
+
+    /// What the last session amounted to, for Today to close the loop. Cleared by the next start.
+    struct Result: Equatable {
+        var name: String
+        /// Active time: wall clock from start to end minus paused time. Skipped steps are not counted as done.
+        var seconds: TimeInterval
+        var completed: Bool
+        /// True once the workout reached Health. False for smoke runs, denied access or an unfinished save.
+        var saved: Bool = false
+    }
+
+    /// A contiguous run of steps in one sport, with the wall clock interval the player actually spent in it.
+    private struct Leg {
+        var sport: Sport
+        var start: Date
+        var end: Date?
+    }
 
     @Published private(set) var isRunning = false
     @Published private(set) var isPaused = false
@@ -23,9 +49,14 @@ final class PhonePlayer: ObservableObject {
     @Published private(set) var steps: [Step] = []
     @Published private(set) var now = Date()
     @Published var voiceOn = true
+    @Published private(set) var lastResult: Result?
 
     private(set) var sessionName = ""
+    private(set) var sport: Sport = .run
     private var startDate = Date()
+    /// The real start. `startDate` is shifted by skips so `elapsed` follows the plan; this one never moves.
+    private var originalStart = Date()
+    private var legs: [Leg] = []
     private var boundaries: [Date] = []
     private var pausedAt: Date?
     private var pausedTotal: TimeInterval = 0
@@ -57,12 +88,16 @@ final class PhonePlayer: ObservableObject {
         return max(0, boundaries[stepIndex].timeIntervalSince(reference))
     }
 
-    func start(name: String, steps: [Step], smoke: Bool = false) async {
+    func start(name: String, sport: Sport, steps: [Step], smoke: Bool = false) async {
         guard !isRunning, !steps.isEmpty else { return }
         self.smoke = smoke
         sessionName = name
+        self.sport = sport
         self.steps = steps
+        lastResult = nil
         startDate = Date()
+        originalStart = startDate
+        legs = [Leg(sport: steps[0].sport, start: startDate, end: nil)]
         pausedAt = nil
         pausedTotal = 0
         rebuildBoundaries(from: 0, at: startDate)
@@ -83,7 +118,7 @@ final class PhonePlayer: ObservableObject {
         }
         startLiveActivity()
         UIApplication.shared.isIdleTimerDisabled = true
-        speak("\(name). \(steps[0].name), \(spoken(steps[0].seconds)).")
+        speak("\(name). \(steps[0].spokenName), \(spoken(steps[0].seconds)).")
         startTicker()
     }
 
@@ -107,7 +142,7 @@ final class PhonePlayer: ObservableObject {
         isPaused = false
         now = Date()
         await rescheduleNotifications()
-        speak("Resuming. \(steps[stepIndex].name).")
+        speak("Resuming. \(steps[stepIndex].spokenName).")
         log.record("player", "resume", String(format: "paused %.0f s", gap))
         updateLiveActivity()
         startTicker()
@@ -124,9 +159,10 @@ final class PhonePlayer: ObservableObject {
         startDate = reference.addingTimeInterval(-before - pausedTotal)
         rebuildBoundaries(from: target, at: reference)
         stepIndex = target
+        noteStepEntered(target, at: reference)
         now = Date()
         if !isPaused { await rescheduleNotifications() }
-        speak("\(steps[target].name), \(spoken(steps[target].seconds)).")
+        speak("\(steps[target].spokenName), \(spoken(steps[target].seconds)).")
         log.record("player", delta < 0 ? "previous step" : "next step", "now step \(target + 1)")
         updateLiveActivity()
     }
@@ -135,15 +171,22 @@ final class PhonePlayer: ObservableObject {
         guard isRunning else { return }
         ticker?.invalidate()
         ticker = nil
+        let end = min(pausedAt ?? Date(), boundaries.last ?? Date())
+        let done = max(0, end.timeIntervalSince(originalStart) - pausedTotal)
+        // Published before isRunning flips, so Today already has the result when the player dismisses.
+        lastResult = Result(name: sessionName, seconds: done, completed: stepIndex >= steps.count)
+        if !legs.isEmpty { legs[legs.count - 1].end = end }
         isRunning = false
         isPaused = false
         UIApplication.shared.isIdleTimerDisabled = false
-        let end = min(pausedAt ?? Date(), boundaries.last ?? Date())
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: notificationIDs)
         await activity?.end(nil, dismissalPolicy: .immediate)
         activity = nil
-        log.record("player", "stop", "elapsed \(Int(end.timeIntervalSince(startDate) - pausedTotal)) s, save=\(save)")
-        if save { await saveWorkout(end: end) }
+        log.record("player", "stop", "elapsed \(Int(done)) s, save=\(save)")
+        if save {
+            let ok = await saveWorkout()
+            lastResult?.saved = ok
+        }
     }
 
     /// Called on foreground: rebuild state from the wall clock (spec annex G, player suspended mid session).
@@ -185,15 +228,21 @@ final class PhonePlayer: ObservableObject {
             let state = UIApplication.shared.applicationState == .active ? "foreground" : "background"
             log.record("player", "in process cue \(crossed + 1)", String(format: "late by %.1f s, app %@", lateBy, state), pass: lateBy < 2)
         }
+        // A sport change is stamped at the boundary actually crossed, even if the app was suspended past several.
+        var entered = stepIndex + 1
+        while entered <= newIndex, entered < steps.count {
+            noteStepEntered(entered, at: boundaries[entered - 1])
+            entered += 1
+        }
         stepIndex = newIndex
         if stepIndex >= steps.count {
-            speak("Session complete. Well done.")
+            speak("Session complete.")
             let save = !smoke
             Task { await stop(save: save) }
             return
         }
         let step = steps[stepIndex]
-        speak("\(step.name), \(spoken(step.seconds))\(step.target.map { ", \($0)" } ?? "").")
+        speak("\(step.spokenName), \(spoken(step.seconds))\(step.target.map { ", \($0)" } ?? "").")
         updateLiveActivity()
     }
 
@@ -227,8 +276,8 @@ final class PhonePlayer: ObservableObject {
         for i in stepIndex..<boundaries.count {
             let content = UNMutableNotificationContent()
             if i + 1 < steps.count {
-                content.title = steps[i + 1].name
-                content.body = "\(spoken(steps[i + 1].seconds)). Step \(i + 2) of \(steps.count)."
+                content.title = steps[i + 1].spokenName
+                content.body = "\(spoken(steps[i + 1].seconds))."
             } else {
                 content.title = "Session complete"
                 content.body = sessionName
@@ -271,25 +320,63 @@ final class PhonePlayer: ObservableObject {
         Task { await activity.update(ActivityContent(state: state, staleDate: boundaries.last)) }
     }
 
-    /// Spec annex E: save with HKWorkoutBuilder, duration only, never fabricated energy, distance or heart rate.
-    private func saveWorkout(end: Date) async {
-        guard HKHealthStore.isHealthDataAvailable() else {
-            log.record("player", "save workout", "Health unavailable", pass: false)
-            return
-        }
-        do {
-            try await health.requestAuthorization(toShare: [HKObjectType.workoutType()], read: [])
-            let config = HKWorkoutConfiguration()
+    /// Closes the open leg and opens a new one when the step just entered is a different sport.
+    private func noteStepEntered(_ index: Int, at date: Date) {
+        guard steps.indices.contains(index), let last = legs.last, last.sport != steps[index].sport else { return }
+        legs[legs.count - 1].end = max(date, last.start)
+        legs.append(Leg(sport: steps[index].sport, start: max(date, last.start), end: nil))
+    }
+
+    private func configuration(for sport: Sport) -> HKWorkoutConfiguration {
+        let config = HKWorkoutConfiguration()
+        switch sport {
+        case .swim:
+            config.activityType = .swimming
+            config.locationType = .indoor
+            config.swimmingLocationType = .pool
+        case .bike:
+            // The phone player is the trainer experience; an outdoor ride runs on the watch.
+            config.activityType = .cycling
+            config.locationType = .indoor
+        case .run:
             config.activityType = .running
             config.locationType = .outdoor
-            let builder = HKWorkoutBuilder(healthStore: health, configuration: config, device: .local())
-            try await builder.beginCollection(at: startDate)
-            try await builder.addMetadata(["TriSpikeSession": sessionName])
-            try await builder.endCollection(at: end)
-            let workout = try await builder.finishWorkout()
-            log.record("player", "save workout", workout.map { "saved \(Int($0.duration)) s, source \($0.sourceRevision.source.name)" } ?? "finishWorkout returned nil", pass: workout != nil)
+        }
+        return config
+    }
+
+    /// Spec annex E: save with HKWorkoutBuilder, duration only, never fabricated energy, distance or heart rate.
+    /// One workout per contiguous leg of one sport, split where the player actually crossed (a brick is a ride, then a run).
+    /// Returns true when every leg was saved.
+    private func saveWorkout() async -> Bool {
+        guard HKHealthStore.isHealthDataAvailable() else {
+            log.record("player", "save workout", "Health unavailable", pass: false)
+            return false
+        }
+        let toSave = legs.compactMap { leg -> (sport: Sport, start: Date, end: Date)? in
+            guard let end = leg.end, end > leg.start else { return nil }
+            return (leg.sport, leg.start, end)
+        }
+        guard !toSave.isEmpty else {
+            log.record("player", "save workout", "no time recorded", pass: false)
+            return false
+        }
+        var allSaved = true
+        do {
+            try await health.requestAuthorization(toShare: [HKObjectType.workoutType()], read: [])
+            for leg in toSave {
+                let builder = HKWorkoutBuilder(healthStore: health, configuration: configuration(for: leg.sport), device: .local())
+                try await builder.beginCollection(at: leg.start)
+                try await builder.addMetadata(["TriSpikeSession": sessionName])
+                try await builder.endCollection(at: leg.end)
+                let workout = try await builder.finishWorkout()
+                if workout == nil { allSaved = false }
+                log.record("player", "save workout", workout.map { "\(leg.sport.rawValue) saved \(Int($0.duration)) s, source \($0.sourceRevision.source.name)" } ?? "\(leg.sport.rawValue) finishWorkout returned nil", pass: workout != nil)
+            }
         } catch {
             log.record("player", "save workout", "error \(error)", pass: false)
+            return false
         }
+        return allSaved
     }
 }

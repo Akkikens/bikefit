@@ -57,6 +57,11 @@ enum BL {
         static let card: CGFloat = 14, chip: CGFloat = 8, button: CGFloat = 8, sheet: CGFloat = 28, block: CGFloat = 2, plate: CGFloat = 20
     }
 
+    /// Card edge width: hairline normally, 1 pt under Increase Contrast (spec section 6).
+    static func edgeWidth(_ contrast: ColorSchemeContrast) -> CGFloat {
+        contrast == .increased ? 1 : 0.5
+    }
+
     private static func dynamic(_ light: UInt32, _ dark: UInt32, highContrastLight: UInt32? = nil, highContrastDark: UInt32? = nil) -> Color {
         Color(uiColor: UIColor { traits in
             let isDark = traits.userInterfaceStyle == .dark
@@ -82,22 +87,30 @@ enum BLFont {
     static let readoutValue = Font.title3.weight(.semibold).monospacedDigit()
     static let rowNumeral = Font.body.weight(.medium).monospacedDigit()
     static let label = Font.footnote.weight(.semibold).lowercaseSmallCaps()
+    /// Units keep their case: m is meters, M is not. Small caps are for labels and words only.
+    static let unit = Font.footnote.weight(.semibold)
     static let meta = Font.subheadline
     static let arcCountdown = Font.title.weight(.semibold).width(.expanded).monospacedDigit()
     static let labMono = Font.footnote.monospaced()
     static func hero(_ size: CGFloat) -> Font { Font.system(size: size, weight: .semibold).width(.expanded).monospacedDigit() }
 }
 
-/// Card surface: solid, light cards get a hairline, dark cards are lighter than the background.
+/// Card surface: solid. Light cards get a hairline; dark cards rely on being lighter than the background,
+/// except under Increase Contrast, where every card gets a 1 pt separatorHC edge.
+/// `radius` and `padded` let the week strip and the watch card share the same rule.
 struct CardBackground: ViewModifier {
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.colorSchemeContrast) private var contrast
+    var radius: CGFloat = BL.Radius.card
+    var padded: Bool = true
     func body(content: Content) -> some View {
         content
-            .padding(BL.Space.cardPadding)
-            .background(BL.surface, in: RoundedRectangle(cornerRadius: BL.Radius.card, style: .continuous))
+            .padding(padded ? BL.Space.cardPadding : 0)
+            .background(BL.surface, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
             .overlay {
-                if scheme == .light {
-                    RoundedRectangle(cornerRadius: BL.Radius.card, style: .continuous).strokeBorder(BL.separator, lineWidth: 0.5)
+                if scheme == .light || contrast == .increased {
+                    RoundedRectangle(cornerRadius: radius, style: .continuous)
+                        .strokeBorder(BL.separator, lineWidth: BL.edgeWidth(contrast))
                 }
             }
     }
@@ -105,10 +118,19 @@ struct CardBackground: ViewModifier {
 
 extension View {
     func card() -> some View { modifier(CardBackground()) }
+    /// Card surface without the default padding, for components that pad themselves.
+    func cardSurface(radius: CGFloat = BL.Radius.card) -> some View { modifier(CardBackground(radius: radius, padded: false)) }
 }
 
 /// Motion that respects Reduce Motion (section 7).
 struct Motion {
     let reduce: Bool
     func animation(_ a: Animation) -> Animation? { reduce ? nil : a }
+}
+
+extension View {
+    /// Scrolled content ends hard at the floating tab bar instead of ghosting through its glass.
+    @ViewBuilder func bottomEdgeSolid() -> some View {
+        if #available(iOS 26, *) { self.scrollEdgeEffectStyle(.hard, for: .bottom) } else { self }
+    }
 }
