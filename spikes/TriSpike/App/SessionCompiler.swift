@@ -68,7 +68,7 @@ enum SampleSessions {
                 Measurement(value: 100, unit: .meters), Measurement(value: 2, unit: .minutes)),
             displayName: "100 on 2:00"))
         return CustomWorkout(
-            activity: .swimming, location: .indoor, displayName: "CSS 8x100",
+            activity: .swimming, location: .indoor, displayName: "Eight fast 100 m swims",
             warmup: WorkoutStep(goal: .distance(300, .meters), displayName: "Easy 300"),
             blocks: [IntervalBlock(steps: [rep], iterations: 8)],
             cooldown: WorkoutStep(goal: .distance(200, .meters), displayName: "Easy 200"))

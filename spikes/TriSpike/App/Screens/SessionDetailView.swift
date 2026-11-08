@@ -3,6 +3,8 @@ import SwiftUI
 struct SessionDetailView: View {
     var session: Session
     @Binding var playerSession: Session?
+    /// Decides between the Apple Watch card and the "how you will follow this" card.
+    @ObservedObject private var setup = UserSetup.shared
     @ScaledMetric(relativeTo: .body) private var profileHeight: CGFloat = 120
 
     var body: some View {
@@ -12,20 +14,29 @@ struct SessionDetailView: View {
                     SportChip(sport: session.sport, second: session.brickSecond)
                     Text(session.name).font(BLFont.sessionName).foregroundStyle(BL.textPrimary)
                         .accessibilityAddTraits(.isHeader)
-                    Text("\(Demo.currentPhase.rawValue.capitalized) phase, week \(Demo.currentWeek) of \(Demo.totalWeeks)")
-                        .font(BLFont.meta).foregroundStyle(BL.textSecondary)
+                    if let idea = session.idea {
+                        CompactJargon(term: idea, label: session.ideaLabel, font: BLFont.meta, ink: BL.textPrimary, textHeight: 20)
+                    }
+                    phaseLine
                     Text(session.purpose).font(BLFont.purpose).foregroundStyle(BL.textPrimary).lineSpacing(2)
                         .fixedSize(horizontal: false, vertical: true)
+                    if let feel = session.feel {
+                        Label("How it should feel: \(feel.lowercasedFirst)", systemImage: "gauge.with.dots.needle.33percent")
+                            .font(BLFont.meta)
+                            .foregroundStyle(BL.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: BL.Space.l) {
                     ProfileView(steps: session.steps, mode: .structure, height: profileHeight, ruler: true, showRepeats: true)
-                    ReadoutGrid(items: readouts)
+                    ProfileLegend(steps: session.steps, explainsScale: true)
+                    ReadoutGrid(items: readouts, maxColumns: 2)
                 }
                 .card()
 
                 VStack(alignment: .leading, spacing: 8) {
-                    SectionLabel(text: "Steps", trailing: "\(numberedStepCount)")
+                    SectionLabel(text: "Steps", trailing: "\(numberedStepCount) steps")
                     VStack(spacing: 0) {
                         ForEach(Array(groupedRows.enumerated()), id: \.offset) { i, row in
                             switch row {
@@ -35,9 +46,8 @@ struct SessionDetailView: View {
                                 // The bracket spans only the repeated rows, in the same hairline the Profile uses,
                                 // and starts below the count so it never touches the label.
                                 VStack(alignment: .leading, spacing: 0) {
-                                    Text("\(count)x").font(BLFont.label).foregroundStyle(BL.textSecondary)
+                                    Text("Repeat \(count) times").font(BLFont.label).foregroundStyle(BL.textSecondary)
                                         .padding(.top, 10).padding(.leading, 12)
-                                        .accessibilityLabel("\(count) times")
                                     VStack(spacing: 0) {
                                         StepRow(number: n, step: work, indented: true)
                                         if let rest { StepRow(number: n + 1, step: rest, indented: true) }
@@ -54,7 +64,11 @@ struct SessionDetailView: View {
                     .card()
                 }
 
-                WatchCard(line: session.watchLine)
+                if setup.canSendToWatch {
+                    WatchCard(line: session.watchLine)
+                } else {
+                    FollowCard(tracker: setup.tracker)
+                }
 
                 VStack(spacing: BL.Space.m) {
                     Button { playerSession = session } label: { Label("Start on phone", systemImage: "iphone") }
@@ -81,6 +95,15 @@ struct SessionDetailView: View {
         }
     }
 
+    /// Where this session sits in the plan, with the phase name explained.
+    private var phaseLine: some View {
+        HStack(spacing: BL.Space.s) {
+            CompactJargon(term: Demo.currentPhase.glossaryTerm, font: BLFont.meta, ink: BL.textSecondary, textHeight: 20)
+            Text("Week \(Demo.currentWeek) of \(Demo.totalWeeks)").font(BLFont.meta).foregroundStyle(BL.textSecondary)
+            Spacer(minLength: 0)
+        }
+    }
+
     /// Distance first for swims, then time, target and an estimated load.
     private var readouts: [Readout] {
         var items: [Readout] = []
@@ -88,8 +111,8 @@ struct SessionDetailView: View {
             items.append(Readout(label: "distance", value: "\(m)", unit: "m"))
         }
         items.append(Readout(label: "duration", value: "\(session.minutes)", unit: "min"))
-        items.append(Readout(label: "target", value: session.headlineTarget?.value ?? "easy", unit: session.headlineTarget?.unit ?? "", ink: session.sport.ink))
-        items.append(Readout(label: "load", value: "\(session.estimatedLoad)", estimated: true))
+        items.append(Readout(label: session.targetLabel, value: session.headlineTarget?.value ?? "easy", unit: session.headlineTarget?.unit ?? "", ink: session.sport.ink))
+        items.append(Readout(label: "Training load", value: "\(session.estimatedLoad)", unit: "points", term: .load, estimated: true))
         return items
     }
 
@@ -105,7 +128,7 @@ struct SessionDetailView: View {
         }
     }
 
-    /// Collapses repeat groups into one "8x" row pair, numbering steps as an athlete reads them.
+    /// Collapses repeat groups into one "repeat 8 times" row pair, numbering steps as an athlete reads them.
     private var groupedRows: [Row] {
         var rows: [Row] = []
         var seen = Set<Int>()
@@ -126,4 +149,9 @@ struct SessionDetailView: View {
         }
         return rows
     }
+}
+
+private extension String {
+    /// "Easy. You could chat." becomes "easy. You could chat." so it reads after a colon.
+    var lowercasedFirst: String { prefix(1).lowercased() + dropFirst() }
 }

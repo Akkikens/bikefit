@@ -10,6 +10,8 @@ struct RaceView: View {
     /// (not index) so editing or reordering a list never moves a tick onto a different item.
     @AppStorage("race.checked") private var checkedRaw = ""
     @State private var sentToWatch = false
+    /// Only people who chose Apple Watch can send the race to a watch.
+    @ObservedObject private var setup = UserSetup.shared
 
     // Transition estimates in seconds. The three legs plus these make the predicted finish.
     private static let t1: TimeInterval = 120
@@ -17,7 +19,7 @@ struct RaceView: View {
 
     /// Race morning mode starts on race day. `-raceMorning` previews it for screenshots and testing.
     private static let previewRaceMorning = ProcessInfo.processInfo.arguments.contains("-raceMorning")
-    private var isRaceMorning: Bool { Demo.daysToRace <= 0 || Self.previewRaceMorning }
+    private var isRaceMorning: Bool { (Demo.hasRace && Demo.daysToRace <= 0) || Self.previewRaceMorning }
 
     var body: some View {
         NavigationStack {
@@ -35,6 +37,10 @@ struct RaceView: View {
                             }
                             morningSentence
                             morningAction
+                        } else if !Demo.hasRace {
+                            noRaceCard
+                            courseCard
+                            fueling
                         } else {
                             countdown
                             courseCard
@@ -70,11 +76,6 @@ struct RaceView: View {
 
     private var daysWord: String { Demo.daysToRace == 1 ? "day" : "days" }
 
-    private func hm(_ s: TimeInterval) -> String {
-        let m = Int(s.rounded()) / 60
-        return String(format: "%d:%02d", m / 60, m % 60)
-    }
-
     private func legSeconds(_ sport: Sport) -> TimeInterval {
         Demo.raceLegs.first { $0.sport == sport }?.seconds ?? 0
     }
@@ -85,11 +86,27 @@ struct RaceView: View {
         guard legs.count == 3 else { return legs }
         return [
             legs[0],
-            PlanStep(sport: legs[1].sport, kind: .recovery, name: "T1", seconds: Self.t1, level: 1, target: nil),
+            PlanStep(sport: legs[1].sport, kind: .recovery, name: "Swim to bike transition", seconds: Self.t1, level: 1, target: nil),
             legs[1],
-            PlanStep(sport: legs[2].sport, kind: .recovery, name: "T2", seconds: Self.t2, level: 1, target: nil),
+            PlanStep(sport: legs[2].sport, kind: .recovery, name: "Bike to run transition", seconds: Self.t2, level: 1, target: nil),
             legs[2],
         ]
+    }
+
+    // MARK: No race yet
+
+    private var noRaceCard: some View {
+        VStack(alignment: .leading, spacing: BL.Space.s) {
+            Label("No race date yet", systemImage: "calendar.badge.plus")
+                .font(.headline)
+                .foregroundStyle(BL.textPrimary)
+            Text("Your plan is 12 weeks of mostly easy training. When you sign up for a race, choose Redo setup under Learn and setup to add the date. Below is what race day looks like for the distance you picked.")
+                .font(.subheadline)
+                .foregroundStyle(BL.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .card()
     }
 
     // MARK: Countdown
@@ -103,20 +120,20 @@ struct RaceView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
                     .foregroundStyle(BL.textPrimary)
-                Text(daysWord).font(BLFont.label).foregroundStyle(BL.textSecondary)
+                Text("\(daysWord) to go").font(BLFont.label).foregroundStyle(BL.textSecondary)
             }
             Text(raceDateText).font(BLFont.meta).foregroundStyle(BL.textSecondary)
-            Text("Start \(Demo.raceStart), wake \(Demo.raceWake)").font(BLFont.meta).foregroundStyle(BL.textSecondary)
+            Text("Race starts \(Demo.raceStartLabel). Wake up at \(Demo.raceWakeLabel).").font(BLFont.meta).foregroundStyle(BL.textSecondary)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(Demo.daysToRace) \(daysWord) to race. \(raceDateText). Start \(Demo.raceStart), wake \(Demo.raceWake).")
+        .accessibilityLabel("\(Demo.daysToRace) \(daysWord) to go. \(raceDateText). Race starts \(Demo.raceStartLabel). Wake up at \(Demo.raceWakeLabel).")
     }
 
     // MARK: Race day
 
     private var courseCard: some View {
         VStack(alignment: .leading, spacing: BL.Space.l) {
-            SectionLabel(text: "Race day", trailing: "predicted " + hm(predicted))
+            SectionLabel(text: "Race day", trailing: "finish about " + duration(predicted))
             ProfileView(steps: profileSteps, mode: .structure, height: profileHeight, ruler: true)
             VStack(spacing: 0) {
                 ForEach(Array(Demo.raceLegs.enumerated()), id: \.offset) { i, leg in
@@ -141,19 +158,20 @@ struct RaceView: View {
                     if i < Demo.raceLegs.count - 1 {
                         let seconds = i == 0 ? Self.t1 : Self.t2
                         HStack(spacing: 8) {
-                            Text(i == 0 ? "t1" : "t2").font(BLFont.label).foregroundStyle(BL.textSecondary)
-                            Rectangle().fill(BL.separator).frame(height: 0.5)
-                            Text(duration(seconds))
+                            CompactJargon(term: .transition, label: i == 0 ? "Transition to bike" : "Transition to run", textHeight: 20)
+                                .fixedSize()
+                            Rectangle().fill(BL.separator).frame(height: 0.5).accessibilityHidden(true)
+                            Text("about \(duration(seconds))")
                                 .font(BLFont.label.monospacedDigit())
                                 .foregroundStyle(BL.textSecondary)
                         }
-                        .frame(minHeight: 24)
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("Transition \(i == 0 ? "one" : "two"), about \(duration(seconds))")
+                        .padding(.vertical, 6)
+                        .frame(minHeight: 32)
+                        .accessibilityElement(children: .contain)
                     }
                 }
             }
-            Text("Targets are ranges. On a hilly or windy course they can be off by several percent, so go by feel\u{00A0}first.")
+            Text("Targets are ranges. On a hilly or windy course they can be off by several percent, so go by how it feels\u{00A0}first.")
                 .font(.subheadline).foregroundStyle(BL.textSecondary)
         }
         .card()
@@ -183,14 +201,14 @@ struct RaceView: View {
                         .foregroundStyle(item.done ? BL.accent : BL.textPrimary)
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(item.tMinus.lowercased()).font(BLFont.label).foregroundStyle(BL.textSecondary)
+                        Text(item.when).font(BLFont.label).foregroundStyle(BL.textSecondary)
                         Text(item.text).font(.body).foregroundStyle(BL.textPrimary)
                     }
                     Spacer()
                 }
                 .padding(.vertical, 10)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("\(item.tMinus), \(item.text)\(item.done ? ", done" : "")")
+                .accessibilityLabel("\(item.when), \(item.text)\(item.done ? ", done" : "")")
                 if i < items.count - 1 { Divider().overlay(BL.separator) }
             }
         }
@@ -242,7 +260,7 @@ struct RaceView: View {
             VStack(alignment: .leading, spacing: BL.Space.m) {
                 fuelRow(.swim, "Swim, \(duration(legSeconds(.swim)))", "Nothing needed. Breakfast carries you.")
                 Divider().overlay(BL.separator)
-                fuelRow(.bike, "Bike, \(duration(legSeconds(.bike)))", "About 30 to 45 g carbohydrate per hour. Practice it in training.")
+                fuelRow(.bike, "Bike, \(duration(legSeconds(.bike)))", "About 30 to 45 g of carbohydrate per hour. Practice it in training first.")
                 Divider().overlay(BL.separator)
                 fuelRow(.run, "Run, \(duration(legSeconds(.run)))", "Fluids to thirst. A gel at the start is optional.")
             }
@@ -276,9 +294,9 @@ struct RaceView: View {
                     .foregroundStyle(BL.textPrimary)
                     .accessibilityLabel(context.date.formatted(date: .omitted, time: .shortened))
                 if let minutes = minutesUntilStart(from: context.date) {
-                    Text("\(duration(TimeInterval(minutes * 60))) to start").font(BLFont.meta).foregroundStyle(BL.textPrimary)
+                    Text("\(duration(TimeInterval(minutes * 60))) until the start").font(BLFont.meta).foregroundStyle(BL.textPrimary)
                 }
-                Text("Start \(Demo.raceStart), wake \(Demo.raceWake)").font(BLFont.meta).foregroundStyle(BL.textSecondary)
+                Text("Race starts \(Demo.raceStartLabel). Wake up at \(Demo.raceWakeLabel).").font(BLFont.meta).foregroundStyle(BL.textSecondary)
             }
             .accessibilityElement(children: .combine)
         }
@@ -294,7 +312,7 @@ struct RaceView: View {
     }
 
     private var morningTimeline: some View {
-        let items = Demo.timeline.filter { !$0.tMinus.hasPrefix("T minus") }
+        let items = Demo.timeline.filter { $0.daysBefore == nil }
         return VStack(alignment: .leading, spacing: 8) {
             SectionLabel(text: "Timeline")
             timelineRows(items.isEmpty ? Demo.timeline : items).card()
@@ -309,21 +327,50 @@ struct RaceView: View {
     }
 
     @ViewBuilder private var morningAction: some View {
-        VStack(spacing: BL.Space.m) {
-            if sentToWatch {
-                Label("On your watch", systemImage: "checkmark.circle.fill")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(BL.success)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            } else {
-                Button {
-                    withAnimation(Motion(reduce: reduceMotion).animation(.easeOut(duration: 0.2))) { sentToWatch = true }
-                } label: {
-                    Label("Send race to watch", systemImage: "applewatch")
+        if setup.canSendToWatch {
+            VStack(spacing: BL.Space.m) {
+                if sentToWatch {
+                    Label("On your watch", systemImage: "checkmark.circle.fill")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(BL.success)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    Button {
+                        withAnimation(Motion(reduce: reduceMotion).animation(.easeOut(duration: 0.2))) { sentToWatch = true }
+                    } label: {
+                        Label("Send race to watch", systemImage: "applewatch")
+                    }
+                    .buttonStyle(PrimaryButtonStyle())
                 }
-                .buttonStyle(PrimaryButtonStyle())
             }
+            .sensoryFeedback(.success, trigger: sentToWatch)
+        } else {
+            raceTrackingNote
         }
-        .sensoryFeedback(.success, trigger: sentToWatch)
+    }
+
+    /// No watch to send to: say plainly how race day works with the way the athlete records.
+    private var raceTrackingNote: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: setup.tracker.symbol).font(.title3).foregroundStyle(BL.textSecondary)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Recording the race").font(BLFont.label).foregroundStyle(BL.textSecondary)
+                Text(raceTrackingCopy).font(.subheadline).foregroundStyle(BL.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .cardSurface(radius: 18)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var raceTrackingCopy: String {
+        switch setup.tracker {
+        case .whoop: "Your band records your heart rate. You will not carry your phone in the race, so learn your targets before the start."
+        case .garmin, .otherWatch: "Your watch records the race. You will not carry your phone in the race, so learn your targets before the start."
+        default: "You will not carry your phone in the race, so learn your targets before the start."
+        }
     }
 }

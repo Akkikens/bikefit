@@ -25,6 +25,7 @@ struct TriSpikeApp: App {
             ContentView()
                 .environmentObject(player)
                 .environmentObject(SpikeLog.shared)
+                .environmentObject(UserSetup.shared)
                 .task {
                     // Unattended run of every check that works without a watch, for the simulator and CI.
                     if ProcessInfo.processInfo.arguments.contains("-spikeSelfTest") {

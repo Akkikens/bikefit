@@ -3,6 +3,8 @@ import SwiftUI
 struct TodayView: View {
     @Binding var playerSession: Session?
     @EnvironmentObject private var player: PhonePlayer
+    /// How the athlete tracks workouts decides whether "Send to watch" exists at all.
+    @ObservedObject private var setup = UserSetup.shared
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var type
     @ScaledMetric(relativeTo: .body) private var profileHeight: CGFloat = 56
@@ -32,9 +34,9 @@ struct TodayView: View {
     private var changesThisWeek: Int { days.flatMap(\.sessions).filter { $0.reason != nil }.count }
     private var engineNote: String {
         switch changesThisWeek {
-        case 0: return "No changes this week."
-        case 1: return "One change this week. The session says why."
-        default: return "\(changesThisWeek) changes this week. Each session says why."
+        case 0: return "Your plan has no changes this week."
+        case 1: return "Your plan has one change this week. The session says why."
+        default: return "Your plan has \(changesThisWeek) changes this week. Each session says why."
         }
     }
 
@@ -79,17 +81,29 @@ struct TodayView: View {
             Text(Self.dateFormat.string(from: Date()))
                 .font(BLFont.meta)
                 .foregroundStyle(BL.textSecondary)
-            SportChip(sport: session.sport, second: session.brickSecond)
+            HStack(alignment: .center, spacing: BL.Space.s) {
+                SportChip(sport: session.sport, second: session.brickSecond)
+                Spacer(minLength: BL.Space.s)
+                // Swims lead with distance below, so the time is said here: the first thing to know is how long it takes.
+                if session.showsDistance && result == nil {
+                    Label("about \(session.minutes) min", systemImage: "clock")
+                        .font(BLFont.meta)
+                        .foregroundStyle(BL.textSecondary)
+                        .accessibilityLabel("About \(session.minutes) minutes")
+                }
+            }
             Text(session.name)
                 .font(BLFont.sessionName)
                 .foregroundStyle(BL.textPrimary)
                 .accessibilityAddTraits(.isHeader)
+            if let idea = session.idea {
+                CompactJargon(term: idea, label: session.ideaLabel, font: BLFont.meta, ink: BL.textSecondary, textHeight: 20)
+            }
             Text(session.purpose)
                 .font(BLFont.purpose)
                 .foregroundStyle(BL.textPrimary)
                 .lineSpacing(2)
-                .lineLimit(3)
-                .fixedSize(horizontal: false, vertical: !type.isAccessibilitySize)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -107,16 +121,15 @@ struct TodayView: View {
         switch unit {
         case "min": return "minutes"
         case "m": return "meters"
-        case "/100m": return "per 100 meters"
-        case "/km": return "per kilometer"
-        case "W": return "watts"
+        case "per 100 m": return "per 100 meters"
+        case "per km": return "per kilometer"
         default: return unit
         }
     }
 
     private var heroLabel: String {
         var s = "\(session.name), \(lead.label) \(lead.value) \(spoken(lead.unit))"
-        if let t = session.headlineTarget { s += ", target \(t.value) \(spoken(t.unit))" }
+        if let t = session.headlineTarget { s += ", \(session.targetLabel) \(t.value) \(spoken(t.unit))" }
         return s
     }
 
@@ -127,6 +140,7 @@ struct TodayView: View {
             Button { path.append(session) } label: {
                 VStack(alignment: .leading, spacing: BL.Space.m) {
                     ProfileView(steps: session.steps, mode: result == nil ? .structure : .state(.done), height: profileHeight, showRepeats: true)
+                    if result == nil { ProfileLegend(steps: session.steps) }
                     readouts
                 }
                 .contentShape(Rectangle())
@@ -149,7 +163,7 @@ struct TodayView: View {
             GridRow {
                 Text(lead.label).font(BLFont.label).foregroundStyle(BL.textSecondary)
                 if session.headlineTarget != nil {
-                    Text("target").font(BLFont.label).foregroundStyle(BL.textSecondary)
+                    Text(session.targetLabel).font(BLFont.label).foregroundStyle(BL.textSecondary)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             }
@@ -178,7 +192,7 @@ struct TodayView: View {
                 ReadoutGrid(items: [
                     Readout(label: "planned", value: "\(session.minutes)", unit: "min"),
                     Readout(label: "done", value: "\(done)", unit: "min"),
-                    Readout(label: "load", value: "\(Session.loadEstimate(minutes: done))", estimated: true),
+                    Readout(label: "Training load", value: "\(Session.loadEstimate(minutes: done))", unit: "points", term: .load, estimated: true),
                 ])
                 .card()
                 Text(resultNote)
@@ -186,30 +200,51 @@ struct TodayView: View {
                     .foregroundStyle(BL.textSecondary)
             }
             .transition(.opacity)
+        } else if setup.canSendToWatch {
+            watchActions
         } else {
-            VStack(spacing: BL.Space.m) {
-                if synced {
-                    Label("On your watch, scheduled \(Demo.sessionTime)", systemImage: "checkmark.circle.fill")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(BL.success)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .transition(.opacity)
-                    Button("Start on phone") { playerSession = session }
-                        .buttonStyle(PrimaryButtonStyle())
-                } else {
-                    Button {
-                        withAnimation(Motion(reduce: reduceMotion).animation(.easeOut(duration: 0.2))) { synced = true }
-                    } label: {
-                        Label("Send to watch", systemImage: "applewatch")
-                    }
+            phoneActions
+        }
+    }
+
+    /// Apple Watch: sending the session to the wrist is the main action, the phone is the alternative.
+    private var watchActions: some View {
+        VStack(spacing: BL.Space.m) {
+            if synced {
+                Label("On your watch, scheduled \(Demo.sessionTimeLabel)", systemImage: "checkmark.circle.fill")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(BL.success)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .transition(.opacity)
+                Button("Start on phone") { playerSession = session }
                     .buttonStyle(PrimaryButtonStyle())
-                    .sensoryFeedback(.success, trigger: synced)
-                    Button { playerSession = session } label: {
-                        Label("Start on phone", systemImage: "iphone")
-                    }
-                    .buttonStyle(SecondaryButtonStyle())
+            } else {
+                Button {
+                    withAnimation(Motion(reduce: reduceMotion).animation(.easeOut(duration: 0.2))) { synced = true }
+                } label: {
+                    Label("Send to watch", systemImage: "applewatch")
                 }
+                .buttonStyle(PrimaryButtonStyle())
+                .sensoryFeedback(.success, trigger: synced)
+                Button { playerSession = session } label: {
+                    Label("Start on phone", systemImage: "iphone")
+                }
+                .buttonStyle(SecondaryButtonStyle())
             }
+        }
+    }
+
+    /// WHOOP, Garmin, another device or phone only: there is no watch to send to, so the phone guides the session.
+    private var phoneActions: some View {
+        VStack(alignment: .leading, spacing: BL.Space.m) {
+            Button { playerSession = session } label: {
+                Label("Start on phone", systemImage: "iphone")
+            }
+            .buttonStyle(PrimaryButtonStyle())
+            Text(FollowCard.short(for: setup.tracker))
+                .font(.footnote)
+                .foregroundStyle(BL.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -219,7 +254,7 @@ struct TodayView: View {
     private var weekSection: some View {
         VStack(alignment: .leading, spacing: BL.Space.m) {
             VStack(alignment: .leading, spacing: 8) {
-                SectionLabel(text: "This week", trailing: "week \(Demo.currentWeek) of \(Demo.totalWeeks)")
+                SectionLabel(text: "This week", trailing: "Week \(Demo.currentWeek) of \(Demo.totalWeeks)")
                 WeekStrip(days: days) { day in
                     if let s = day.sessions.first { path.append(s) }
                 }

@@ -25,8 +25,11 @@ struct WeekView: View {
                     .accessibilityAddTraits(.isHeader)
                 VStack(alignment: .leading, spacing: BL.Space.sectionGap) {
                     ArcBar()
-                    WeekStrip(days: days) { day in
-                        if let s = day.sessions.first { path.append(s) }
+                    VStack(alignment: .leading, spacing: BL.Space.s) {
+                        WeekStrip(days: days) { day in
+                            if let s = day.sessions.first { path.append(s) }
+                        }
+                        WeekStripKey()
                     }
                     VStack(spacing: 0) {
                         ForEach(days) { day in
@@ -42,9 +45,9 @@ struct WeekView: View {
                     }
                     .card()
                     ReadoutGrid(items: [
-                        Readout(label: "planned", value: hours(plannedMinutes), unit: "h"),
-                        Readout(label: "done so far", value: hours(doneMinutes), unit: "h"),
-                        Readout(label: "load", value: "\(loadSoFar)", estimated: true),
+                        Readout(label: "planned", value: hours(plannedMinutes), unit: "hours"),
+                        Readout(label: "done so far", value: hours(doneMinutes), unit: "hours"),
+                        Readout(label: "Training load", value: "\(loadSoFar)", unit: "points", term: .load, estimated: true),
                     ])
                     .card()
                 }
@@ -79,12 +82,13 @@ struct WeekView: View {
                         Image(systemName: second.symbol()).foregroundStyle(second.ink)
                     }
                     Text(s.name).font(.body).foregroundStyle(BL.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 ProfileView(steps: s.steps, mode: .state(s.state), height: 22)
                 if s.state == .done, let done = s.doneMinutes {
                     Text("planned \(s.minutes) min, done \(done) min").font(BLFont.label).foregroundStyle(BL.textSecondary)
                 } else if s.state == .skipped {
-                    Text("skipped, dropped from the week").font(BLFont.label).foregroundStyle(BL.textSecondary)
+                    Text("skipped, left out of this week's totals").font(BLFont.label).foregroundStyle(BL.textSecondary)
                 } else {
                     Text("\(s.minutes) min").font(BLFont.label).foregroundStyle(BL.textSecondary)
                 }
@@ -102,12 +106,12 @@ struct WeekView: View {
     }
 
     private func rowLabel(_ day: PlanDay, _ s: Session) -> String {
-        let sport = s.brickSecond.map { "Brick, \(s.sport.word) then \($0.word)" } ?? s.sport.word
+        let sport = s.brickSecond.map { "\(s.sport.word) then \($0.word.lowercased())" } ?? s.sport.word
         let dayText = Self.weekday.string(from: day.date) + (day.isToday ? ", today" : "")
         let state: String
         switch s.state {
         case .done: state = s.doneMinutes.map { "done, \($0) minutes of \(s.minutes) planned" } ?? "done"
-        case .skipped: state = "skipped, dropped from the week"
+        case .skipped: state = "skipped, left out of this week's totals"
         case .planned: state = "planned, \(s.minutes) minutes"
         }
         return "\(dayText), \(sport), \(s.name), \(state)"

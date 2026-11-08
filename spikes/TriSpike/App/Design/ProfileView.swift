@@ -205,7 +205,7 @@ struct ProfileView: View {
             for (_, span) in groupSpans where span.count > 1 {
                 // Bracket with a gap around the label, so the count never sits on the line.
                 let ink = onBlack ? BL.Player.textSecondary : BL.textSecondary
-                let label = ctx.resolve(Text("\(span.count)x").font(BLFont.label).foregroundStyle(ink))
+                let label = ctx.resolve(Text("\(span.count) times").font(BLFont.label).foregroundStyle(ink))
                 let labelSize = label.measure(in: CGSize(width: 200, height: repeatBand))
                 let mid = (span.start + span.end) / 2
                 let y: CGFloat = headroom + repeatBand / 2
@@ -325,6 +325,78 @@ struct ProfileView: View {
         }
         if case .state(let s) = mode { parts.append(s == .done ? "done" : s == .skipped ? "skipped" : "planned") }
         return parts.joined(separator: ", ")
+    }
+}
+
+/// Says what the bars in a Profile mean, so nobody has to guess which are easy and which are hard.
+/// Only the kinds of step the session really has are listed.
+struct ProfileLegend: View {
+    var steps: [PlanStep]
+    var onBlack = false
+    /// Adds a line on what the scale under the chart counts.
+    var explainsScale = false
+
+    private var sport: Sport { steps.first(where: { $0.kind == .work })?.sport ?? steps.first?.sport ?? .run }
+    private var color: Color {
+        if onBlack { switch sport { case .swim: return BL.Player.swimFill; case .bike: return BL.Player.bikeFill; case .run: return BL.Player.runFill } }
+        return sport.fill
+    }
+    private var ink: Color { onBlack ? BL.Player.textSecondary : BL.textSecondary }
+    private var hasEasyEnds: Bool { steps.contains { $0.kind == .warm || $0.kind == .cool } }
+    private var hasRest: Bool { steps.contains { $0.kind == .recovery } }
+    private var workLevel: Int { steps.filter { $0.kind == .work }.map(\.level).max() ?? 2 }
+    private var workWord: String {
+        if workLevel >= 4 { return sport == .swim ? "Fast swim" : "Hard part" }
+        return workLevel == 3 ? "Steady part" : "Easy part"
+    }
+    private var isSwim: Bool { steps.allSatisfy { $0.sport == .swim } }
+    private var scaleText: String { isSwim ? "The scale under the chart is the distance swum so far." : "The scale under the chart is minutes so far." }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: BL.Space.l) { items; Spacer(minLength: 0) }
+                VStack(alignment: .leading, spacing: 4) { items }
+            }
+            if explainsScale {
+                Text(scaleText).font(.caption).foregroundStyle(ink).fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(label)
+    }
+
+    private var label: String {
+        var parts: [String] = []
+        if hasEasyEnds { parts.append("light bars are the easy warm up and cool down") }
+        parts.append("solid bars are the \(workWord.lowercased()), and taller means harder")
+        if hasRest { parts.append(sport == .swim ? "gaps are rest" : "outlined bars are easy rest") }
+        return "Chart key: " + parts.joined(separator: ", ") + "."
+    }
+
+    @ViewBuilder private var items: some View {
+        if hasEasyEnds {
+            item("Easy warm up and cool down") {
+                RoundedRectangle(cornerRadius: 2).fill(color.opacity(0.55))
+                    .overlay(RoundedRectangle(cornerRadius: 2).strokeBorder(color, lineWidth: 1))
+            }
+        }
+        item(workWord) { RoundedRectangle(cornerRadius: 2).fill(color) }
+        if hasRest {
+            if sport == .swim {
+                Text("Gaps are rest").font(.caption.weight(.medium)).foregroundStyle(ink).lineLimit(1)
+            } else {
+                item("Easy rest") { RoundedRectangle(cornerRadius: 2).strokeBorder(color, lineWidth: 1.5) }
+            }
+        }
+    }
+
+    private func item<G: View>(_ text: String, @ViewBuilder glyph: () -> G) -> some View {
+        HStack(spacing: 6) {
+            glyph().frame(width: 14, height: 10).accessibilityHidden(true)
+            Text(text).font(.caption.weight(.medium)).foregroundStyle(ink).lineLimit(1).minimumScaleFactor(0.8)
+        }
     }
 }
 

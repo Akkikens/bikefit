@@ -10,6 +10,7 @@ struct PlayerView: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @ScaledMetric(relativeTo: .largeTitle) private var hero: CGFloat = 112
     @ScaledMetric(relativeTo: .body) private var profileHeight: CGFloat = 150
+    @ScaledMetric(relativeTo: .title3) private var nextWidth: CGFloat = 56
     @State private var confirmEnd = false
     @State private var started = false
 
@@ -34,7 +35,12 @@ struct PlayerView: View {
                 ProfileView(steps: session.steps, mode: .player(progress: player.elapsed),
                             height: compact ? 56 : min(profileHeight, 160), ruler: !compact, onBlack: true)
                     .opacity(dimSecondary)
-                    .padding(.bottom, 16)
+                    .padding(.bottom, compact ? 16 : 8)
+                if !compact {
+                    ProfileLegend(steps: session.steps, onBlack: true)
+                        .opacity(dimSecondary)
+                        .padding(.bottom, 12)
+                }
                 nextRow.opacity(dimSecondary)
                     .padding(.bottom, 20)
                 plate
@@ -117,13 +123,22 @@ struct PlayerView: View {
                 .accessibilityLabel("Time left in step")
                 .accessibilityValue(spokenRemaining)
                 .accessibilityAddTraits(.updatesFrequently)
+            Text("left in this step")
+                .font(BLFont.label)
+                .foregroundStyle(BL.Player.textSecondary)
+                .opacity(dimSecondary)
+                .accessibilityHidden(true)
             if let c = current {
                 Text(c.name).font(BLFont.sessionName).foregroundStyle(BL.Player.textPrimary).opacity(dim)
                 if let t = c.target {
                     Text(t).font(BLFont.largeValue).foregroundStyle(c.sport.playerInk).opacity(dimSecondary)
+                        .multilineTextAlignment(.center)
                 }
+                Text(c.feel).font(.subheadline).foregroundStyle(BL.Player.textSecondary).opacity(dimSecondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            Text("\(placeText), \(clock(sessionRemaining)) left")
+            Text("\(placeText), \(duration(sessionRemaining)) left")
                 .font(Font.subheadline.weight(.semibold).lowercaseSmallCaps())
                 .monospacedDigit()
                 .multilineTextAlignment(.center)
@@ -146,26 +161,17 @@ struct PlayerView: View {
     @ViewBuilder private var nextRow: some View {
         if let n = next {
             let name = cue(at: index + 1) ?? n.name
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 10) {
-                    Image(systemName: "arrow.right")
-                    Text(name)
-                    Spacer(minLength: 10)
-                    Text(duration(n.seconds)).monospacedDigit()
-                    if let t = n.target { Text("\u{00B7}"); Text(t).monospacedDigit() }
-                }
-                .lineLimit(1)
+            // A step named "Steady hard run, 15 min" already says its length.
+            let showDuration = !n.name.contains(duration(n.seconds))
+            // "Next" has its own fixed column, so a name that wraps lines up under itself, not under the word Next.
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Text("Next").fontWeight(.semibold).frame(width: nextWidth, alignment: .leading)
                 VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 10) {
-                        Image(systemName: "arrow.right")
-                        Text(name)
-                    }
-                    HStack(spacing: 10) {
-                        Text(duration(n.seconds)).monospacedDigit()
-                        if let t = n.target { Text("\u{00B7}"); Text(t).monospacedDigit() }
-                    }
+                    Text(name).fixedSize(horizontal: false, vertical: true)
+                    let detail = [showDuration ? duration(n.seconds) : nil, n.target].compactMap { $0 }.joined(separator: " \u{00B7} ")
+                    if !detail.isEmpty { Text(detail).monospacedDigit().font(.body) }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer(minLength: 0)
             }
             .font(.title3)
             .foregroundStyle(BL.Player.textSecondary)
