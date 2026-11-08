@@ -136,3 +136,17 @@ Dynamic Type: styles or `@ScaledMetric` everywhere, Canvas heights included. Her
 - No warning as a block, chip or fill; text plus exclamationmark.triangle only.
 - No scroll driven or looping animation, no parallax, no haptics beyond section 7.
 - No em or en dashes in copy; ranges say "to".
+
+## 10 Plain language and onboarding (added after the first review)
+
+Shorthand is never the headline. Session titles are plain with units ("Easy run, 40 min", "Swim: 8 fast hundreds", "Ride 60 min, then run 15 min"); the technical idea (Brick, Threshold, Sweet spot) sits in a JargonText line that opens a sheet. JargonText is the body text plus a 13 pt info.circle glyph in textSecondary, 44 pt tall, VoiceOver label "<term>. Explain". The glossary sheet uses the standard medium and large detents with a 28 pt corner and one short sentence over the longer explanation. Every number carries its unit.
+
+Onboarding is eight full screens on the Contour background: a segmented progress bar, one large headline, one plain sentence on why we ask, selectable cards (surface, 14 pt radius, accent stroke when selected, never color alone), Back and a primary Next, Skip only where a default is fine. Tracker choice is a first class setting: without an Apple Watch the primary action on Today and Session detail is Start on phone, and the watch card is replaced by a card that says how the session will be followed.
+
+## 11 Connections and readiness
+
+Onboarding step 6 is Connect your devices: multi select cards (Apple Watch, WHOOP, Oura, Garmin, another watch or band, just my phone), each a surface card with a symbol, a plain line on what it gives ("Heart rate variability, resting heart rate and sleep through Apple Health"), and a selected state that is never color alone. Apple Health access is requested here with the reason. WHOOP and Oura rows carry a Beta label and appear only when their flag is on.
+
+Today shows one readiness line under the session in subheadline textSecondary: "HRV on track. Resting heart rate normal. Sleep 7h 10m." or "Learning your baseline, night 9 of 14." Vendor data is credited in plain text ("Data by WHOOP"), no logos. When a rule changes the session, the reason line carries the change and the two facts, and a one tap Keep planned session is the only secondary action.
+
+Methods gains a Connections screen with one row per source and these states: not connected ("Connect to adjust your plan from your sleep and HRV. Disconnect any time."), calibrating ("Learning your baseline, night 9 of 14. No plan changes yet."), connected ("Connected. Last synced 6:40 am."), stale ("No new data for 2 days. Plan changes are paused."), needs sign in ("Sign in again to keep adjusting your plan."), at capacity ("This connection cannot take more people right now."), and a disconnect that says "Removes the connection and deletes saved readings from this phone."

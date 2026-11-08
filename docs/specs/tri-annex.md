@@ -58,8 +58,13 @@ Deterministic, ordered, every fired rule writes a reason line shown on the Today
 | 6 | Acute load (7 day) over chronic (28 day) above 1.5 | Insert one easy day, flag the week | Your recent load spiked; today went easy. This is a caution rule, not a prediction that anything is wrong |
 | 7 | Race window active | Taper lock: no added intensity, no zone nudges, rules 3 and 5 suspended | Race week: the plan holds steady on purpose |
 | 8 | Any sport's last completed test older than 8 weeks | Insert that sport's test at the next block boundary | Time to retest so your zones stay honest |
+| 9 | Readiness data exists for fewer than 14 valid nights, or fewer than 3 valid nights in the last 7, or the source changed | Readiness rules 10 to 12 stay off; the Sources screen says "Learning your baseline, night N of 14" | (no change, no reason line) |
+| 10 | A source's 7 night mean of the natural log of HRV is below its 35 night baseline minus 0.5 SD, and the source is not Apple Watch alone | Move today's quality session to the next free day, else make it easy | Moved Thursday's tempo to Friday. Your 7 night HRV is below your usual range. |
+| 11 | Two consecutive mornings below baseline minus 1 SD plus a second signal (resting heart rate 1 SD or more above baseline, or a check-in of 2 or lower out of 5); with no device, two check-ins of 2 or lower | Make today's quality session easy at about 80 percent duration | Today's intervals became an easy run. Your HRV has been below your usual range two mornings running and resting heart rate is up. Tap to keep the original. |
+| 12 | Sleep of 6 hours or less and 1 hour or more under the athlete's median | A note on the Today card only, no change | Short night. Sleep was 5h 40m, about 1h 20m under your usual. |
+| 13 | Guardrails | At most 2 plan changes per rolling 7 days across rules 10 to 12; every change has a one tap Keep planned session; 3 overrides in 14 days drops readiness to notes only; no sync for 48 hours silences readiness; taper lock still wins | (none) |
 
-Rule 6's reason line carries the B32 heuristic disclaimer and must stay phrased without the words doctor, injury or illness so a copy pass cannot clash with the Safety.strings fence.
+Readiness rules 9 to 13 are downward only (they defer or soften, never add load), use personal baselines per source (mean and SD of the natural log of nightly values over the 35 nights before the latest 7, minimum 3 valid nights a week), never pool HRV across sources, never use vendor scores, never name a cause, and are advisory. All thresholds are design choices to tune in the field; no rule is validated in triathletes. Rule 6's reason line carries the B32 heuristic disclaimer and must stay phrased without the words doctor, injury or illness so a copy pass cannot clash with the Safety.strings fence.
 
 ## D. Load model
 
