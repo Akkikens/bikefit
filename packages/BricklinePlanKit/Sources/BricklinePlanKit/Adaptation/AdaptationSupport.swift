@@ -265,6 +265,26 @@ struct AdaptationUnwellPeriod: Hashable {
 /// A test spacing). Shared by rule 1 and by `PlanKit.moveSession`, so a drag to a new day and an automatic move
 /// follow the same rules.
 enum PlanMoveRules {
+    /// The first day from `firstDay` through `lastDay` that `session` may move to, empty days before occupied ones
+    /// (annex C rules 1 and 10: "next free day"). Days for which `isExcluded` is true are skipped. Nil when none
+    /// fits. Shared by rule 1 and rule 10 so both land a session on the same day.
+    static func firstAllowedDay(
+        for session: Session, from firstDay: Date, through lastDay: Date, in plan: Plan, calendar: Calendar,
+        isExcluded: (Date) -> Bool = { _ in false }
+    ) -> Date? {
+        guard firstDay <= lastDay else { return nil }
+        for emptyOnly in [true, false] {
+            var day = firstDay
+            while day <= lastDay {
+                if !isExcluded(day), problem(for: session, on: day, in: plan, calendar: calendar, emptyOnly: emptyOnly) == nil {
+                    return day
+                }
+                day = calendar.addDays(1, to: day)
+            }
+        }
+        return nil
+    }
+
     /// Why `session` cannot go to `day`, in a calm sentence, or nil when it can. With `emptyOnly` the day must
     /// hold no other live session.
     static func problem(
@@ -288,14 +308,23 @@ enum PlanMoveRules {
         }
 
         let live = week.sessions.filter { $0.id != session.id && AdaptationSupport.isLive($0) }
+        // Neighbouring days can sit in the next or the previous week (Sunday and Monday), so the day checks read
+        // every week. Each neighbour's long ride or long run status is judged against its own week.
+        let everyLive = plan.weeks.flatMap(\.sessions).filter { $0.id != session.id && AdaptationSupport.isLive($0) }
         func sessions(on target: Date) -> [Session] {
-            live.filter { calendar.startOfDay(for: $0.scheduledDate) == target }
+            everyLive.filter { calendar.startOfDay(for: $0.scheduledDate) == target }
         }
         let hard = AdaptationSupport.isHard(session)
         let sports = AdaptationSupport.sports(of: session)
         let isBrick = session.brickSecondSport != nil
         let allLive = live + [session]
         let longKind = AdaptationSupport.longKind(of: session, among: allLive)
+        func longKindOfNeighbour(_ other: Session) -> Sport? {
+            guard let otherWeek = plan.weekIndex(containing: other.scheduledDate, calendar: calendar),
+                  otherWeek != weekIndex else { return AdaptationSupport.longKind(of: other, among: allLive) }
+            let peers = plan.weeks[otherWeek].sessions.filter { AdaptationSupport.isLive($0) }
+            return AdaptationSupport.longKind(of: other, among: peers)
+        }
 
         let present = sessions(on: day)
         if present.contains(where: AdaptationSupport.isHard) { return "That day already has a hard session." }
@@ -310,7 +339,7 @@ enum PlanMoveRules {
             let other: Sport = longKind == .bike ? .run : .bike
             for offset in [-1, 0, 1] {
                 let nearby = sessions(on: calendar.addDays(offset, to: day))
-                if nearby.contains(where: { AdaptationSupport.longKind(of: $0, among: allLive) == other }) {
+                if nearby.contains(where: { longKindOfNeighbour($0) == other }) {
                     return "Keep the long ride and the long run at least a day apart."
                 }
             }
@@ -326,7 +355,7 @@ enum PlanMoveRules {
             }
         }
         if session.isTest {
-            for other in live where other.isTest {
+            for other in everyLive where other.isTest {
                 let gap = abs(calendar.daysBetween(calendar.startOfDay(for: other.scheduledDate), day))
                 if gap < AdaptationConstants.testSpacingDays { return "Tests need at least 48 hours between them." }
             }

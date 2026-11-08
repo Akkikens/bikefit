@@ -123,18 +123,7 @@ extension DefaultAdaptationEngine {
         if let raceDay = run.raceDay(plan: plan), calendar.addDays(-1, to: raceDay) < lastDay {
             lastDay = calendar.addDays(-1, to: raceDay)
         }
-        guard firstDay <= lastDay else { return nil }
-
-        for emptyOnly in [true, false] {
-            var day = firstDay
-            while day <= lastDay {
-                if PlanMoveRules.problem(for: session, on: day, in: plan, calendar: calendar, emptyOnly: emptyOnly) == nil {
-                    return day
-                }
-                day = calendar.addDays(1, to: day)
-            }
-        }
-        return nil
+        return PlanMoveRules.firstAllowedDay(for: session, from: firstDay, through: lastDay, in: plan, calendar: calendar)
     }
 
     // MARK: Rule 3: zone nudge

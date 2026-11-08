@@ -12,6 +12,8 @@ public struct PlanKit: Sendable {
     public let load: any LoadModel
     public let race: any RaceWindow
     public let compiler: any SessionCompiler
+    /// Readiness rules 9 to 13 (annex C). Shares the zone calculator with the adaptation engine.
+    public let readinessRules: ReadinessRules
 
     /// Default wiring. The adaptation engine and the compiler share one zone calculator and one load model.
     public init() {
@@ -23,6 +25,7 @@ public struct PlanKit: Sendable {
         self.load = load
         self.race = DefaultRaceWindow()
         self.compiler = DefaultSessionCompiler(zones: zones)
+        self.readinessRules = ReadinessRules(zones: zones)
     }
 
     public init(
@@ -31,7 +34,8 @@ public struct PlanKit: Sendable {
         adaptation: any AdaptationEngine,
         load: any LoadModel,
         race: any RaceWindow,
-        compiler: any SessionCompiler
+        compiler: any SessionCompiler,
+        readinessRules: ReadinessRules? = nil
     ) {
         self.zones = zones
         self.templates = templates
@@ -39,6 +43,7 @@ public struct PlanKit: Sendable {
         self.load = load
         self.race = race
         self.compiler = compiler
+        self.readinessRules = readinessRules ?? ReadinessRules(zones: zones)
     }
 
     /// Shared default instance.
@@ -108,6 +113,65 @@ public struct PlanKit: Sendable {
         _ option: RealignmentOption, plan: Plan, context: AdaptationContext, calendar: Calendar
     ) throws -> AdaptationResult {
         try adaptation.applyRealignment(option, to: plan, context: context, calendar: calendar)
+    }
+
+    // MARK: Readiness (annex C rules 9 to 13)
+
+    /// Evaluates the readiness rules for `today` and returns the plan, the newly fired advisory events (rules 10 to
+    /// 12) and the assessment for the Today card. The rules only defer or soften a hard session. Pass the adaptation
+    /// `history` (so the one structural change per day and the 2 changes per 7 days hold) and the athlete's event
+    /// log (so the unwell days stay with rule 4). Append `events` to the history afterwards. Prefer the
+    /// `readiness(state:...)` overload, which reads and writes both logs for you. Pass `pendingRealignment: true`
+    /// while a rule 2 prompt awaits the athlete, since the prompt reserves the day's structural change.
+    public func readiness(
+        plan: Plan,
+        inputs: ReadinessInputs,
+        today: Date,
+        calendar: Calendar,
+        history: [AdaptationEvent] = [],
+        athleteEvents: [AthleteEvent] = [],
+        pendingRealignment: Bool = false
+    ) -> (plan: Plan, events: [AdaptationEvent], assessment: ReadinessAssessment) {
+        let result = readinessRules.apply(
+            to: plan, inputs: inputs, today: today, calendar: calendar, history: history, athleteEvents: athleteEvents,
+            structuralReserved: pendingRealignment)
+        return (result.plan, result.events, result.assessment)
+    }
+
+    /// Evaluates the readiness rules on a plan kept with its logs. The plan changes and the new events go into
+    /// `state` for you, so the history, the athlete's events and the one structural change per day cannot be
+    /// forgotten. The rules 1 to 8 are not run here; use `adapt(_:readiness:...)` to run both in order.
+    @discardableResult
+    public func readiness(
+        state: inout AdaptationState,
+        inputs: ReadinessInputs,
+        today: Date,
+        calendar: Calendar,
+        pendingRealignment: Bool = false
+    ) -> ReadinessAssessment {
+        let result = readinessRules.apply(
+            to: state.plan, inputs: inputs, today: today, calendar: calendar, history: state.history,
+            athleteEvents: state.events, structuralReserved: pendingRealignment)
+        state.plan = result.plan
+        state.history.append(contentsOf: result.events)
+        return result.assessment
+    }
+
+    /// The one tap Keep planned session for a rule 10 or 11 event, valid on the day of the change. The returned
+    /// `overrideDay` is the tap to remember; `keepPlannedSession(_:in state:...)` remembers it in the log instead.
+    public func keepPlannedSession(
+        _ event: AdaptationEvent, in plan: Plan, today: Date, calendar: Calendar
+    ) throws -> KeepPlannedSessionResult {
+        try readinessRules.keepPlannedSession(event, in: plan, today: today, calendar: calendar)
+    }
+
+    /// Keep planned session on a plan kept with its logs: restores the plan and records the tap on the event in
+    /// `state.history`, which is where the rule 13 override count (3 in 14 days) is read from. A second tap on the
+    /// same event does nothing.
+    public func keepPlannedSession(
+        _ event: AdaptationEvent, in state: inout AdaptationState, today: Date, calendar: Calendar
+    ) throws {
+        try state.keepPlannedSession(event, using: readinessRules, today: today, calendar: calendar)
     }
 
     // MARK: Compile (annex E)
@@ -192,6 +256,16 @@ public struct PlanKit: Sendable {
 
     /// Runs the eight adaptation rules on a plan that is kept together with its logs. The fired events go into
     /// `state.history` for you.
+    ///
+    /// With `readiness` inputs, the readiness rules 9 to 13 run right after the adaptation rules on the resulting
+    /// plan and share the day's single structural change. Their events are added to `state.history` and to the
+    /// result, and the result carries the `readinessAssessment`. Without them (the default) nothing about the run
+    /// changes.
+    ///
+    /// Precedence: the adaptation rules go first and readiness only ever yields. When rule 1, 4, 5, 6 or 8 spent the
+    /// day's structural change, or a rule 2 realignment prompt awaits the athlete, rules 10 and 11 stay out (a
+    /// retest that put a hard test on today beats a readiness swap of it). The rule 12 note is not structural and is
+    /// still written.
     @discardableResult
     public func adapt(
         _ state: inout AdaptationState,
@@ -199,11 +273,24 @@ public struct PlanKit: Sendable {
         completedWorkouts: [CompletedWorkout] = [],
         benchmarks: Benchmarks = Benchmarks(),
         dailyLoads: [LoadSample] = [],
+        readiness: ReadinessInputs? = nil,
         calendar: Calendar
     ) -> AdaptationResult {
-        state.apply(
+        var result = state.apply(
             using: adaptation, today: today, completedWorkouts: completedWorkouts, benchmarks: benchmarks,
             dailyLoads: dailyLoads, calendar: calendar)
+        guard let readiness else { return result }
+        // A rule 2 prompt awaiting the athlete reserves the day's one structural change (it is not logged as
+        // structural), so readiness may not edit a plan the athlete is about to compress or shift.
+        let outcome = readinessRules.apply(
+            to: state.plan, inputs: readiness, today: today, calendar: calendar,
+            history: state.history, athleteEvents: state.events, structuralReserved: result.pendingRealignment != nil)
+        state.plan = outcome.plan
+        state.history.append(contentsOf: outcome.events)
+        result.plan = outcome.plan
+        result.events.append(contentsOf: outcome.events)
+        result.readinessAssessment = outcome.assessment
+        return result
     }
 
     /// Race day multisport workout with open goals.

@@ -67,6 +67,43 @@ public struct AdaptationState: Codable, Hashable, Sendable {
         return result
     }
 
+    /// Keep planned session (annex C rule 13) for a rule 10 or 11 event in `history`: puts the sessions back, valid on
+    /// the day of the change, and marks the event as kept on `today`. The rule 13 override count (3 in 14 days) reads
+    /// those marks, so the host cannot forget to record the tap. A second tap on an event already kept does
+    /// nothing. Throws as `ReadinessRules.keepPlannedSession` does, and `PlanKitError.invalidInput` for an event
+    /// that is not in the history. The state is unchanged on a throw.
+    public mutating func keepPlannedSession(
+        _ event: AdaptationEvent, using rules: ReadinessRules, today: Date, calendar: Calendar
+    ) throws {
+        func same(_ other: AdaptationEvent) -> Bool {
+            other.rule == event.rule && other.date == event.date && other.sessionIDs == event.sessionIDs
+                && other.reasonLine == event.reasonLine
+        }
+        if history.contains(where: { same($0) && $0.advisory?.keptOn != nil })
+            && !history.contains(where: { same($0) && $0.advisory?.keptOn == nil }) {
+            return
+        }
+        guard let index = history.firstIndex(where: { same($0) && $0.advisory?.keptOn == nil }) else {
+            throw PlanKitError.invalidInput("That change is not in your log.")
+        }
+        let result = try rules.keepPlannedSession(history[index], in: plan, today: today, calendar: calendar)
+        plan = result.plan
+        history[index].advisory?.keptOn = result.overrideDay
+    }
+
+    /// Drops the stored original sessions of advisory changes dated before `today`: Keep planned session is only
+    /// valid on the day of the change, so they can no longer be used and would only grow the saved log. The kept
+    /// marks stay, since they feed the override count.
+    public mutating func pruneAdvisories(before today: Date, calendar: Calendar) {
+        let calendar = plan.resolvedCalendar(calendar)
+        let start = calendar.startOfDay(for: today)
+        for index in history.indices where calendar.startOfDay(for: history[index].date) < start {
+            if let advisory = history[index].advisory, !advisory.originalSessions.isEmpty {
+                history[index].advisory = advisory.pruned()
+            }
+        }
+    }
+
     private func context(
         today: Date, completedWorkouts: [CompletedWorkout], benchmarks: Benchmarks, dailyLoads: [LoadSample]
     ) -> AdaptationContext {
