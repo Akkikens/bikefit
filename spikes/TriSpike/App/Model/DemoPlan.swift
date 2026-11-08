@@ -150,21 +150,38 @@ enum Demo {
         return s
     }()
 
-    static var week: [PlanDay] {
-        // Monday based week containing today; today is Wednesday in the story, wherever the real date falls.
-        let monday = calendar.date(byAdding: .day, value: -2, to: today)!
-        func day(_ offset: Int, _ sessions: [Session]) -> PlanDay {
-            PlanDay(date: calendar.date(byAdding: .day, value: offset, to: monday)!, sessions: sessions, isToday: offset == 2)
+    /// Sessions by offset from today, so the story always fits the real week: past days done or skipped,
+    /// today the CSS swim, the rest planned.
+    private static func sessions(at offset: Int) -> [Session] {
+        func past(_ s: Session) -> Session { var c = s; c.state = .done; c.doneMinutes = s.minutes + 3; return c }
+        func planned(_ s: Session) -> Session { var c = s; c.state = .planned; c.doneMinutes = nil; return c }
+        switch offset {
+        case -6: return [past(easySwim)]
+        case -5: return [past(thresholdRun)]
+        case -4: return []
+        case -3: return [past(brick)]
+        case -2: return [skippedRun]
+        case -1: return [sweetSpotBike]
+        case 0: return [cssSwim]
+        case 1: return [planned(thresholdRun)]
+        case 2: return []
+        case 3: return [planned(brick)]
+        case 4: return [easySwim, longRun]
+        case 5: return [planned(sweetSpotBike)]
+        default: return [planned(easySwim)]
         }
-        return [
-            day(0, [skippedRun]),
-            day(1, [sweetSpotBike]),
-            day(2, [cssSwim]),
-            day(3, [thresholdRun]),
-            day(4, []),
-            day(5, [brick]),
-            day(6, [easySwim, longRun]),
-        ]
+    }
+
+    static var week: [PlanDay] {
+        // Monday based week containing the real today.
+        var cal = Calendar(identifier: .gregorian)
+        cal.firstWeekday = 2
+        let monday = cal.dateInterval(of: .weekOfYear, for: today)?.start ?? today
+        return (0..<7).map { i in
+            let date = cal.date(byAdding: .day, value: i, to: monday)!
+            let offset = cal.dateComponents([.day], from: today, to: date).day ?? 0
+            return PlanDay(date: date, sessions: sessions(at: offset), isToday: offset == 0)
+        }
     }
 
     static let raceLegs: [PlanStep] = [

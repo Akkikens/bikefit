@@ -25,7 +25,7 @@ struct ProfileView: View {
         Canvas { ctx, size in
             draw(&ctx, size: size)
         }
-        .frame(height: height + (ruler ? 18 : 0) + (showRepeats ? 14 : 0))
+        .frame(height: height + (ruler ? 26 : 0) + (showRepeats ? 18 : 0))
         .accessibilityElement()
         .accessibilityLabel(accessibilitySummary)
     }
@@ -45,7 +45,7 @@ struct ProfileView: View {
     }
 
     private func draw(_ ctx: inout GraphicsContext, size: CGSize) {
-        let top: CGFloat = showRepeats ? 14 : 0
+        let top: CGFloat = showRepeats ? 18 : 0
         let baseline = top + height
         let gap: CGFloat = 1.5
         let available = size.width - gap * CGFloat(max(0, steps.count - 1))
@@ -131,15 +131,22 @@ struct ProfileView: View {
         // Repeat brackets with small caps count.
         if showRepeats {
             for (_, span) in groupSpans where span.count > 1 {
-                var b = Path()
-                b.move(to: CGPoint(x: span.start, y: 10))
-                b.addLine(to: CGPoint(x: span.start, y: 6))
-                b.addLine(to: CGPoint(x: span.end, y: 6))
-                b.addLine(to: CGPoint(x: span.end, y: 10))
+                // Bracket with a gap around the label, so the count never sits on the line.
                 let ink = onBlack ? BL.Player.textSecondary : BL.textSecondary
+                let label = ctx.resolve(Text("\(span.count)x").font(BLFont.label).foregroundStyle(ink))
+                let labelSize = label.measure(in: CGSize(width: 80, height: 20))
+                let mid = (span.start + span.end) / 2
+                let y: CGFloat = 9
+                let gapHalf = labelSize.width / 2 + 4
+                var b = Path()
+                b.move(to: CGPoint(x: span.start, y: y + 5))
+                b.addLine(to: CGPoint(x: span.start, y: y))
+                b.addLine(to: CGPoint(x: max(span.start, mid - gapHalf), y: y))
+                b.move(to: CGPoint(x: min(span.end, mid + gapHalf), y: y))
+                b.addLine(to: CGPoint(x: span.end, y: y))
+                b.addLine(to: CGPoint(x: span.end, y: y + 5))
                 ctx.stroke(b, with: .color(ink), lineWidth: 0.5)
-                ctx.draw(Text("\(span.count)x").font(BLFont.label).foregroundStyle(ink),
-                         at: CGPoint(x: (span.start + span.end) / 2, y: 0), anchor: .top)
+                ctx.draw(label, at: CGPoint(x: mid, y: y), anchor: .center)
             }
         }
 
