@@ -69,7 +69,7 @@ enum ReadinessPlainCopy {
         case .noData:
             return ReadinessLineModel(
                 symbol: "moon.stars", headline: "Waiting for your first night of data.",
-                detail: "Brickline reads sleep and heart rate from Apple Health. Wear your device overnight, then open the app.",
+                detail: "TriSpike reads sleep and heart rate from Apple Health. Wear your device overnight, then open the app.",
                 tone: .neutral, offersKeep: false, mentionsHRV: false)
         case .calibrating(let night, let of):
             return ReadinessLineModel(
@@ -108,7 +108,7 @@ enum ReadinessPlainCopy {
             case .notesOnly:
                 return ReadinessLineModel(
                     symbol: "pause.circle", headline: "Notes only for now.",
-                    detail: "You kept your planned session 3 times lately, so Brickline will leave your sessions as planned. " + details(a),
+                    detail: "You kept your planned session 3 times lately, so TriSpike will leave your sessions as planned. " + details(a),
                     tone: .neutral, offersKeep: false, mentionsHRV: a.hrv.isAvailable)
             case .raceWindow:
                 return ReadinessLineModel(
@@ -135,7 +135,7 @@ enum ReadinessPlainCopy {
         case notEnoughData
         /// Has nights but another device is in use.
         case standby
-        /// A device Brickline does not read from.
+        /// A device TriSpike does not read from.
         case notRead
 
         var label: String {
@@ -153,7 +153,7 @@ enum ReadinessPlainCopy {
     struct SourceRow: Equatable, Identifiable {
         var device: DeviceChoice
         var state: SourceState
-        /// What Brickline uses this device for, in plain words.
+        /// What TriSpike uses this device for, in plain words.
         var usedFor: String
         /// A line under the state: why it is paused, or why it is not in use.
         var note: String?

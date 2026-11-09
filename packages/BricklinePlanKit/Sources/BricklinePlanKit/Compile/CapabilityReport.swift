@@ -86,7 +86,7 @@ public struct CapabilityReport: Codable, Hashable, Sendable {
         self.supportsStepDisplayNames = supportsStepDisplayNames
     }
 
-    /// The activities Brickline compiles for: pool swim, indoor and outdoor bike, indoor and outdoor run.
+    /// The activities TriSpike compiles for: pool swim, indoor and outdoor bike, indoor and outdoor run.
     public static let compiledActivities: [CompiledActivity] = [
         CompiledActivity(sport: .swim, location: .pool),
         CompiledActivity(sport: .bike, location: .indoor),

@@ -1,4 +1,4 @@
-# Brickline design spec: Contour
+# TriSpike design spec: Contour
 
 Final spec from the four direction panel. Base: Direction D, Contour (summed 145). Grafts: A's Fill versus Ink rule, Increase Contrast mapping and Dynamic Type collapses; B's always black player, paused dimming, live heart rate and settings style Lab; C's Readout, time ruler, planned versus done grid and honest watch footnote. Judge fixes are in section 8; copy follows the tri spec.
 

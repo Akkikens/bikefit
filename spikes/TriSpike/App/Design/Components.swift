@@ -660,7 +660,7 @@ struct FollowCard: View {
     static func copy(for tracker: DeviceChoice) -> String {
         switch tracker {
         case .whoop:
-            return "This app guides the session with voice cues on your phone. Your WHOOP keeps recording on its own. Brickline reads your sleep and recovery from it through Apple Health, never your workout."
+            return "This app guides the session with voice cues on your phone. Your WHOOP keeps recording on its own. TriSpike reads your sleep and recovery from it through Apple Health, never your workout."
         case .oura:
             return "This app guides the session with voice cues on your phone. Your Oura ring keeps recording on its own."
         case .garmin:

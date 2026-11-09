@@ -293,6 +293,14 @@ public struct PlanKit: Sendable {
         return result
     }
 
+    /// A gentler copy of a session for "this feels too hard": every step at the easy ceiling or lower, no hard or
+    /// test flags, and every duration cut by `shortenBy` (default a quarter). The id stays the same, so a finished
+    /// session still matches its day. The athlete chooses this, so it is never a prediction or a judgement.
+    public func easedSession(_ session: Session, shortenBy: Double = 0.25) -> Session {
+        let factor = min(max(1 - (shortenBy.isFinite ? shortenBy : 0.25), 0.4), 1)
+        return AdaptationSupport.scaled(AdaptationSupport.easy(session, zones: zones), by: factor)
+    }
+
     /// Race day multisport workout with open goals.
     public func compileRaceDay(distance: RaceDistance, displayName: String) -> CompiledWorkout {
         compiler.compileRaceDay(distance: distance, displayName: displayName)

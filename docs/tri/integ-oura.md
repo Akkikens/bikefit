@@ -1,6 +1,6 @@
 # Oura integration notes (Oura API v2)
 
-Researched 2026-11-08 for Brickline (free iPhone triathlon app). Primary sources only unless marked THIRD PARTY. No dashes used as punctuation in this file; ranges use "to".
+Researched 2026-11-08 for TriSpike (free iPhone triathlon app). Primary sources only unless marked THIRD PARTY. No dashes used as punctuation in this file; ranges use "to".
 
 ## Source map (what was actually read)
 
@@ -18,15 +18,15 @@ Researched 2026-11-08 for Brickline (free iPhone triathlon app). Primary sources
 | Apple privacy | https://developer.apple.com/app-store/app-privacy-details/ | Fetched |
 | Liftspark code | liftspark/backend/lib/providers.ts, liftspark/backend/api/oauth/[provider]/start.ts, liftspark/README.md, liftspark/PLAN.md | Read locally |
 
-## 1. Bottom line for Brickline
+## 1. Bottom line for TriSpike
 
 1. Oura is feasible and free, but the June 8, 2026 Agreement is the real constraint, more than the API itself. Read it before designing the data layer.
 2. Cloud OAuth 2.0 authorization code flow only (personal access tokens retired). A client secret is required for the code exchange and refresh, so a native app needs a thin token proxy (the Liftspark Vercel backend pattern).
 3. Webhooks exist but need a server that stores per-user mappings and tokens. That conflicts with "Data Not Collected". Recommended design: tokens in the iOS Keychain, backend as a stateless exchange and refresh proxy, data pulled on app open (and optionally in a background refresh), no webhooks.
 4. The Agreement (3(m), 4(a)(x)) says API data "may not be stored or retained beyond the duration strictly necessary". How much history an on-device training-load model may keep is unresolved. Ask api-support@ouraring.com before building a rolling baseline.
 5. AI/ML: using the Oura API to "prompt, or otherwise provide input or data to any AI Model or AI Platform" is prohibited (4(d)). "AI Model" is defined very broadly. Do not feed Oura data into any LLM or ML model, including on device. A deterministic rules engine is the safe path.
-6. Never charge users for functionality "included in or related to" the Oura API (4(a)(xiii)). Brickline is free now, which is fine, but any future paid tier must not gate Oura features without Oura's written consent.
-7. Credentials may not be reused across apps (3(i)). Brickline needs its own Oura API application and client id and secret; do not reuse Liftspark's.
+6. Never charge users for functionality "included in or related to" the Oura API (4(a)(xiii)). TriSpike is free now, which is fine, but any future paid tier must not gate Oura features without Oura's written consent.
+7. Credentials may not be reused across apps (3(i)). TriSpike needs its own Oura API application and client id and secret; do not reuse Liftspark's.
 8. Unapproved apps are capped at 10 users. No approval process is documented anywhere I could read (see open questions).
 9. Apple Health is an alternative path for part of the data (sleep, heart rate, steps, workouts), but not for readiness, HRV, temperature or resting heart rate.
 
@@ -47,8 +47,8 @@ Sources: Auth page, Spec (info.description, securitySchemes).
 - Access token lifetime: sources disagree. Spec "Authentication Troubleshooting" says "typically 24 hours for Oura"; the Spec FAQ says tokens "typically last 30 days"; the Auth page gives only `expires_in`. Rely on `expires_in` in the token response.
 - Authorization code validity: "valid for only 10 minutes" (Spec, Authentication Troubleshooting).
 - Redirect URI: must exactly match a registered URI (an allowlist), URL-encoded; may be omitted if exactly one is registered, but include it (Auth page).
-- Required header on API calls: `Authorization: Bearer <token>` plus a non-empty `User-Agent` (for example `YourAppName/1.0`); without it requests "may be rejected" with 403 (Spec and Auth page). Liftspark's `tokenRequest` does not set a User-Agent on the token POST; Node's fetch sends a default one, but set an explicit `User-Agent` for Brickline to be safe.
-- Gen3 and newer ring users without an active Oura Membership cannot access data through the API, and partner apps lose access to them (Support: API). A lapsed membership shows up as HTTP 403 (Spec response codes). Brickline must treat 403 as "Oura paused, check membership or consent" rather than an error.
+- Required header on API calls: `Authorization: Bearer <token>` plus a non-empty `User-Agent` (for example `YourAppName/1.0`); without it requests "may be rejected" with 403 (Spec and Auth page). Liftspark's `tokenRequest` does not set a User-Agent on the token POST; Node's fetch sends a default one, but set an explicit `User-Agent` for TriSpike to be safe.
+- Gen3 and newer ring users without an active Oura Membership cannot access data through the API, and partner apps lose access to them (Support: API). A lapsed membership shows up as HTTP 403 (Spec response codes). TriSpike must treat 403 as "Oura paused, check membership or consent" rather than an error.
 - Developer portal: new apps are created at `developer.ouraring.com`; the older portal `cloud.ouraring.com/oauth/applications` still edits existing apps (Support: API). The Spec still points to the older URL for registration.
 
 ### Scopes
@@ -71,7 +71,7 @@ Spec securitySchemes lists nine scopes (exact names and descriptions):
 - Scopes are space separated; omitting `scope` requests all available scopes; the page recommends requesting only what is needed. The `scope` value echoed in the redirect is deprecated and may differ from what was requested, so do not rely on it (Auth page).
 - The Spec does not map each endpoint to a scope. Tag descriptions name scopes for only some routes: Daily Activity ("The Daily Activity scope"), Heart Rate ("The Heart Rate data scope"), Personal Info ("personal info scope"; its `id` needs no scope), Sessions ("Sessions data scope"), Workout ("Workout data scope"). Mapping of the remaining endpoints is INFERRED, not confirmed: `daily_readiness`, `daily_sleep`, `sleep`, `daily_stress`, `daily_resilience`, `sleep_time` presumably need `daily`; `daily_spo2` presumably `spo2`; `vO2_max` and `daily_cardiovascular_age` presumably `heart_health`. Verify with sandbox or a real token before relying on it.
 - Existing Liftspark Oura config requests `daily heartrate workout personal` (liftspark/backend/lib/providers.ts).
-- Suggested Brickline minimum: `daily` (readiness, sleep, activity). Add `workout` only if importing Oura-recorded workouts. Skip `email`, `tag`, `session`, `spo2`, `heart_health`, `personal` and `heartrate` unless a feature needs them (data minimisation is also required by Agreement 4(c)).
+- Suggested TriSpike minimum: `daily` (readiness, sleep, activity). Add `workout` only if importing Oura-recorded workouts. Skip `email`, `tag`, `session`, `spo2`, `heart_health`, `personal` and `heartrate` unless a feature needs them (data minimisation is also required by Agreement 4(c)).
 
 ## 3. Endpoints and fields (Spec, base `https://api.ouraring.com`)
 
@@ -126,7 +126,7 @@ Source: Spec, tag "Webhook Subscription Routes", FAQ.
 - Create body: `callback_url`, `verification_token`, `event_type` (`create`, `update`, `delete`), `data_type` (enum: `tag`, `enhanced_tag`, `workout`, `session`, `sleep`, `daily_sleep`, `daily_readiness`, `daily_activity`, `daily_spo2`, `sleep_time`, `rest_mode_period`, `ring_configuration`, `daily_stress`, `daily_cardiovascular_age`, `daily_resilience`, `vo2_max`). One subscription per event_type and data_type combination. The subscription model has an `expiration_time`, hence the renew route (the renewal cadence is not stated in the Spec text I read).
 - Verification: Oura sends GET to the callback with `verification_token` and `challenge`; the endpoint must return `{"challenge": "..."}`.
 - Delivery: POST with headers `x-oura-signature` and `x-oura-timestamp`; body `event_type`, `data_type`, `object_id`, `event_time`, `user_id`. Signature is HMAC SHA256 over `timestamp + body` using the client secret, hex uppercased. Respond with 2xx within 10 seconds. 10 retries on 4xx, 5xx or timeout; Oura retries "for about an hour". Returning 410 cancels the subscription.
-- Implication for Brickline: a webhook receiver is app-level, so it receives events for all users with `user_id` and `object_id`, and the server would need the user's token to fetch the data. That means storing tokens and data identifiers server side, which collides with the "Data Not Collected" target and with the Agreement's retention limits. Skip webhooks for 1.x. Revisit only if the app ever gets a real account system.
+- Implication for TriSpike: a webhook receiver is app-level, so it receives events for all users with `user_id` and `object_id`, and the server would need the user's token to fetch the data. That means storing tokens and data identifiers server side, which collides with the "Data Not Collected" target and with the Agreement's retention limits. Skip webhooks for 1.x. Revisit only if the app ever gets a real account system.
 
 ## 5. Rate limits
 
@@ -142,15 +142,15 @@ Source: Spec, tag "Webhook Subscription Routes", FAQ.
 - Neither the Spec, Auth page, Support article nor Agreement describes how to apply for approval. The Spec points to api-support@ouraring.com for higher limits. The Agreement 4(e) says Oura may revoke access for any app that "is not providing added benefit to Users" or is "not in the best interests of Oura or Users", at sole discretion, so approval criteria are subjective.
 - Practical: the first 10 connected users are the beta cohort. Do not market the Oura connection until approval is requested.
 
-## 7. Agreement terms that bind Brickline (read directly, effective June 8, 2026)
+## 7. Agreement terms that bind TriSpike (read directly, effective June 8, 2026)
 
 URL: https://cloud.ouraring.com/legal/api-agreement. Section numbers are from the document. "User Data" is defined to include data "derived from or based upon" Oura data, so computed readiness adjustments are covered.
 
 ### Storage and retention
 - 3(m): data from the Oura API "may not be stored or retained beyond the duration strictly necessary." (The no-storage-at-all rule applies to the MCP Server and to Aggregators; the API is "strictly necessary" only.) 4(a)(x) prohibits retaining data "beyond the periods specified in this Agreement".
 - 4(c): data minimisation; request only necessary data and promptly delete data no longer needed.
-- 5(f): on a user's deletion request, delete their User Data within 72 hours and retain nothing; on opt out or revoked consent, stop all processing immediately; also delete data if the user cancels the app subscription. This means Brickline needs an in-app "disconnect Oura and erase Oura data" action that really wipes local Oura-derived data, plus a documented path for a deletion request by email.
-- 4(a)(xx): do not aggregate, cache or store geographic location or other User Data via the API. Brickline does not request location data (not in any scope read).
+- 5(f): on a user's deletion request, delete their User Data within 72 hours and retain nothing; on opt out or revoked consent, stop all processing immediately; also delete data if the user cancels the app subscription. This means TriSpike needs an in-app "disconnect Oura and erase Oura data" action that really wipes local Oura-derived data, plus a documented path for a deletion request by email.
+- 4(a)(xx): do not aggregate, cache or store geographic location or other User Data via the API. TriSpike does not request location data (not in any scope read).
 - Gray area to resolve with Oura: an on-device rolling window (for example 7 to 28 days of daily readiness) to compute a baseline or trend. "Strictly necessary" is undefined.
 
 ### AI and ML
@@ -161,10 +161,10 @@ URL: https://cloud.ouraring.com/legal/api-agreement. Section numbers are from th
 
 ### Sharing, consent, privacy
 - 4(a)(vi) and 5(j): no disclosure of User Data to third parties without express user consent and not beyond what the Agreement permits.
-- "Aggregator" (section 1) is broad: any party (including a User) that provides User Data "or any data or information derived therefrom" to a third party "for enabling, facilitating, supporting, or enhancing a third party's products, services, platforms, or applications". Aggregators face 3(e), 3(f), 4(b), no storage or caching, no analysis or benefit. If Brickline forwards Oura-derived adjustments to Garmin Connect, Apple Watch workouts or WHOOP, Oura could argue Brickline is an Aggregator. Needs a written answer from Oura before shipping cross-provider features that carry Oura-derived values off the phone. Apple Watch workout scheduling on the same phone is likely a lesser concern but still unconfirmed.
+- "Aggregator" (section 1) is broad: any party (including a User) that provides User Data "or any data or information derived therefrom" to a third party "for enabling, facilitating, supporting, or enhancing a third party's products, services, platforms, or applications". Aggregators face 3(e), 3(f), 4(b), no storage or caching, no analysis or benefit. If TriSpike forwards Oura-derived adjustments to Garmin Connect, Apple Watch workouts or WHOOP, Oura could argue TriSpike is an Aggregator. Needs a written answer from Oura before shipping cross-provider features that carry Oura-derived values off the phone. Apple Watch workout scheduling on the same phone is likely a lesser concern but still unconfirmed.
 - 4(a)(v): combining or correlating Oura data with other sources to create or maintain a database about a User needs User Consent first. Add explicit consent text when the same plan engine uses several providers.
 - 5(a): consent must be specific, informed, unambiguous, and you must tell users how to revoke it. 5(c): a conspicuous privacy policy explaining collect, store, use, disclose, retain and delete. 5(b): do not interfere with Oura's consent screens.
-- 5(e): the developer is solely responsible for outputs and recommendations and must present them in a way that is "not inaccurate, misleading, or deceptive". Add wording that readiness is Oura's score and Brickline's adjustment is a suggestion.
+- 5(e): the developer is solely responsible for outputs and recommendations and must present them in a way that is "not inaccurate, misleading, or deceptive". Add wording that readiness is Oura's score and TriSpike's adjustment is a suggestion.
 - 5(g): use User Data only for a function directly relevant to the Authorized Purpose.
 - 5(i): the app's own terms must not conflict with the Agreement and must disclaim warranties for third-party providers. (The Agreement has no dedicated medical disclaimer; the general "as is" disclaimer is in 10(a).)
 
@@ -172,11 +172,11 @@ URL: https://cloud.ouraring.com/legal/api-agreement. Section numbers are from th
 - 4(a)(xiii): "charging Users in any manner for access to or use of the MCP Server or any services or functionality included in or related to the MCP Server, Oura API, or Oura Platform" is a Prohibited Use without Oura's prior written consent.
 - 4(a)(vii), 4(a)(viii): no advertising, marketing, targeting or promoting using Oura data.
 - 3(h): Oura may start charging developers for API use, with notice.
-- 4(a)(ix) and the preamble: no building products that compete with or merely replicate Oura's own. Brickline's triathlon planning does not replicate an Oura Readiness score, but do not ship a re-derived readiness or sleep score that mimics Oura's algorithms (4(a)(xi) bars reverse engineering scoring methodologies).
+- 4(a)(ix) and the preamble: no building products that compete with or merely replicate Oura's own. TriSpike's triathlon planning does not replicate an Oura Readiness score, but do not ship a re-derived readiness or sleep score that mimics Oura's algorithms (4(a)(xi) bars reverse engineering scoring methodologies).
 - 4(e): Oura can revoke or suspend access at its sole discretion with no liability. 3(c): Oura can change or discontinue the API with or without notice. 3(p): no SLA.
 
 ### Credentials and security
-- 3(i): the client id and secret are for one application only. Brickline needs its own registration; Liftspark's Oura app cannot be reused.
+- 3(i): the client id and secret are for one application only. TriSpike needs its own registration; Liftspark's Oura app cannot be reused.
 - 9(a): "comprehensive" security measures including encryption in transit and at rest, access controls and MFA for systems processing the data, incident response, and so on. 9(b): report a Data Incident to Oura within 24 hours. These obligations are phrased for any developer. For a design where the backend sees only tokens in transit and the phone holds data in the Keychain and protected storage, the surface is small, but write the policy down.
 - 3(l), 9(h): Oura may monitor use and audit.
 - 4(g) and others apply only to MCP use or are not relevant.
@@ -201,12 +201,12 @@ Oura writes to Apple Health (as listed on that page):
 - Steps
 - Workout routes and workouts (manual, Activity Heart Rate, or Automatic Activity Detection)
 
-The page does not list HRV, body temperature, SpO2 or resting heart rate as written to Health, so Apple Health will not give Brickline Oura's readiness score, HRV, temperature deviation or resting heart rate. (THIRD PARTY: a web search summary said HRV is not written; Oura's own Apple Health list is the reason I trust that conclusion.) The page also says Oura imports from Health: active and resting energy, blood pressure, body fat and lean mass, cardio fitness, date of birth, sex, height, weight, heart rate, respiratory rate, sleep, steps, workout routes and workouts. Units are not listed. Reading these through HealthKit needs no Oura API terms at all, but it is also bounded by whatever Oura chooses to write, and data lands later or not at all if the user disables the Health sync.
+The page does not list HRV, body temperature, SpO2 or resting heart rate as written to Health, so Apple Health will not give TriSpike Oura's readiness score, HRV, temperature deviation or resting heart rate. (THIRD PARTY: a web search summary said HRV is not written; Oura's own Apple Health list is the reason I trust that conclusion.) The page also says Oura imports from Health: active and resting energy, blood pressure, body fat and lean mass, cardio fitness, date of birth, sex, height, weight, heart rate, respiratory rate, sleep, steps, workout routes and workouts. Units are not listed. Reading these through HealthKit needs no Oura API terms at all, but it is also bounded by whatever Oura chooses to write, and data lands later or not at all if the user disables the Health sync.
 
 Live heart rate during workouts:
 - Oura's Live Activity Tracking (start from the + menu on the Today tab) shows pace and distance from GPS and "live heart rate from third-party monitors"; it "replaces" the earlier Record Workout Heart Rate feature (Support: workouts, https://support.ouraring.com/hc/en-us/articles/42821224955795-Record-a-Workout-with-Oura). The page does not say whether the Oura ring itself shares live heart rate with other apps, and I found no Oura documentation of a Bluetooth heart rate broadcast.
 - The API only exposes heart rate after the app syncs, at 5 minute resolution, with `source` values `live` and `workout` marking samples (Spec). It is not suitable for live coaching during a session.
-- Conclusion: for live heart rate in Brickline use Apple Watch or a BLE chest strap or armband, not Oura. Oura contributes pre-workout readiness and post-workout summaries only.
+- Conclusion: for live heart rate in TriSpike use Apple Watch or a BLE chest strap or armband, not Oura. Oura contributes pre-workout readiness and post-workout summaries only.
 
 ## 9. Brand and attribution
 
@@ -218,7 +218,7 @@ Live heart rate during workouts:
 
 From liftspark/backend/lib/providers.ts, api/oauth/[provider]/start.ts, README.md and PLAN.md:
 - The Oura provider is already wired: authorize `https://cloud.ouraring.com/oauth/authorize`, token `https://api.ouraring.com/oauth/token`, scope `daily heartrate workout personal`, env `OURA_CLIENT_ID` and `OURA_CLIENT_SECRET`, PKCE S256 required, redirect `.../api/oauth/oura/callback`. `tokenRequest` returns only token fields, never provider bodies, and never stores anything. PLAN.md item 6 notes the WHOOP and Oura apps still need registering with the callback `https://<backend>/api/oauth/<provider>/callback`.
-- For Brickline: fork or deploy a separate instance with its own `OURA_CLIENT_ID` and secret (Agreement 3(i)), narrow the scope string, add an explicit `User-Agent` on the token POST, and keep the backend free of request-body logging (the callback URL carries the authorization `code` in its query string).
+- For TriSpike: fork or deploy a separate instance with its own `OURA_CLIENT_ID` and secret (Agreement 3(i)), narrow the scope string, add an explicit `User-Agent` on the token POST, and keep the backend free of request-body logging (the callback URL carries the authorization `code` in its query string).
 - Apple's definition of "collect" (https://developer.apple.com/app-store/app-privacy-details/): transmitting data off device so it can be accessed "for a period longer than what is necessary to service the transmitted request in real time"; Apple says that if "an authentication token or IP address is sent on a server call and not retained, or if data is sent to your servers then immediately discarded after servicing the request, you do not need to disclose this." So a stateless exchange and refresh proxy does not by itself force a data type onto the privacy label, provided hosting logs do not retain tokens. Health data pulled directly from Oura to the phone and kept on device is "processed only on device".
 
 ## 11. Suggested design (for the synthesiser to challenge)
@@ -236,13 +236,13 @@ From liftspark/backend/lib/providers.ts, api/oauth/[provider]/start.ts, README.m
 1. How does an app apply for approval beyond 10 users, what are the criteria and timeline? Only api-support@ouraring.com is named (for higher rate limits).
 2. What does "strictly necessary" retention mean in 3(m) for an on-device rolling baseline of 7 to 28 days of readiness, sleep and HRV values?
 3. Does a rule based, non-ML plan adjuster fall under "AI Model" or "computational intelligence system" in 4(d)? Does Apple's on-device Foundation Models count?
-4. Does passing Oura derived values to another provider (Garmin push, WHOOP or Apple Watch workout scheduling) make Brickline an "Aggregator" under section 1 and 3(e)?
+4. Does passing Oura derived values to another provider (Garmin push, WHOOP or Apple Watch workout scheduling) make TriSpike an "Aggregator" under section 1 and 3(e)?
 5. Is `client_secret` optional when PKCE is used, and are custom URL scheme redirects or the client-side (implicit) flow allowed for a native app? The Auth page is silent. If the implicit flow is allowed, a secretless, backendless design with a 30 day token might be possible, at the cost of monthly re-consent.
 6. Real access token lifetime: 24 hours (troubleshooting text) or 30 days (FAQ) or whatever `expires_in` says?
 7. Rate limit numbers: is 5000 requests per 5 minutes still current, and what is the per-application layer limit for an unapproved app?
 8. Which scope covers which endpoint (`sleep`, `daily_stress`, `daily_resilience`, `sleep_time`, `vO2_max`, `daily_cardiovascular_age`)? What exactly does `heart_health` cover? Test in the sandbox with a real token.
 9. What is the webhook subscription `expiration_time` cadence and how often must `renew` be called?
 10. Brand usage: are logos or the word "Oura" allowed in a free third party app UI and App Store listing, and what attribution wording, if any, does Oura require for API data? The 2020 PDF is the only guideline available and is marked confidential; contact branduse@ouraring.com.
-11. Future paid features: does 4(a)(xiii) bar a Brickline premium tier if Oura integration stays free for everyone? Likely needs Oura's written consent or a strict separation; ask before any monetisation (Brickline is currently no revenue by design).
+11. Future paid features: does 4(a)(xiii) bar a TriSpike premium tier if Oura integration stays free for everyone? Likely needs Oura's written consent or a strict separation; ask before any monetisation (TriSpike is currently no revenue by design).
 12. Does the Oura Membership requirement (Gen3 and newer) apply to Gen 4 and later rings in the same way, and how does the API signal a lapsed membership (403 only)?
 13. Does the Oura ring or app expose any BLE heart rate broadcast for use by third party apps during workouts? Nothing found.

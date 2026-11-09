@@ -1,11 +1,11 @@
 import SwiftUI
 import UIKit
 
-/// First launch onboarding: eight short screens, each with a plain reason for asking.
+/// First launch onboarding: nine short screens, each with a plain reason for asking.
 /// Reads and writes `UserSetup.shared` live, so quitting mid flow loses nothing.
 ///
 /// Steps: 0 Welcome, 1 How it works, 2 Safety note, 3 Your race, 4 About you,
-/// 5 Connect your devices, 6 Your fitness numbers, 7 Your plan.
+/// 5 Where you start, 6 Connect your devices, 7 Your fitness numbers, 8 Your plan.
 struct OnboardingFlow: View {
     var initialStep: Int = 0
     var onFinish: () -> Void
@@ -15,12 +15,12 @@ struct OnboardingFlow: View {
     @State private var goingForward = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    static let stepCount = 8
+    static let stepCount = 9
     private static let safetyStep = 2
     private static let lastStep = stepCount - 1
     /// Steps where the defaults are fine, so a Skip is offered.
-    private static let skippable: Set<Int> = [1, 4, 5, 6]
-    private static let stepNames = ["Welcome", "How it works", "Safety note", "Your race", "Experience and time", "Your devices", "Effort numbers", "Your plan"]
+    private static let skippable: Set<Int> = [1, 4, 5, 6, 7]
+    private static let stepNames = ["Welcome", "How it works", "Safety note", "Your race", "Experience and time", "Where you start", "Your devices", "Effort numbers", "Your plan"]
 
     init(initialStep: Int = 0, onFinish: @escaping () -> Void) {
         self.initialStep = initialStep
@@ -59,8 +59,9 @@ struct OnboardingFlow: View {
         case 2: OnboardingSafetyStep(setup: setup)
         case 3: OnboardingRaceStep(setup: setup)
         case 4: OnboardingAboutYouStep(setup: setup)
-        case 5: OnboardingDevicesStep(setup: setup)
-        case 6: OnboardingNumbersStep(setup: setup)
+        case 5: OnboardingStartStep(setup: setup)
+        case 6: OnboardingDevicesStep(setup: setup)
+        case 7: OnboardingNumbersStep(setup: setup)
         default: OnboardingPlanStep(setup: setup)
         }
     }

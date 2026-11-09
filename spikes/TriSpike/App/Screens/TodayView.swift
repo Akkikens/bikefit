@@ -9,6 +9,7 @@ struct TodayView: View {
     @Environment(\.dynamicTypeSize) private var type
     @ScaledMetric(relativeTo: .body) private var profileHeight: CGFloat = 56
     @State private var synced = false
+    @State private var confirmEase = false
     @ObservedObject private var engine = EngineAdapter.shared
     @State private var path: [Session] = ProcessInfo.processInfo.arguments.contains("-screenDetail") ? (Demo.smokeSession.map { [$0] } ?? []) : []
     private var days: [PlanDay] { Demo.week }
@@ -277,6 +278,8 @@ struct TodayView: View {
                 Text(resultNote)
                     .font(.footnote)
                     .foregroundStyle(BL.textSecondary)
+                if let card = shareData { ShareCardButton(data: card) }
+                if let upload = stravaUpload { StravaShareButton(upload: upload) }
             }
             .transition(.opacity)
         } else if setup.canSendToWatch {
@@ -327,6 +330,49 @@ struct TodayView: View {
         }
     }
 
+    // MARK: Share
+
+    /// The share card for the session just finished: only what is on this screen.
+    private var shareData: ShareCardData? {
+        guard let r = result, let done = doneMinutes else { return nil }
+        let others = days.flatMap(\.sessions).filter { $0.state == .done && $0.engineID != session.engineID }
+        let minutes = others.reduce(0) { $0 + ($1.doneMinutes ?? 0) } + done
+        return ShareCards.session(
+            name: session.name, sport: session.sport, brickSecond: session.brickSecond, minutes: done,
+            finishedInFull: r.completed, distanceMeters: session.showsDistance ? session.totalMeters : nil,
+            target: session.headlineTarget, targetEstimated: session.targetsEstimated,
+            weekDoneMinutes: minutes, weekDoneSessions: others.count + 1, weekLabel: Demo.weekLabel, date: r.startedAt ?? Date())
+    }
+
+    /// What Strava would receive for the session just finished.
+    private var stravaUpload: StravaUpload? {
+        guard let r = result else { return nil }
+        let start = r.startedAt ?? Date().addingTimeInterval(-r.seconds)
+        return StravaUpload(
+            key: (session.engineID ?? session.name) + "|" + String(Int(start.timeIntervalSince1970)),
+            name: session.name, sport: session.sport, isBrick: session.brickSecond != nil,
+            start: start, elapsedSeconds: Int(r.seconds.rounded()))
+    }
+
+    // MARK: Ease the week
+
+    private var hasSessionsLeft: Bool { days.contains { $0.sessions.contains { $0.state == .planned } } }
+
+    @ViewBuilder private var easeControl: some View {
+        if engine.model.weekEased {
+            VStack(alignment: .leading, spacing: BL.Space.s) {
+                Label("You made the rest of this week easier.", systemImage: "leaf")
+                    .font(.subheadline.weight(.medium)).foregroundStyle(BL.textPrimary)
+                Button("Undo, go back to the plan") { engine.undoEaseCurrentWeek() }
+                    .font(.subheadline).foregroundStyle(BL.accent).frame(minHeight: 44)
+            }
+        } else if hasSessionsLeft {
+            Button { confirmEase = true } label: { Label("This week feels too hard", systemImage: "leaf") }
+                .buttonStyle(SecondaryButtonStyle())
+                .accessibilityHint("Makes the sessions you have not done yet this week easier")
+        }
+    }
+
     // MARK: Readiness
 
     /// One plain line about last night. Hidden when no connected device can supply sleep or heart data.
@@ -355,6 +401,13 @@ struct TodayView: View {
                 .font(.footnote)
                 .foregroundStyle(BL.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
+            easeControl
+        }
+        .confirmationDialog("Make the rest of this week easier?", isPresented: $confirmEase, titleVisibility: .visible) {
+            Button("Make it easier") { engine.easeCurrentWeek() }
+            Button("Keep the plan", role: .cancel) {}
+        } message: {
+            Text(EaseWeek.confirmMessage)
         }
     }
 }

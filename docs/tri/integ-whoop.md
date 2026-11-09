@@ -1,6 +1,6 @@
-# WHOOP integration notes (Brickline)
+# WHOOP integration notes (TriSpike)
 
-Research date: 2026-11-08. Scope: WHOOP developer platform, for a free iPhone triathlon app (Brickline) that reads recovery and training signals and adapts the plan. Every fact below names the exact URL read. Items marked UNVERIFIED could not be confirmed from a primary source. No personal data about the owner is recorded here.
+Research date: 2026-11-08. Scope: WHOOP developer platform, for a free iPhone triathlon app (TriSpike) that reads recovery and training signals and adapts the plan. Every fact below names the exact URL read. Items marked UNVERIFIED could not be confirmed from a primary source. No personal data about the owner is recorded here.
 
 ## 0. Bottom line
 
@@ -10,8 +10,8 @@ Research date: 2026-11-08. Scope: WHOOP developer platform, for a free iPhone tr
   1. A new app is capped at 10 connected WHOOP members until WHOOP approves a higher tier. Community reports in 2026 describe approval requests going unanswered for months.
   2. The API Terms (effective 2026-10-06) forbid "permanent copies" of WHOOP Data, bound caching by a cache header, define WHOOP Data to include "copies or derivatives", and forbid use of the API to "compete, directly or indirectly" with WHOOP. A training plan that adapts to WHOOP recovery sits close to the edge of two of these clauses and needs a written answer from WHOOP before launch.
   3. WHOOP brand rules say recommendations must not contradict WHOOP coaching and its metrics must not be renamed or recolored.
-  4. Developer credentials, including the client ID, may not be embedded in open source projects. The Brickline repo is public, so IDs and secrets live only in Vercel environment variables.
-- Cheap fallback that needs no approval: WHOOP can write workouts and sleep to Apple Health (secondary sources), and Brickline already reads HealthKit. That gives completed workouts but not the Recovery score.
+  4. Developer credentials, including the client ID, may not be embedded in open source projects. The TriSpike repo is public, so IDs and secrets live only in Vercel environment variables.
+- Cheap fallback that needs no approval: WHOOP can write workouts and sleep to Apple Health (secondary sources), and TriSpike already reads HealthKit. That gives completed workouts but not the Recovery score.
 
 ## 1. Platform basics
 
@@ -53,7 +53,7 @@ Primary sources: https://developer.whoop.com/docs/developing/oauth , the machine
 | `read:body_measurement` | Height, weight, max heart rate |
 | `offline` | Refresh token (documented on the OAuth page, not listed in the OpenAPI scopes map) |
 
-The Liftspark backend requests `offline read:recovery read:cycles read:workout read:sleep read:profile` (liftspark/backend/lib/providers.ts). Suggested for Brickline: `offline read:recovery read:sleep read:cycles read:workout`, optionally `read:body_measurement` (WHOOP computed max heart rate could seed zones, but Brickline has its own LTHR based zones). Skip `read:profile`: it returns email and name, which Brickline does not need, and the docs tell developers to request only scopes they use (getting-started page).
+The Liftspark backend requests `offline read:recovery read:cycles read:workout read:sleep read:profile` (liftspark/backend/lib/providers.ts). Suggested for TriSpike: `offline read:recovery read:sleep read:cycles read:workout`, optionally `read:body_measurement` (WHOOP computed max heart rate could seed zones, but TriSpike has its own LTHR based zones). Skip `read:profile`: it returns email and name, which TriSpike does not need, and the docs tell developers to request only scopes they use (getting-started page).
 
 ### Can a native app use PKCE and skip the server?
 
@@ -96,7 +96,7 @@ There is no endpoint that writes anything for a regular OAuth app. No continuous
 
 - Required: `id` (int64), `user_id`, `created_at`, `updated_at`, `start`, `timezone_offset`, `score_state`. `end` is absent for the current cycle. `step_count` is nullable (added 2026-09-23, covered by `read:cycles`).
 - `score` required: `strain` (float, 0 to 21 scale), `kilojoule`, `average_heart_rate` (int), `max_heart_rate` (int).
-- A physiological cycle is not a calendar day; it can start and end mid day (https://developer.whoop.com/docs/developing/user-data/cycle). Brickline's day boundaries must key off `start`, `end` and `timezone_offset`.
+- A physiological cycle is not a calendar day; it can start and end mid day (https://developer.whoop.com/docs/developing/user-data/cycle). TriSpike's day boundaries must key off `start`, `end` and `timezone_offset`.
 
 ### Sleep (`Sleep`, `SleepScore`)
 
@@ -110,7 +110,7 @@ There is no endpoint that writes anything for a regular OAuth app. No continuous
 - `score` required: `strain`, `average_heart_rate`, `max_heart_rate` (bpm), `kilojoule`, `percent_recorded`, `zone_durations` with `zone_zero_milli` through `zone_five_milli` (milliseconds in WHOOP zones 0 to 5).
 - Optional: `distance_meter` (only if distance data was sent to WHOOP), `altitude_gain_meter`, `altitude_change_meter`.
 - `sport_id` and `v1_id` carry the note "Will not exist past 09/01/2025": use `sport_name` and the UUID `id`. The list of valid `sport_name` values is not in the spec (open question). Strength Trainer activities appear in the workout endpoint since 2024-05-01 (https://developer.whoop.com/docs/api-changelog).
-- Important for matching: WHOOP zones are WHOOP's own heart rate zones (based on its max heart rate), not Brickline's LTHR zones. Use `average_heart_rate`, `max_heart_rate`, and start/end to match against Brickline sessions; do not mix WHOOP zone durations with Brickline zone tables.
+- Important for matching: WHOOP zones are WHOOP's own heart rate zones (based on its max heart rate), not TriSpike's LTHR zones. Use `average_heart_rate`, `max_heart_rate`, and start/end to match against TriSpike sessions; do not mix WHOOP zone durations with TriSpike zone tables.
 
 ### Body and profile
 
@@ -130,7 +130,7 @@ Source: https://developer.whoop.com/docs/developing/webhooks/
 - Signature: headers `X-WHOOP-Signature` and `X-WHOOP-Signature-Timestamp` (ms epoch). Compute base64(HMAC-SHA256(client secret, timestamp + raw body)).
 - Config: HTTPS POST endpoint, set in the dashboard per app, each URL has a model version (v1 or v2, default v2). Retries: 5 over about an hour on non-2xx or timeout; respond 2xx within about a second and process async. Duplicates and misses happen; run a reconciliation poll.
 - v1 webhooks are no longer published (changelog 2025-11-01 and the banner on every developer page).
-- Fit for Brickline: webhooks need a server endpoint that stores per-user mapping and then a way to wake the phone (APNs), which conflicts with the "no remote notifications, no accounts, Data Not Collected" posture in the spec (section 9). Recommended instead: poll from the phone on foreground and on background app refresh. A day of data is about 4 KB and plain polling is a handful of calls (FAQ), far below 100 requests per minute.
+- Fit for TriSpike: webhooks need a server endpoint that stores per-user mapping and then a way to wake the phone (APNs), which conflicts with the "no remote notifications, no accounts, Data Not Collected" posture in the spec (section 9). Recommended instead: poll from the phone on foreground and on background app refresh. A day of data is about 4 KB and plain polling is a handful of calls (FAQ), far below 100 requests per minute.
 
 ## 5. Rate limits
 
@@ -176,19 +176,19 @@ Source: https://developer.whoop.com/api-terms-of-use/ , "Effective Date: October
 - 2.4: WHOOP Data must be encrypted in transit and at rest (HTTPS); Company is fully responsible for End User information security; notify WHOOP of a security incident within 48 hours (security-notifications@whoop.com).
 - 4.2.1 and 4.2.4: do not expose WHOOP Data to other users or third parties without explicit opt-in from the user, and do not "publicly display" or distribute WHOOP Data to a third party. Implication: share cards, plan share codes and race debrief images must not contain WHOOP derived values (recovery, HRV, strain) unless the athlete explicitly opts in per share.
 - 3.1.2 and 3.1.3: no selling, renting or syndicating API materials, and no marketing, selling or licensing API data to third parties "even if an End User consents". 2.5: no use of WHOOP Data in advertisements without written consent.
-- 3.2: "Developer credentials (such as passwords, keys, and client IDs)" must stay confidential and "may not be embedded in open-source projects". 1.4: do not share credentials across more than one application. Implications: Brickline needs its own WHOOP app (not Liftspark's credentials), and neither client ID nor secret may be committed to this public repo; keep them in Vercel environment variables only.
+- 3.2: "Developer credentials (such as passwords, keys, and client IDs)" must stay confidential and "may not be embedded in open-source projects". 1.4: do not share credentials across more than one application. Implications: TriSpike needs its own WHOOP app (not Liftspark's credentials), and neither client ID nor secret may be committed to this public repo; keep them in Vercel environment variables only.
 
 ### Derivative use, AI or ML
 
-- 4.2.3: Company will not "Use any API or WHOOP Data to create, develop, test, train, fine-tune or improve any large language model or any other machine learning or artificial intelligence model, application, or system". Brickline's adaptation is deterministic rules with no model training, which stays outside this clause, but note the clause says "test" and "improve" and covers any "application, or system", so keep WHOOP data out of any dataset used to tune the rules. Never send WHOOP data to an LLM service. Sending data to any third party is separately restricted by 2.3.
+- 4.2.3: Company will not "Use any API or WHOOP Data to create, develop, test, train, fine-tune or improve any large language model or any other machine learning or artificial intelligence model, application, or system". TriSpike's adaptation is deterministic rules with no model training, which stays outside this clause, but note the clause says "test" and "improve" and covers any "application, or system", so keep WHOOP data out of any dataset used to tune the rules. Never send WHOOP data to an LLM service. Sending data to any third party is separately restricted by 2.3.
 - 4.2.4: no "Copy, translate, modify, create a derivative work of" WHOOP Data to a third party (wording is tied to third party transfer). 4.1 still defines derivatives as WHOOP Data. Whether an on device computed adjustment ("lighter session today because Recovery is 28 percent") is a permitted use is not answered by the text; this is the first question for WHOOP.
 - 3.1.12: no reverse engineering of any underlying algorithm or model from the APIs.
 
 ### Competition and coaching
 
 - 3.1.16: Company may not "Use any API Materials to compete, directly or indirectly, with WHOOP or its products or services (including the WHOOP Platform) in any manner". 1.9: WHOOP can build competing products and the API is non exclusive.
-- WHOOP sells Strain Target (a recommendation of exertion from recovery) and a Coach that can propose training plans (secondary sources: https://www.whoop.com/the-locker/strain-coach/ via search, and https://the5krunner.com/2023/09/27/whoop-coach-openai-chargpt/). A triathlon plan that adapts to recovery overlaps these conceptually. Brickline's position: it adds multisport structured workouts and a race plan that WHOOP does not offer, and it does not replicate WHOOP's scores. Still ask WHOOP in writing.
-- 3.1.10 and 3.1.11: no use of the APIs to design or support a "medical device" (US FDCA 201(h)(1) or equivalent) or to "offer, solicit, obtain, or provide any medical, legal, or other professional advice". 3.1.14(C): no use "in connection with any dangerous or high-risk activities" (triathlon open water is risky; Brickline never schedules it as required, and the spec already forbids medical framing). Brickline copy rules (fitness only, no diagnosis, no "AI coach") align; keep recovery driven changes phrased as training load suggestions, not health advice.
+- WHOOP sells Strain Target (a recommendation of exertion from recovery) and a Coach that can propose training plans (secondary sources: https://www.whoop.com/the-locker/strain-coach/ via search, and https://the5krunner.com/2023/09/27/whoop-coach-openai-chargpt/). A triathlon plan that adapts to recovery overlaps these conceptually. TriSpike's position: it adds multisport structured workouts and a race plan that WHOOP does not offer, and it does not replicate WHOOP's scores. Still ask WHOOP in writing.
+- 3.1.10 and 3.1.11: no use of the APIs to design or support a "medical device" (US FDCA 201(h)(1) or equivalent) or to "offer, solicit, obtain, or provide any medical, legal, or other professional advice". 3.1.14(C): no use "in connection with any dangerous or high-risk activities" (triathlon open water is risky; TriSpike never schedules it as required, and the spec already forbids medical framing). TriSpike copy rules (fitness only, no diagnosis, no "AI coach") align; keep recovery driven changes phrased as training load suggestions, not health advice.
 - 3.1.17: no disparaging WHOOP. 3.1.7: no unsolicited messaging.
 - 1.8: no PHI use without WHOOP's written consent; 3.1.14(A) export control data bar. Not expected to matter.
 
@@ -208,10 +208,10 @@ Source: https://developer.whoop.com/api-terms-of-use/ , "Effective Date: October
 
 - Nothing in the terms or docs forbids a free app or an app with no accounts. Fees for added functionality are allowed (3.1.2). The only identity requirements are accurate registration info, privacy policy URL and support contact (app approval page, terms 1.2, 2.1, 2.3). The per user OAuth consent is the user's "account" with WHOOP, and the disconnect path must be easy. No source found that rejects free apps. UNVERIFIED that approval reviewers accept a no-account app.
 
-## 9. Architecture notes for the Brickline constraints (analysis, not from WHOOP)
+## 9. Architecture notes for the TriSpike constraints (analysis, not from WHOOP)
 
-- Reuse the Liftspark Vercel pattern (liftspark/backend/lib/providers.ts, api/oauth/[provider]/{start,callback,token,refresh}): the server only proxies the code exchange and the refresh, returns token fields, stores nothing. Brickline needs its own WHOOP app, its own redirect URL (a custom scheme for Brickline), and its own deployment or a per app provider config, because credentials may not be shared across applications (terms 1.4).
-- All data calls go phone to `api.prod.whoop.com` directly using the access token in the Keychain, so the backend never sees WHOOP data. This supports the privacy story but is an inference: Apple's App Privacy "Data Not Collected" definition for a transient token proxy and for data flowing from a third party into the app has to be checked against Apple's definitions by the privacy workstream. It also adds the first network call to Brickline, which the spec says does not exist in 1.0, and a client secret holding backend to operate.
+- Reuse the Liftspark Vercel pattern (liftspark/backend/lib/providers.ts, api/oauth/[provider]/{start,callback,token,refresh}): the server only proxies the code exchange and the refresh, returns token fields, stores nothing. TriSpike needs its own WHOOP app, its own redirect URL (a custom scheme for TriSpike), and its own deployment or a per app provider config, because credentials may not be shared across applications (terms 1.4).
+- All data calls go phone to `api.prod.whoop.com` directly using the access token in the Keychain, so the backend never sees WHOOP data. This supports the privacy story but is an inference: Apple's App Privacy "Data Not Collected" definition for a transient token proxy and for data flowing from a third party into the app has to be checked against Apple's definitions by the privacy workstream. It also adds the first network call to TriSpike, which the spec says does not exist in 1.0, and a client secret holding backend to operate.
 - Polling plan: on foreground fetch the latest cycle recovery (`/v2/recovery?limit=3`), latest sleep, and workouts since last sync; refresh tokens lazily on 401 with a single flight refresher; background app refresh opportunistically.
 - Adaptation inputs that map cleanly: `recovery_score` and `user_calibrating` (ignore while calibrating), `hrv_rmssd_milli` and `resting_heart_rate` against the athlete's own rolling baseline, `sleep_performance_percentage`, summed sleep stage time, day strain, workout average and max HR and duration. All adaptation changes must show a reason line and must not contradict the WHOOP recovery band (red recovery should never produce a "go hard" prompt).
 - Retention: until WHOOP answers the cache question, store only a short rolling window plus the derived adjustment decisions, delete everything on disconnect (and call `DELETE /v2/user/access`), and keep WHOOP derived values off share cards and share codes.
@@ -228,7 +228,7 @@ Source: https://developer.whoop.com/api-terms-of-use/ , "Effective Date: October
 - Developer FAQ confirms the API has no continuous heart rate and that live heart rate "can only be streamed over Bluetooth Low Energy": https://developer.whoop.com/docs/developing/support
 - Standard Heart Rate Service (0x180D, measurement characteristic 0x2A37): not stated on any official page I could open. Secondary evidence: a community reverse engineering write-up says WHOOP 4.0 exposes the standard service while broadcast is on and is only discoverable then (https://www.mintlify.com/bWanShiTong/reverse-engineering-whoop-post/control/heart-rate-broadcast , page returned HTTP 410 on a direct fetch so I relied on the search result text); the Liftspark README lists "WHOOP or Garmin with heart-rate broadcast on" under standard Heart Rate Service 0x180D sensors (liftspark/README.md). Treat as UNVERIFIED until a real band is scanned with CoreBluetooth.
 - Limits reported by users: single connection at a time, so a band broadcasting to a bike computer or Garmin watch cannot also feed the phone (https://forums.garmin.com/sports-fitness/cycling/f/edge-1040-series/420547/whoop-5-0-ble-connection-shows-0-bpm); a WHOOP 5.0 on a Garmin Edge showed 0 bpm until toggled; some WHOOP 5.0 or MG users report problems with ANT+ only Wahoo units (https://www.community.whoop.com/t/broadcast-heartrate-hr-not-working-with-wahoo-elemnt/6590/9); the older Strap 3.0 and 4.0 do not broadcast ANT+ (a third party converter exists: https://the5krunner.com/2023/12/28/whoop-broadcast-your-heart-rate-over-ant/). The broadcast is live only, with no history. It is off by default and app or firmware updates can switch it off (secondary).
-- Brickline impact: the phone interval player could show live heart rate from a broadcasting WHOOP, but this needs a Bluetooth purpose string (the spec says 1.0 has only the two HealthKit strings, section 9), the CoreBluetooth code, and has the single connection limit. Suggest deferring to 1.1 and using HealthKit afterwards in 1.0.
+- TriSpike impact: the phone interval player could show live heart rate from a broadcasting WHOOP, but this needs a Bluetooth purpose string (the spec says 1.0 has only the two HealthKit strings, section 9), the CoreBluetooth code, and has the single connection limit. Suggest deferring to 1.1 and using HealthKit afterwards in 1.0.
 
 ## 12. Open questions to put to WHOOP in writing (dashboard support or apisupport@whoop.com)
 

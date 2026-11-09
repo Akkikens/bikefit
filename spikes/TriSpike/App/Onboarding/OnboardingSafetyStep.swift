@@ -5,7 +5,7 @@ struct OnboardingSafetyStep: View {
     @ObservedObject var setup: UserSetup
 
     /// Annex K, Safety.strings entry 1. Do not rephrase without updating the annex and the scan test.
-    static let acknowledgement = "Brickline builds training plans for sport. It is not medical advice. Check with a doctor before starting a new training program, especially if you have a heart condition, are pregnant, or are returning from injury. Stop training and seek help if you feel chest pain, dizziness or shortness of breath."
+    static let acknowledgement = "TriSpike builds training plans for sport. It is not medical advice. Check with a doctor before starting a new training program, especially if you have a heart condition, are pregnant, or are returning from injury. Stop training and seek help if you feel chest pain, dizziness or shortness of breath."
 
     /// `acknowledgement` split at its sentences into three short lines. Joined with a space they are the annex string again.
     static var lines: [String] {

@@ -92,6 +92,9 @@ struct OnboardingAboutYouStep: View {
     private var hoursNote: String {
         let h = setup.data.hoursPerWeek
         let race = setup.data.raceChoice
+        if setup.data.isGentleStart && h > StartingPoint.gentleHoursCap {
+            return "Your plan will start with up to \(StartingPoint.gentleHoursCap) hours a week, because you are new to training. More time is not better when your body is just getting used to it."
+        }
         if h < race.obHoursFloor {
             return "\(h) hours is on the light side for \(race.obRacePhrase). It can still work. The plan keeps to the essentials, and you may finish slower than you hoped."
         }
@@ -109,7 +112,7 @@ struct OnboardingAboutYouStep: View {
             OBDayChips(selected: setup.data.trainingDays, onTap: toggleTraining)
             Text(showMinimumNote
                  ? "Keep at least 1 day selected so there is something to plan around."
-                 : "Pick every day you could train. Brickline will not use all of them, and it keeps some days free.")
+                 : "Pick every day you could train. TriSpike will not use all of them, and it keeps some days free.")
                 .font(.footnote)
                 .foregroundStyle(BL.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)

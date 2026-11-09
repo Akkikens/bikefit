@@ -118,6 +118,8 @@ struct EngineModel {
     var readinessKept = false
     /// Set while the race plan has not started yet and base weeks bridge the gap. Week x of y does not apply then.
     var planBeginsOn: Date? = nil
+    /// True when the athlete used "This feels too hard" for the week on screen.
+    var weekEased = false
 }
 
 // MARK: Building
@@ -139,19 +141,23 @@ enum EngineBuilder {
     }
 
     static func distance(_ r: RaceChoice) -> RaceDistance {
-        switch r { case .sprint: .sprint; case .olympic: .olympic; case .half: .half }
+        switch r { case .superSprint, .sprint: .sprint; case .olympic: .olympic; case .half: .half }
     }
+
+    /// The engine level for the answers: the starting point questions can lower the level the athlete picked, never raise it.
+    static func level(_ d: SetupData) -> Level { level(d.startingPoint.resolvedLevel(experience: d.experience)) }
 
     static func athlete(_ d: SetupData, poolOverride: Set<Weekday>? = nil) -> AthleteProfile {
         AthleteProfile(
-            level: level(d.experience),
-            weeklyHours: Double(d.hoursPerWeek),
+            level: level(d),
+            weeklyHours: Double(d.effectiveHours),
             availableWeekdays: Set(d.trainingDays.compactMap { Weekday(rawValue: $0) }),
             poolWeekdays: poolOverride ?? Set(d.poolDays.compactMap { Weekday(rawValue: $0) }),
             hasWatch: d.canSendToWatch,
             hasPowerMeter: d.hasPowerMeter,
             hasTrainer: d.hasTrainer,
-            prefersRunWalk: d.experience == .firstTimer)
+            prefersRunWalk: d.startingPoint.prefersRunWalk(experience: d.experience),
+            gentleStart: d.isGentleStart)
     }
 
     /// Typical starting numbers by level, used only when the athlete has no test yet. They are marked estimated
@@ -169,7 +175,7 @@ enum EngineBuilder {
     /// Benchmarks from setup. Numbers the athlete typed count as theirs; anything missing is an estimate for their
     /// level. A bike power number exists only with a power meter, so without one the bike runs on feel.
     static func benchmarks(_ d: SetupData, today: Date) -> Benchmarks {
-        let l = level(d.experience)
+        let l = level(d)
         func value(_ entered: Double?, typical: Double) -> BenchmarkValue {
             if !d.useEstimates, let entered, entered > 0 {
                 return BenchmarkValue(value: entered, isEstimated: false, date: today)
@@ -379,7 +385,7 @@ enum EngineBuilder {
 
     static func makeSession(
         _ s: BricklinePlanKit.Session, plan: EnginePlan, benchmarks: Benchmarks, completion: CompletionRecord?,
-        reason: String? = nil
+        reason: String? = nil, reasonRule: String? = nil
     ) -> Session {
         let steps = planSteps(for: s, plan: plan, benchmarks: benchmarks)
         let css = benchmarks.cssSecondsPer100m?.value
@@ -421,7 +427,7 @@ enum EngineBuilder {
             brickSecond: s.brickSecondSport.map(sport), isOpenWater: s.isOpenWater,
             idea: idea?.term, ideaLabel: idea?.label)
         out.engineID = s.id
-        if reason != nil { out.reasonRule = ReadinessPlainCopy.ruleExplanation }
+        if reason != nil { out.reasonRule = reasonRule ?? ReadinessPlainCopy.ruleExplanation }
         out.scheduledDate = s.scheduledDate
         out.loadPoints = loadPoints
         out.loadEstimated = loadEstimated
@@ -470,6 +476,17 @@ enum EngineBuilder {
         return cal.addDays(days / 28 * 28, to: planStart)
     }
 
+    /// The engine's refusal in words for the screen. Never shows the engine's own reason text, which is for developers.
+    static func plainProblem(_ error: PlanKitError, setup d: SetupData) -> String {
+        switch error {
+        case .infeasibleProfile:
+            if let note = d.gentleRaceNote { return note }
+            return "The plan cannot fit your answers yet. Try more training days or more hours."
+        default:
+            return error.errorDescription ?? "The plan could not be built from your answers yet."
+        }
+    }
+
     /// Builds the plan the setup asks for. When the engine refuses, falls back to a base plan with a calm reason.
     static func buildPlan(_ d: SetupData, planStart: Date, today: Date, benchmarks: Benchmarks, calendar cal: Calendar) -> PlanResult {
         var athlete = athlete(d)
@@ -499,9 +516,9 @@ enum EngineBuilder {
                 athlete: athlete, benchmarks: benchmarks, calendar: cal)
             return PlanResult(plan: plan, problem: note)
         } catch let error as PlanKitError {
-            return PlanResult(plan: basePlan(from: blockStart), problem: error.errorDescription)
+            return PlanResult(plan: basePlan(from: blockStart), problem: plainProblem(error, setup: d))
         } catch {
-            return PlanResult(plan: basePlan(from: blockStart), problem: error.localizedDescription)
+            return PlanResult(plan: basePlan(from: blockStart), problem: "The plan could not be built from your answers yet. Try more training days or more hours.")
         }
     }
 
@@ -524,7 +541,7 @@ enum EngineBuilder {
 
     static func build(
         setup d: SetupData, planStart: Date, today rawToday: Date, completions: [String: CompletionRecord],
-        readiness: ReadinessInputs? = nil, calendar cal: Calendar = EngineBuilder.calendar()
+        readiness: ReadinessInputs? = nil, easedWeeks: Set<String> = [], calendar cal: Calendar = EngineBuilder.calendar()
     ) -> EngineModel {
         let today = cal.startOfDay(for: rawToday)
         let start = cal.startOfDay(for: planStart)
@@ -578,21 +595,35 @@ enum EngineBuilder {
             weekPlan = plan
         }
 
-        let engineSessions: [String: BricklinePlanKit.Session] = {
+        var engineSessions: [String: BricklinePlanKit.Session] = {
             var all: [String: BricklinePlanKit.Session] = [:]
             for p in [built.plan, weekPlan].compactMap({ $0 }) { for s in p.allSessions { all[s.id] = s } }
             return all
         }()
+        var easedThisWeek = false
 
         // The seven days of the current week.
         var days: [PlanDay] = []
         if let wp = weekPlan, wp.weeks.indices.contains(weekIndex) {
             let c = wp.resolvedCalendar(cal)
             let week = wp.weeks[weekIndex]
+            // "This feels too hard": the sessions still to do this week come down to easy and a quarter shorter.
+            easedThisWeek = easedWeeks.contains(EaseStore.weekKey(week.startDate, calendar: c))
             for i in 0..<7 {
                 let date = c.startOfDay(for: c.addDays(i, to: week.startDate))
                 let list = (week.days[date] ?? []).sorted { $0.id < $1.id }
-                let sessions = list.map { makeSession($0, plan: wp, benchmarks: bench, completion: completions[$0.id], reason: reasons[$0.id]) }
+                let sessions: [Session] = list.map { original in
+                    var source = original
+                    var why = reasons[original.id]
+                    var rule: String? = nil
+                    if easedThisWeek, EaseWeek.shouldEase(original, today: today, hasCompletion: completions[original.id] != nil, calendar: c) {
+                        source = EaseWeek.eased(original, kit: kit)
+                        engineSessions[original.id] = source
+                        why = EaseWeek.reason
+                        rule = EaseWeek.rule
+                    }
+                    return makeSession(source, plan: wp, benchmarks: bench, completion: completions[original.id], reason: why, reasonRule: rule)
+                }
                 days.append(PlanDay(date: date, sessions: sessions, isToday: c.isDate(date, inSameDayAs: today)))
             }
         } else {
@@ -635,7 +666,7 @@ enum EngineBuilder {
             sessionsPerWeek: sessionsPerWeek, hoursPerWeek: hoursPerWeek,
             firstWeekSessions: firstWeek, firstWeekIsPartial: previewWeek?.index == 0 && (previewWeek?.sessions.count ?? 0) < 3,
             engineSessions: engineSessions, readiness: assessment, readinessEvent: pendingEvent, readinessKept: kept,
-            planBeginsOn: planBeginsOn)
+            planBeginsOn: planBeginsOn, weekEased: easedThisWeek)
     }
 
     // MARK: Fitness
@@ -692,6 +723,27 @@ enum EngineBuilder {
                 legs.append(PlanStep(sport: .run, kind: .work, name: "Run \(km) km", seconds: seconds, level: 4, target: targetText))
             }
         }
+        // The engine plans a sprint for a super sprint. The race card shows the shorter legs, scaled from the sprint times.
+        if d.raceChoice == .superSprint {
+            let sprint = RaceChoice.sprint
+            legs = legs.map { leg in
+                var out = leg
+                switch leg.sport {
+                case .swim:
+                    out.seconds = leg.seconds * Double(d.raceChoice.swimMeters) / Double(sprint.swimMeters)
+                    out.name = "Swim \(d.raceChoice.swimMeters) m"
+                    out.distance = "\(d.raceChoice.swimMeters) m"
+                    out.meters = d.raceChoice.swimMeters
+                case .bike:
+                    out.seconds = leg.seconds * Double(d.raceChoice.bikeKm) / Double(sprint.bikeKm)
+                    out.name = "Bike \(d.raceChoice.bikeKm) km"
+                case .run:
+                    out.seconds = leg.seconds * d.raceChoice.runKm / sprint.runKm
+                    out.name = "Run 2.5 km"
+                }
+                return out
+            }
+        }
         let raceDay = d.noRaceYet ? cal.addDays(84, to: today) : cal.startOfDay(for: d.raceDate)
         let details = RaceDetails(distance: dist, raceDate: raceDay, startMinutesAfterMidnight: defaultStartMinutes)
         let entries = kit.raceWindow(for: details, calendar: cal)
@@ -745,9 +797,11 @@ final class EngineAdapter: ObservableObject {
         var today: Date
         var completions: [String: CompletionRecord]
         var readiness: ReadinessInputs?
+        var eased: Set<String>
     }
 
     @Published private(set) var completions: [String: CompletionRecord]
+    @Published private(set) var easedWeeks: Set<String> = EaseStore.load()
     private var cached: (key: Key, model: EngineModel)?
     private var readinessWatch: AnyCancellable?
 
@@ -764,10 +818,11 @@ final class EngineAdapter: ObservableObject {
         let calendar = EngineBuilder.calendar()
         let key = Key(setup: UserSetup.shared.data, planStart: Demo.planStart,
                       today: calendar.startOfDay(for: Date()), completions: completions,
-                      readiness: ReadinessCoordinator.shared.inputs(for: UserSetup.shared.data))
+                      readiness: ReadinessCoordinator.shared.inputs(for: UserSetup.shared.data),
+                      eased: easedWeeks)
         if let cached, cached.key == key { return cached.model }
         let built = EngineBuilder.build(setup: key.setup, planStart: key.planStart, today: key.today,
-                                        completions: key.completions, readiness: key.readiness, calendar: calendar)
+                                        completions: key.completions, readiness: key.readiness, easedWeeks: key.eased, calendar: calendar)
         cached = (key, built)
         return built
     }
@@ -802,6 +857,23 @@ final class EngineAdapter: ObservableObject {
     func clearCompletions() {
         completions = [:]
         CompletionStore.clear()
+        easedWeeks = []
+        EaseStore.clear()
+    }
+
+    /// "This feels too hard": eases what is left of the week on screen.
+    func easeCurrentWeek() {
+        guard let wp = model.weekPlan else { return }
+        let c = wp.resolvedCalendar(EngineBuilder.calendar())
+        guard let index = wp.weekIndex(containing: Demo.today, calendar: c), wp.weeks.indices.contains(index) else { return }
+        easedWeeks.insert(EaseStore.weekKey(wp.weeks[index].startDate, calendar: c))
+        EaseStore.save(easedWeeks)
+    }
+
+    /// Puts the week back as planned.
+    func undoEaseCurrentWeek() {
+        easedWeeks = []
+        EaseStore.clear()
     }
 
     // MARK: Compiled workouts

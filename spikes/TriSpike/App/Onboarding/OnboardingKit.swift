@@ -179,19 +179,19 @@ struct OBDayChips: View {
 extension RaceChoice {
     /// Weeks of lead time that suit this race. Matches `typicalWeeks`.
     var obWeeksRange: ClosedRange<Int> {
-        switch self { case .sprint: 8...12; case .olympic: 10...16; case .half: 14...24 }
+        switch self { case .superSprint, .sprint: 8...12; case .olympic: 10...16; case .half: 14...24 }
     }
     /// "a Sprint plan", "an Olympic plan".
     var obPlanPhrase: String {
-        switch self { case .sprint: "a Sprint plan"; case .olympic: "an Olympic plan"; case .half: "a half iron plan" }
+        switch self { case .superSprint: "a super sprint plan"; case .sprint: "a Sprint plan"; case .olympic: "an Olympic plan"; case .half: "a half iron plan" }
     }
     /// "a Sprint race", "an Olympic race".
     var obRacePhrase: String {
-        switch self { case .sprint: "a Sprint race"; case .olympic: "an Olympic race"; case .half: "a half iron (70.3) race" }
+        switch self { case .superSprint: "a super sprint race"; case .sprint: "a Sprint race"; case .olympic: "an Olympic race"; case .half: "a half iron (70.3) race" }
     }
     /// Hours a week below which the race gets tight, and above which it is more than most people need.
-    var obHoursFloor: Int { switch self { case .sprint: 3; case .olympic: 5; case .half: 8 } }
-    var obHoursCeiling: Int { switch self { case .sprint: 8; case .olympic: 10; case .half: 14 } }
+    var obHoursFloor: Int { switch self { case .superSprint: 3; case .sprint: 3; case .olympic: 5; case .half: 8 } }
+    var obHoursCeiling: Int { switch self { case .superSprint: 6; case .sprint: 8; case .olympic: 10; case .half: 14 } }
 }
 
 // MARK: Number formatting and parsing
@@ -282,9 +282,15 @@ enum OBPlan {
         }
         func blurb(_ p: Phase) -> String {
             switch p {
-            case .base: "Easy building. Mostly easy training that builds a steady habit."
-            case .build: "Harder sessions are added. Your weekly time stays steady."
-            case .peak: "Your biggest weeks, with sessions that feel like race day."
+            case .base: d.isGentleStart
+                ? "Easy building. Only easy sessions, with no hard efforts yet, so your body gets used to training."
+                : "Easy building. Mostly easy training that builds a steady habit."
+            case .build: d.isGentleStart
+                ? "Your sessions get a little longer. They stay easy or steady, with no hard efforts."
+                : "Harder sessions are added. Your weekly time stays steady."
+            case .peak: d.isGentleStart
+                ? "Your biggest weeks, still easy or steady, to get you ready for race day."
+                : "Your biggest weeks, with sessions that feel like race day."
             case .taper: "Lighter weeks, so you arrive fresh."
             }
         }

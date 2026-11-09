@@ -55,7 +55,7 @@ struct OnboardingDevicesStep: View {
                                     isOn: $setup.data.hasPowerMeter)
                         Divider().overlay(BL.separator)
                         OBToggleRow(title: "I have an indoor trainer",
-                                    detail: "Lets Brickline offer indoor rides for bad weather and short evenings.",
+                                    detail: "Lets TriSpike offer indoor rides for bad weather and short evenings.",
                                     symbol: "figure.indoor.cycle",
                                     isOn: $setup.data.hasTrainer)
                     }
@@ -95,7 +95,7 @@ struct OnboardingDevicesStep: View {
         }
     }
 
-    static let whyLine = "Brickline reads your sleep, resting heart rate and heart rate variability from Apple Health, and saves the workouts you record with the phone player. It all stays on your phone. You choose what to share in the sheet that opens, and you can skip this and allow it later."
+    static let whyLine = "TriSpike reads your sleep, resting heart rate and heart rate variability from Apple Health, and saves the workouts you record with the phone player. It all stays on your phone. You choose what to share in the sheet that opens, and you can skip this and allow it later."
     static let phoneOnlyLine = "With just your phone there is no sleep or heart data to read. When you finish a session in the phone player, Apple Health asks if it can save the workout."
 
     /// What to say after the permission sheet. Health never says whether a read was allowed, so the line only reports what was found.

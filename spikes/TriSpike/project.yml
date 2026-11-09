@@ -30,9 +30,13 @@ targets:
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIBackgroundModes: [audio]
+        TSStravaProxyBaseURL: ""
+        CFBundleURLTypes:
+          - CFBundleURLName: com.akkikens.trispike
+            CFBundleURLSchemes: [trispike]
         NSSupportsLiveActivities: true
-        NSHealthShareUsageDescription: "Brickline reads your sleep, resting heart rate and heart rate variability to compare each night with your own usual range. It all stays on your phone."
-        NSHealthUpdateUsageDescription: "Brickline saves workouts you record with its phone player so they appear in Health."
+        NSHealthShareUsageDescription: "TriSpike reads your sleep, resting heart rate and heart rate variability to compare each night with your own usual range. It all stays on your phone."
+        NSHealthUpdateUsageDescription: "TriSpike saves workouts you record with its phone player so they appear in Health."
     entitlements:
       path: App/TriSpike.entitlements
       properties:

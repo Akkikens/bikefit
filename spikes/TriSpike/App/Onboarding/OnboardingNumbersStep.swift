@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-/// Step 6: the three numbers Brickline uses to set effort. Estimates by default, optional entry for people who know theirs.
+/// Step 7: the three numbers TriSpike uses to set effort. Estimates by default, optional entry for people who know theirs.
 struct OnboardingNumbersStep: View {
     @ObservedObject var setup: UserSetup
 
@@ -18,7 +18,7 @@ struct OnboardingNumbersStep: View {
 
     var body: some View {
         OBPage(title: "How hard should training feel?",
-               why: "Brickline sets your paces from three short tests. You can start with estimates and test later.") {
+               why: "TriSpike sets your paces from three short tests. You can start with estimates and test later.") {
             VStack(alignment: .leading, spacing: BL.Space.sectionGap) {
                 VStack(alignment: .leading, spacing: BL.Space.s) {
                     OBToggleRow(title: "Use estimates for now (recommended)",

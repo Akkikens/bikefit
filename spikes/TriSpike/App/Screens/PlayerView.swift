@@ -135,7 +135,7 @@ struct PlayerView: View {
                     Text(t).font(BLFont.largeValue).foregroundStyle(c.sport.playerInk).opacity(dimSecondary)
                         .multilineTextAlignment(.center)
                 }
-                Text(c.feel).font(.subheadline).foregroundStyle(BL.Player.textSecondary).opacity(dimSecondary)
+                Text(c.coaching).font(.subheadline).foregroundStyle(BL.Player.textSecondary).opacity(dimSecondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }

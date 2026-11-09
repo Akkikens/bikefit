@@ -4,27 +4,35 @@ import BricklinePlanKit
 /// Everything onboarding collects. Persisted as one JSON blob so the flow can be redone or reset in one call.
 /// The plan engine will read this to build the plan; until it lands the demo plan ignores everything except `tracker`.
 enum RaceChoice: String, Codable, CaseIterable, Identifiable {
-    case sprint, olympic, half
+    case superSprint, sprint, olympic, half
     var id: String { rawValue }
     var title: String {
-        switch self { case .sprint: "Sprint"; case .olympic: "Olympic"; case .half: "Half iron (70.3)" }
+        switch self {
+        case .superSprint: "Super sprint"
+        case .sprint: "Sprint"
+        case .olympic: "Olympic"
+        case .half: "Half iron (70.3)"
+        }
     }
     /// Plain distances, so nobody has to know what "Olympic" means.
-    var swimMeters: Int { switch self { case .sprint: 750; case .olympic: 1500; case .half: 1900 } }
-    var bikeKm: Int { switch self { case .sprint: 20; case .olympic: 40; case .half: 90 } }
-    var runKm: Double { switch self { case .sprint: 5; case .olympic: 10; case .half: 21.1 } }
+    var swimMeters: Int { switch self { case .superSprint: 400; case .sprint: 750; case .olympic: 1500; case .half: 1900 } }
+    var bikeKm: Int { switch self { case .superSprint: 10; case .sprint: 20; case .olympic: 40; case .half: 90 } }
+    var runKm: Double { switch self { case .superSprint: 2.5; case .sprint: 5; case .olympic: 10; case .half: 21.1 } }
+    /// True for the shortest race, made for people who have never done a triathlon.
+    var isBeginnerRace: Bool { self == .superSprint }
     var summary: String {
         "Swim \(swimMeters) m, bike \(bikeKm) km, run \(runKm == runKm.rounded() ? String(Int(runKm)) : String(runKm)) km"
     }
     var blurb: String {
         switch self {
-        case .sprint: "The shortest race. A good first triathlon: about 1 to 1.5 hours for most people."
+        case .superSprint: "The gentlest race, made for first timers. Most people finish in 45 to 75 minutes. Distances vary a little between events, so check yours."
+        case .sprint: "A short race. A good first triathlon: about 1 to 1.5 hours for most people."
         case .olympic: "Twice the sprint. Most people finish in 2.5 to 3.5 hours."
         case .half: "Half of an Ironman. A long day: most people finish in 5 to 7 hours."
         }
     }
     var typicalWeeks: String {
-        switch self { case .sprint: "8 to 12 weeks"; case .olympic: "10 to 16 weeks"; case .half: "14 to 24 weeks" }
+        switch self { case .superSprint: "8 to 12 weeks"; case .sprint: "8 to 12 weeks"; case .olympic: "10 to 16 weeks"; case .half: "14 to 24 weeks" }
     }
 }
 
@@ -85,13 +93,13 @@ enum DeviceChoice: String, Codable, CaseIterable, Identifiable {
         case .appleWatch:
             return "Send each session to the Workout app on your watch, with alerts at the right pace. Your sleep, resting heart rate and heart rate variability come from Apple Health."
         case .whoop:
-            return "Your sleep, resting heart rate and heart rate variability reach Brickline through Apple Health for now. A direct WHOOP connection is coming soon. Follow sessions on your phone."
+            return "Your sleep, resting heart rate and heart rate variability reach TriSpike through Apple Health for now. A direct WHOOP connection is coming soon. Follow sessions on your phone."
         case .oura:
-            return "Your sleep, resting heart rate and heart rate variability reach Brickline through Apple Health for now. A direct Oura connection is coming soon. Follow sessions on your phone."
+            return "Your sleep, resting heart rate and heart rate variability reach TriSpike through Apple Health for now. A direct Oura connection is coming soon. Follow sessions on your phone."
         case .garmin:
             return "Sleep and resting heart rate come through Apple Health when Garmin Connect shares them. Heart rate variability does not come through. Start your recording on your Garmin as usual."
         case .otherWatch:
-            return "Follow each session on your phone. Start your recording on your own device as usual. Brickline does not read its data."
+            return "Follow each session on your phone. Start your recording on your own device as usual. TriSpike does not read its data."
         case .phoneOnly:
             return "Follow each session on your phone with voice cues. No gear needed, and no recovery data is used."
         }
@@ -99,7 +107,7 @@ enum DeviceChoice: String, Codable, CaseIterable, Identifiable {
     /// WHOOP and Oura are early: they work through Apple Health and a direct connection is not built yet.
     var isBeta: Bool { self == .whoop || self == .oura }
     var canReceiveSessionsOnWrist: Bool { self == .appleWatch }
-    /// The recovery source this device feeds in the engine. Nil for devices Brickline cannot read from.
+    /// The recovery source this device feeds in the engine. Nil for devices TriSpike cannot read from.
     var readinessSource: ReadinessSource? {
         switch self {
         case .appleWatch: .appleWatch
@@ -150,6 +158,10 @@ struct SetupData: Codable, Equatable {
     var devices: Set<DeviceChoice> = [.phoneOnly]
     var hasPowerMeter = false
     var hasTrainer = false
+    /// Plain answers to the starting point questions. Nil means not answered, and the plan then follows `experience`.
+    var swimAbility: StartAbility?
+    var bikeAbility: StartAbility?
+    var runAbility: StartAbility?
     var useEstimates = true
     var cssSecondsPer100: Double?
     var ftpWatts: Int?
@@ -206,6 +218,9 @@ extension SetupData {
         hasPowerMeter = try c.decodeIfPresent(Bool.self, forKey: .hasPowerMeter) ?? hasPowerMeter
         hasTrainer = try c.decodeIfPresent(Bool.self, forKey: .hasTrainer) ?? hasTrainer
         useEstimates = try c.decodeIfPresent(Bool.self, forKey: .useEstimates) ?? useEstimates
+        swimAbility = try c.decodeIfPresent(StartAbility.self, forKey: .swimAbility)
+        bikeAbility = try c.decodeIfPresent(StartAbility.self, forKey: .bikeAbility)
+        runAbility = try c.decodeIfPresent(StartAbility.self, forKey: .runAbility)
         cssSecondsPer100 = try c.decodeIfPresent(Double.self, forKey: .cssSecondsPer100)
         ftpWatts = try c.decodeIfPresent(Int.self, forKey: .ftpWatts)
         thresholdPaceSecondsPerKm = try c.decodeIfPresent(Double.self, forKey: .thresholdPaceSecondsPerKm)

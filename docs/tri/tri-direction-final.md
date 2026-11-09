@@ -1,6 +1,6 @@
-# Brickline: final direction
+# TriSpike: final direction
 
-Final direction for Akshay Kalapgar's triathlon app with the bike fit as an in-app module, 2026-11-06. It reconciles the synthesis, the 74-fact verification (64 confirmed, 9 corrected, 1 unsupported), the bike fit integration map, and the adversarial review (all fixes applied). Where inputs disagreed, the verified fact or the stricter fix wins. Working name Brickline, not yet cleared.
+Final direction for Akshay Kalapgar's triathlon app with the bike fit as an in-app module, 2026-11-06. It reconciles the synthesis, the 74-fact verification (64 confirmed, 9 corrected, 1 unsupported), the bike fit integration map, and the adversarial review (all fixes applied). Where inputs disagreed, the verified fact or the stricter fix wins. Working name TriSpike, not yet cleared.
 
 ## 1. Verdict and one-liner
 
@@ -108,7 +108,7 @@ Cut order, revised: adaptation depth first (rules shrink, the explanation line s
 1. Posture: is the owner comfortable that a free, serverless app with StoreKit dormant stays a hobby project?
 2. Week 1 spike: does WorkoutKit behave (max count, horizon, sync reliability, pool goals, multisport, pace alerts)? The go or no-go gate.
 3. CloudKit private sync: does it keep Data Not Collected and clear 5.1.3(ii) (no personal health information in iCloud)? Until both answer yes, sync stays out; fit artifacts stay out permanently regardless.
-4. Name: does Brickline clear USPTO Trademark Search (TESS is retired) and App Store search, given the St. Louis Brickline Greenway? Fallbacks: Taperline or Tricadence; TriPace is taken.
+4. Name: does TriSpike (formerly Brickline) clear USPTO Trademark Search (TESS is retired) and App Store search? Fallbacks: Taperline or Tricadence; TriPace is taken.
 5. Template credibility: will a certified coach or a few experienced triathletes review the templates before launch?
 6. Scope: is 70.3 in 1.0 worth the QA load, and will the revised cut order hold if weeks slip?
 7. Positioning watch: verify Garmin Coach's Olympic ceiling in Garmin Connect; recheck Runna's run-only status near launch.
@@ -120,7 +120,7 @@ Cut order, revised: adaptation depth first (rules shrink, the explanation line s
 
 1. Week 1 spikes, on a named simulator shut down after: schedule and sync through WorkoutScheduler; read maxAllowedScheduledWorkoutCount at runtime; probe scheduling beyond 7 days; build one pool swim custom workout with the distance-with-time goal; build one open-goal SwimBikeRunWorkout; test speed range alerts as run pace. Findings become the go or no-go record.
 2. Owner sign off this week on the free, serverless posture: no revenue, no ads SDK, no analytics, no server, StoreKit dormant.
-3. Name checks before anything ships in repo, site or metadata: Brickline through USPTO Trademark Search and App Store search; hold Taperline and Tricadence as fallbacks; do not use TriPace.
+3. Name checks before anything ships in repo, site or metadata: TriSpike (formerly Brickline) through USPTO Trademark Search and App Store search; hold Taperline and Tricadence as fallbacks; do not use TriPace.
 4. Line up template reviewers; run the per-file git audit on the Liftspark files slated for reuse; calendar the Saddlemark bench for the App Review wait with kill criteria and the fallback beat written down first.
 
 Verification counts: {"confirmed":64,"unsupported":1,"corrected":9}

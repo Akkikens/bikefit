@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The Brickline shell: onboarding on first launch, then four tabs, with the player as a full screen cover (design spec section 6).
+/// The TriSpike shell: onboarding on first launch, then four tabs, with the player as a full screen cover (design spec section 6).
 struct ContentView: View {
     enum Tab: String { case today, week, race, methods }
 

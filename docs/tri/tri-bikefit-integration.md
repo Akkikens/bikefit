@@ -2,7 +2,7 @@
 
 Saddlemark into the triathlon app. Prepared 2026-11-06 for Akshay Kalapgar.
 
-Decision recorded: the bike fit ships as its own tab inside the triathlon app (working name Brickline, pending trademark and App Store checks), not as a standalone app. Sources: bikefit-spec.md version 0.2 and bikefit-annex.md, both 2026-11-04, and tri-synthesis.md, 2026-11-06. The synthesis already placed the module at 1.1; this map holds that placement and works out the seams.
+Decision recorded: the bike fit ships as its own tab inside the triathlon app (working name TriSpike, pending trademark and App Store checks), not as a standalone app. Sources: bikefit-spec.md version 0.2 and bikefit-annex.md, both 2026-11-04, and tri-synthesis.md, 2026-11-06. The synthesis already placed the module at 1.1; this map holds that placement and works out the seams.
 
 ## 1. What moves in unchanged
 

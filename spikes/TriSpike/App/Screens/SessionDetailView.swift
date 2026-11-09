@@ -5,6 +5,7 @@ struct SessionDetailView: View {
     @Binding var playerSession: Session?
     /// Decides between the Apple Watch card and the "how you will follow this" card.
     @ObservedObject private var setup = UserSetup.shared
+    @State private var confirmEase = false
     @ScaledMetric(relativeTo: .body) private var profileHeight: CGFloat = 120
 
     var body: some View {
@@ -64,6 +65,8 @@ struct SessionDetailView: View {
                     .card()
                 }
 
+                coachingCard
+
                 if setup.canSendToWatch {
                     WatchCard(line: session.watchLine)
                 } else {
@@ -84,14 +87,39 @@ struct SessionDetailView: View {
         }
         .background(BL.background.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
+        .confirmationDialog("Make the rest of this week easier?", isPresented: $confirmEase, titleVisibility: .visible) {
+            Button("Make it easier") { EngineAdapter.shared.easeCurrentWeek() }
+            Button("Keep the plan", role: .cancel) {}
+        } message: {
+            Text(EaseWeek.confirmMessage)
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button("Move", systemImage: "calendar") {}
                     Button("Mark done", systemImage: "checkmark.circle") {}
                     Button("Skip", systemImage: "minus.circle", role: .destructive) {}
+                    Button("This week feels too hard", systemImage: "leaf") { confirmEase = true }
                 } label: { Image(systemName: "ellipsis.circle").accessibilityLabel("More") }
             }
+        }
+    }
+
+    /// Short coaching in plain words: how it should feel while you do it.
+    private var coachingCard: some View {
+        let top = session.steps.filter { $0.kind == .work }.map(\.level).max() ?? 2
+        let runWalk = session.name.lowercased().contains("walk")
+        let lines = Coaching.sessionLines(sport: session.sport, topLevel: top, isRunWalk: runWalk)
+        return VStack(alignment: .leading, spacing: BL.Space.s) {
+            SectionLabel(text: "While you do it")
+            VStack(alignment: .leading, spacing: BL.Space.s) {
+                ForEach(lines, id: \.self) { line in
+                    Text(line).font(.subheadline).foregroundStyle(BL.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .card()
         }
     }
 

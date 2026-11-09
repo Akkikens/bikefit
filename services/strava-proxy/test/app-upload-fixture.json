@@ -1,0 +1,9 @@
+{
+  "kind": "manual",
+  "name": "Easy run, 30 min",
+  "sport_type": "Run",
+  "start_date_local": "2026-11-08T07:30:00Z",
+  "elapsed_time": 1800,
+  "description": "Recorded with TriSpike.",
+  "trainer": false
+}

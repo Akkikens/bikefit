@@ -1,6 +1,6 @@
 # Adapting a plan to recovery and readiness data: evidence and a safe design
 
-Research notes, 2026-11-08, for the Brickline wearable integration decision (Garmin, Apple Watch, WHOOP, Oura). Scope: what the science supports, how wearables and commercial products behave, the regulatory and App Store limits, and 5 candidate rules with thresholds. No em or en dashes anywhere. Every fact carries the URL it came from. Where a page was blocked or only a search snippet was available, that is stated next to the fact.
+Research notes, 2026-11-08, for the TriSpike wearable integration decision (Garmin, Apple Watch, WHOOP, Oura). Scope: what the science supports, how wearables and commercial products behave, the regulatory and App Store limits, and 5 candidate rules with thresholds. No em or en dashes anywhere. Every fact carries the URL it came from. Where a page was blocked or only a search snippet was available, that is stated next to the fact.
 
 Retrieval notes: PubMed and PMC pages return bot checks to the fetch tool, so abstracts were read through the Europe PMC REST API (https://www.ebi.ac.uk/europepmc/webservices/rest/search with query EXT_ID:<pmid> AND SRC:MED). The PubMed URL given is the canonical record of the same abstract. Whoop.com marketing pages and the TrainingPeaks help center returned HTTP 403; WHOOP facts come from developer.whoop.com or are marked secondary.
 
@@ -59,7 +59,7 @@ Protocol details pulled from the Manresa-Rocamora full text (https://pmc.ncbi.nl
 
 ### 1.4 What overtraining science says about markers
 
-ECSS and ACSM joint consensus (Meeusen et al. 2013): no marker, hormonal, performance, psychological, biochemical or immune, "meets all the criteria" for general acceptance in detecting overreaching or the overtraining syndrome; diagnosis is by exclusion. https://pubmed.ncbi.nlm.nih.gov/23247672/ Consequence for Brickline: the app must never say it detects overtraining.
+ECSS and ACSM joint consensus (Meeusen et al. 2013): no marker, hormonal, performance, psychological, biochemical or immune, "meets all the criteria" for general acceptance in detecting overreaching or the overtraining syndrome; diagnosis is by exclusion. https://pubmed.ncbi.nlm.nih.gov/23247672/ Consequence for TriSpike: the app must never say it detects overtraining.
 
 Subjective measures: a systematic review of 56 studies (Saw et al. 2016, BJSM) found subjective well being "reflected acute and chronic training loads with superior sensitivity and consistency than objective measures", and the two generally did not correlate. https://pubmed.ncbi.nlm.nih.gov/26423706/ Consequence: a one tap check-in belongs in the signal set, and a rule that ignores it is weaker than one that includes it.
 
@@ -117,7 +117,7 @@ Garmin: only Dial 2025 (Fenix 6, HRV CCC 0.87, poor) and Miller 2022 (Forerunner
 
 - I searched Europe PMC for independent validation of Garmin Training Readiness, WHOOP Recovery and Oura Readiness predicting training outcomes or performance. Nothing peer reviewed turned up that tests whether acting on the score improves training results. Candidates seen: a 2023 preprint (Nilsson et al., Garmin plus a 9 item questionnaire, adaptive versus static training in runners, 39 days) which reports better outcomes in the adaptive group, https://doi.org/10.1101/2023.10.06.561160 (preprint, authors' commercial affiliation not checked); an observational study of 389 pro golfers using a wearable composite recovery score (Grosicki et al. 2026, IJSPP). https://pubmed.ncbi.nlm.nih.gov/41265431/ Neither tests a plan changing rule against a control in multisport athletes.
 - A surgeon study found no association between an HRV based wearable recovery score and perceived workload (Perrone et al. 2025). https://pubmed.ncbi.nlm.nih.gov/39788069/ Different population, but a reminder that a score is not a measured state.
-- Conclusion for design: treat vendor scores as inputs the athlete already looks at, not as evidence. Triggers should be made from named components whose method Brickline can state.
+- Conclusion for design: treat vendor scores as inputs the athlete already looks at, not as evidence. Triggers should be made from named components whose method TriSpike can state.
 
 ### 3.3 What reaches an iPhone app
 
@@ -164,7 +164,7 @@ Primary: https://www.fda.gov/regulatory-information/search-fda-guidance-document
 - Illustrative Example 7 is a wrist wearable "intended to assess activity and recovery" with sleep and pulse outputs, treated as low risk general wellness provided any blood pressure value is validated. Example 9 covers an athlete wearable labeled for exercise and fitness only.
 - Context: FDA's July 2025 warning letter about WHOOP's Blood Pressure Insights, later closed out after labeling changes and the updated guidance (secondary: https://www.kslaw.com/insights/articles/fda-updates-general-wellness-and-clinical-decision-support-guidance-documents). Lesson: the line is crossed by clinical-looking outputs and disease linked claims, not by HRV trend contexts.
 
-Application to Brickline:
+Application to TriSpike:
 - Display ranges and trends such as "lower than your usual". Never "abnormal", "low HRV risk", "stress score", a named condition, or thresholds expressed as health cut points.
 - The statistical thresholds in section 7 are relative to the athlete's own baseline and drive training choices; they are not diagnostic thresholds. Say so on the Methods screen.
 - Do not ingest or display SpO2, skin or wrist temperature, blood pressure, ECG or irregular rhythm outputs. The WHOOP recovery payload carries spo2_percentage and skin_temp_celsius; drop them at parse time and unit test that they never reach storage or UI.
@@ -175,7 +175,7 @@ Application to Brickline:
 
 Primary: https://developer.apple.com/app-store/review/guidelines/ (fetched, first 100,000 characters).
 
-- 1.4.1: medical apps that could provide inaccurate data may get greater scrutiny; "Apps must clearly disclose data and methodology to support accuracy claims relating to health measurements"; apps that measure blood pressure, body temperature, glucose or blood oxygen using only device sensors are not permitted; medical apps should remind users to check with a doctor. Brickline measures nothing itself and claims no accuracy, so the lever is disclosure: Methods lists each input, its source device, baseline method and limits.
+- 1.4.1: medical apps that could provide inaccurate data may get greater scrutiny; "Apps must clearly disclose data and methodology to support accuracy claims relating to health measurements"; apps that measure blood pressure, body temperature, glucose or blood oxygen using only device sensors are not permitted; medical apps should remind users to check with a doctor. TriSpike measures nothing itself and claims no accuracy, so the lever is disclosure: Methods lists each input, its source device, baseline method and limits.
 - 5.1.3(i): health, fitness and HealthKit data may not be used or disclosed to third parties for advertising, marketing or data mining other than improving health management or research, and then only with permission. Keep recovery data out of any analytics or third-party code path (the spec already has none).
 - 5.1.3(ii): no false or inaccurate data into HealthKit; no personal health information in iCloud. Baselines derived from HealthKit and provider data stay out of any sync container (spec section 9 already enforces this for derived HealthKit data; extend the schema test to recovery baselines).
 - 2.5.1: HealthKit used for health and fitness purposes; request only the read types needed (HRV SDNN, resting heart rate, sleep analysis).
@@ -201,7 +201,7 @@ The FTC Health Breach Notification Rule, amended in 2024, covers health apps and
 9. Never medical. No cause attribution, no condition words, no heart rhythm, oxygen or temperature data, no accuracy claims for vendor numbers.
 10. Data quality gates: stale data (older than 36 hours), too few valid nights, a device change, or a "calibrating" flag from the vendor (WHOOP user_calibrating) disable the rules and say why.
 11. Apple Watch only athletes get a lighter version: weak HRV validity (MAPE about 29 to 31%) and irregular sampling mean HRV should be displayed as context, while sleep time, resting HR and the check-in drive any suggestion. This is a design inference from section 3, not from a trial.
-12. Keep it a proposal by default. Industry practice (Athletica, Humango, Reps, Garmin DSW) is advisory or accept/decline. Practical reason for Brickline: the planned session is already on the watch from Sunday Sync, so the easy version is scheduled on demand when accepted (whether WorkoutScheduler can replace or remove a same-day scheduled item reliably is a spike item).
+12. Keep it a proposal by default. Industry practice (Athletica, Humango, Reps, Garmin DSW) is advisory or accept/decline. Practical reason for TriSpike: the planned session is already on the watch from Sunday Sync, so the easy version is scheduled on demand when accepted (whether WorkoutScheduler can replace or remove a same-day scheduled item reliably is a spike item).
 
 ---
 
@@ -258,7 +258,7 @@ Interaction with existing annex C: R2 and R3 are new structural rules (rule 4's 
 
 - Use: "lower than your usual", "your usual range", "your own numbers", "the plan waited a day", "easier option", "you can keep your session".
 - Avoid: abnormal, low HRV risk, stress score, readiness verdicts framed as health, fatigue diagnosis words, any condition, the forbidden list in tri-spec.md section 6, and "recover" as a command. "AI" and "coach" claims stay out.
-- Methods text (draft): "Brickline compares your recent nights with your own earlier nights. It does not know why a number changed. Hard training, alcohol, travel, heat, a late night and stress outside training can all lower HRV. Numbers come from your device and can be off by several percent. Brickline only ever makes your plan easier, never harder, and you can always keep your planned session."
+- Methods text (draft): "TriSpike compares your recent nights with your own earlier nights. It does not know why a number changed. Hard training, alcohol, travel, heat, a late night and stress outside training can all lower HRV. Numbers come from your device and can be off by several percent. TriSpike only ever makes your plan easier, never harder, and you can always keep your planned session."
 
 ---
 

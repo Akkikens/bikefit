@@ -7,6 +7,7 @@ struct ConnectionsView: View {
     @ObservedObject private var setup = UserSetup.shared
     @ObservedObject private var readiness = ReadinessCoordinator.shared
     @ObservedObject private var engine = EngineAdapter.shared
+    @ObservedObject private var strava = StravaClient.shared
 
     private var rows: [ReadinessPlainCopy.SourceRow] {
         let calendar = EngineBuilder.calendar()
@@ -18,7 +19,7 @@ struct ConnectionsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: BL.Space.sectionGap) {
-                Text("Your devices read to Brickline through Apple Health. Nothing leaves your phone.")
+                Text(PrivacyCopy.connectionsIntro(stravaEnabled: strava.isEnabled))
                     .font(.subheadline).foregroundStyle(BL.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -34,6 +35,7 @@ struct ConnectionsView: View {
                 }
 
                 if setup.data.hasRecoverySource { healthCard }
+                StravaCard()
                 if setup.data.readinessSources.count > 1 { preferredCard }
                 changeCard
             }
@@ -55,6 +57,8 @@ struct ConnectionsView: View {
             VStack(alignment: .leading, spacing: BL.Space.m) {
                 Text(OnboardingDevicesStep.whyLine)
                     .font(.subheadline).foregroundStyle(BL.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(PrivacyCopy.health).font(.footnote).foregroundStyle(BL.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
                 CompactJargon(term: .hrv, label: "What is heart rate variability?", font: .subheadline, ink: BL.textSecondary, textHeight: 20)
                 Button {
@@ -81,7 +85,7 @@ struct ConnectionsView: View {
         return VStack(alignment: .leading, spacing: BL.Space.s) {
             SectionLabel(text: "Which device to use")
             VStack(alignment: .leading, spacing: BL.Space.m) {
-                Text("With more than one device, Brickline uses the first with enough recent nights, in this order: Oura, WHOOP, Apple Watch, Garmin. Each device keeps its own usual range, because their numbers are not comparable. Changing the device restarts the 14 night learning period.")
+                Text("With more than one device, TriSpike uses the first with enough recent nights, in this order: Oura, WHOOP, Apple Watch, Garmin. Each device keeps its own usual range, because their numbers are not comparable. Changing the device restarts the 14 night learning period.")
                     .font(.subheadline).foregroundStyle(BL.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
                 Picker("Device for sleep and heart data", selection: Binding(

@@ -36,6 +36,8 @@ final class PhonePlayer: ObservableObject {
         var completed: Bool
         /// True once the workout reached Health. False for smoke runs, denied access or an unfinished save.
         var saved: Bool = false
+        /// When the athlete pressed start. Used for the share card and the optional Strava upload.
+        var startedAt: Date? = nil
     }
 
     /// A contiguous run of steps in one sport, with the wall clock interval the player actually spent in it.
@@ -178,7 +180,7 @@ final class PhonePlayer: ObservableObject {
         let end = min(pausedAt ?? Date(), boundaries.last ?? Date())
         let done = max(0, end.timeIntervalSince(originalStart) - pausedTotal)
         // Published before isRunning flips, so Today already has the result when the player dismisses.
-        lastResult = Result(name: sessionName, engineID: engineID, seconds: done, completed: stepIndex >= steps.count)
+        lastResult = Result(name: sessionName, engineID: engineID, seconds: done, completed: stepIndex >= steps.count, startedAt: originalStart)
         if !legs.isEmpty { legs[legs.count - 1].end = end }
         isRunning = false
         isPaused = false

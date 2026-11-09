@@ -117,6 +117,7 @@ enum SequencePlanner {
         outputOffset: Int,
         raceDate: Date,
         level: Level,
+        gentle: Bool = false,
         benchmarks: Benchmarks,
         calendar: Calendar
     ) -> [WeekSpec] {
@@ -148,8 +149,10 @@ enum SequencePlanner {
         // 3 plus 1 blocks: every fourth week recovers. The last week before the taper stays a load week, so when
         // the fourth week of a block would land exactly there, the recovery moves one week earlier. That keeps
         // every run of load weeks at three or fewer (annex B).
+        // A gentle start recovers after every second load week instead (2 plus 1), so first timers get more easy weeks.
+        let blockLength = gentle ? 3 : 4
         var recovery = [Bool](repeating: false, count: n)
-        for k in 0..<pre where (k + 1) % 4 == 0 {
+        for k in 0..<pre where (k + 1) % blockLength == 0 {
             if k == pre - 1 {
                 if k >= 1, !recovery[k - 1] { recovery[k - 1] = true }
             } else {
@@ -188,7 +191,9 @@ enum SequencePlanner {
         var tests = [[Sport]](repeating: [], count: n)
         var noOther = [Bool](repeating: false, count: n)
         var rotationWeeks: [Int] = (0..<pre).filter { recovery[$0] && phases[$0] != .taper }
-        if distance == .sprint {
+        // A gentle start never tests: maximal efforts wait until the athlete has a base. Estimates stand in.
+        if gentle { rotationWeeks = [] }
+        if distance == .sprint && !gentle {
             let needed = openingTests(start: start, benchmarks: benchmarks, calendar: calendar)
             if !needed.isEmpty {
                 let cap = level.maxQualityPerWeek
@@ -235,6 +240,7 @@ enum SequencePlanner {
         count: Int,
         start: Date,
         outputOffset: Int,
+        gentle: Bool = false,
         benchmarks: Benchmarks,
         calendar: Calendar
     ) -> [WeekSpec] {
@@ -242,15 +248,17 @@ enum SequencePlanner {
         let order = sitOutOrder(benchmarks)
         var t = 0
         var out: [WeekSpec] = []
+        // A gentle start recovers after every second load week (2 plus 1), the same as the race plan path.
+        let blockLength = gentle ? 3 : 4
         for k in 0..<count {
-            let isRecovery = (k + 1) % 4 == 0
+            let isRecovery = (k + 1) % blockLength == 0
             let weekStart = calendar.addDays(7 * k, to: start)
             var tests: [Sport] = []
-            if isRecovery {
+            if isRecovery && !gentle {
                 tests = rotationTests(t: t, weekStart: weekStart, benchmarks: benchmarks, order: order, calendar: calendar)
                 t += 1
             }
-            let position = k % 4
+            let position = k % blockLength
             let factor: Double
             if isRecovery {
                 factor = recoveryFactor

@@ -4,7 +4,7 @@ import Foundation
 public enum WorkoutSource: String, Codable, Hashable, Sendable, CaseIterable {
     /// Recorded from a plan scheduled with WorkoutKit (matched by plan UUID).
     case scheduledPlan
-    /// Recorded by the Brickline phone player.
+    /// Recorded by the TriSpike phone player.
     case phonePlayer
     /// Any other HealthKit workout (watch, Garmin through Apple Health, and so on).
     case healthKit

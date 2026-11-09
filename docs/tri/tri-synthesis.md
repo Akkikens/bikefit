@@ -8,7 +8,7 @@ Yes: the triathlon app is a better lead bet than shipping Saddlemark alone, and 
 
 Two parts of the original idea change. The Strava-like community does not ship in 1.0 (section 3). And the Liftspark React plus Capacitor shell is not reused; the app goes native SwiftUI, because the differentiator is an Apple platform API and the AGPL boundary falls exactly there (section 4).
 
-What to build: one app merging the two top-scoring angles, plan-first's brain delivered through watch-first's wedge, with race-first's race window as the retention bridge and contrarian's positioning discipline. Working name Brickline, pending trademark checks; Taperline and Tricadence returned zero App Store results as fallbacks.
+What to build: one app merging the two top-scoring angles, plan-first's brain delivered through watch-first's wedge, with race-first's race window as the retention bridge and contrarian's positioning discipline. Working name TriSpike, pending trademark checks; Taperline and Tricadence returned zero App Store results as fallbacks.
 
 ## 2. The recommended product
 
@@ -66,7 +66,7 @@ Cut order if slipping: 70.3 moves to 1.1 first, then CloudKit sync, then adaptat
 1. Posture: is a free, serverless hobby app with StoreKit dormant behind the OFF flag the right shape for now?
 2. Week 1 spikes: does WorkoutKit scheduling actually behave (count limit, sync reliability, pool swim goals, multisport)? This is the go or no-go gate.
 3. Does private-database CloudKit sync definitively keep the Data Not Collected label? If unclear, is he willing to drop sync from 1.0?
-4. Name: does Brickline clear USPTO TESS (a Brickline Greenway exists in St. Louis) and App Store search, or fall back to Taperline or Tricadence?
+4. Name: does TriSpike (formerly Brickline) clear USPTO TESS and App Store search, or fall back to Taperline or Tricadence?
 5. Template credibility: can he get a certified coach or two or three experienced triathletes to review the Sprint, Olympic and 70.3 templates before launch?
 6. Scope: is 70.3 in 1.0 worth the QA load, and will he hold the cut list if weeks slip?
 7. Positioning facts: verify in Garmin Connect that Garmin Coach stops at Olympic (currently a forum report), and recheck whether Runna is still run-only near launch.

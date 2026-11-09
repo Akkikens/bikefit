@@ -50,6 +50,10 @@ struct WeekAssembler {
     /// recovery weeks sit 30 to 40 percent below average volume; 0.8 is the loosest the shape may reach). The
     /// trim aims at 0.78 because built step durations land a little off the sized lengths.
     static let recoveryCeilingFactor = 0.78
+    /// Longest single session, in seconds, in the first two weeks of a gentle start.
+    static let gentleOpeningCap = 2400.0
+    /// Shortest session, in seconds, in those two weeks, so the week can shrink to the eased-in size.
+    static let gentleOpeningFloor = 1500.0
 
     // MARK: Shape
 
@@ -176,6 +180,9 @@ struct WeekAssembler {
     private func qualitySlots(spec: WeekSpec, counts: [Sport: Int], tests: [Sport]) -> [QualitySlot] {
         if spec.isRecovery || spec.noOtherQuality { return [] }
         let level = ctx.athlete.level
+        let gentle = ctx.athlete.gentleStart
+        // A gentle start has no hard efforts at all: every session stays easy or steady (level 3 at most).
+        if gentle { return [] }
         var capTotal = level.maxQualityPerWeek - tests.count
         if spec.phase == .taper { capTotal = min(capTotal, spec.isFinal ? 1 : 2) }
         if capTotal <= 0 { return [] }
@@ -369,9 +376,19 @@ struct WeekAssembler {
         let buildContext = { (brickRun: Double) -> BuildContext in
             BuildContext(
                 level: ctx.athlete.level, phase: spec.phase, distance: ctx.distance, runWalk: runWalk, css: ctx.css,
-                allowSteady: !spec.isRecovery && spec.phase != .taper, brickRunSeconds: brickRun)
+                allowSteady: !spec.isRecovery && spec.phase != .taper && !(ctx.athlete.gentleStart && spec.phase == .base),
+                brickRunSeconds: brickRun)
         }
         /// Sizes the variable sessions for the plans that remain, and totals the whole week in seconds.
+        // A gentle start eases in: the first two weeks carry a fraction of the volume and no session over 40 minutes.
+        let gentleRamp: (factor: Double, cap: Double)? = {
+            guard ctx.athlete.gentleStart, !spec.isRecovery else { return nil }
+            switch spec.outputIndex {
+            case 0: return (0.70, WeekAssembler.gentleOpeningCap)
+            case 1: return (0.85, WeekAssembler.gentleOpeningCap)
+            default: return nil
+            }
+        }()
         func sizeSessions(_ current: [SessionPlan]) -> (sizes: [Int: Double], total: Double) {
             var fixedTotal = 0.0
             var fixedIDs = Set<Int>()
@@ -385,7 +402,7 @@ struct WeekAssembler {
             }
             var share = plannedCount > 0 ? Double(current.count) / Double(plannedCount) : 1
             if share.isNaN { share = 1 }
-            let target = spec.hoursFactor * ctx.averageHours * 3600 * share
+            let target = spec.hoursFactor * (gentleRamp?.factor ?? 1) * ctx.averageHours * 3600 * share
             let variable = current.filter { !fixedIDs.contains($0.id) }
             let presentSports = Set(variable.map { $0.sport })
             let fractionSum = presentSports.map { WeekAssembler.sportFraction($0, ctx.distance) }.reduce(0, +)
@@ -400,11 +417,16 @@ struct WeekAssembler {
                 weights.append(sportShare * WeekAssembler.roleWeight(plan.kind) / max(denominator, 0.001))
                 let lim = WeekAssembler.limits(plan.kind, distance: ctx.distance, level: ctx.athlete.level)
                 // Recovery and taper weeks shrink the long sessions too, not just the short ones.
-                lows.append(lim.lo)
+                var low = lim.lo
                 var high = lim.hi * min(1.0, spec.hoursFactor)
+                if let ramp = gentleRamp {
+                    low = min(low, WeekAssembler.gentleOpeningFloor)
+                    high = min(high, ramp.cap)
+                }
+                lows.append(low)
                 // Race week sessions stay short so the legs arrive fresh.
                 if spec.isFinal { high = min(high, 3000) }
-                highs.append(max(lim.lo, high))
+                highs.append(max(low, high))
             }
             let allocated = WeekAssembler.allocate(weights: weights, lows: lows, highs: highs, total: max(target - fixedTotal, 0))
             var byID: [Int: Double] = [:]

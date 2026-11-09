@@ -37,16 +37,21 @@ struct RaceView: View {
                             }
                             morningSentence
                             morningAction
+                            shareSection
                         } else if !Demo.hasRace {
                             noRaceCard
                             courseCard
+                            guideLink
                             fueling
+                            shareSection
                         } else {
                             countdown
                             courseCard
+                            guideLink
                             timeline
                             ForEach(Demo.checklists) { list in checklistCard(list) }
                             fueling
+                            shareSection
                         }
                     }
                 }
@@ -91,6 +96,43 @@ struct RaceView: View {
             PlanStep(sport: legs[2].sport, kind: .recovery, name: "Bike to run transition", seconds: Self.t2, level: 1, target: nil),
             legs[2],
         ]
+    }
+
+    // MARK: Guide and share
+
+    /// The plain race day explainer and the beginner gear list.
+    private var guideLink: some View {
+        NavigationLink {
+            RaceGuideView(race: setup.data.raceChoice)
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "questionmark.bubble").foregroundStyle(BL.textSecondary).frame(width: glyphWidth)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("What to expect on race day").font(.headline).foregroundStyle(BL.textPrimary)
+                    Text("The start, the changing areas, what to eat and wear, and what to bring.")
+                        .font(.subheadline).foregroundStyle(BL.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 8)
+                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(BL.textSecondary)
+                    .accessibilityHidden(true)
+            }
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .card()
+    }
+
+    /// A clean picture of the race to share. Made on the phone.
+    private var shareSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionLabel(text: "Share")
+            ShareCardButton(data: ShareCards.race(
+                name: Demo.raceName, race: setup.data.raceChoice, hasRace: Demo.hasRace, daysToRace: Demo.daysToRace,
+                raceDate: raceDate, estimatedFinish: predicted, weekLabel: Demo.weekLabel), title: "Share race card")
+        }
     }
 
     // MARK: No race yet

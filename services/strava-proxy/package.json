@@ -1,0 +1,11 @@
+{
+  "name": "trispike-strava-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Stateless Strava OAuth and upload proxy for the TRISPIKE iOS app.",
+  "license": "UNLICENSED",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node --test test/handlers.test.js"
+  }
+}

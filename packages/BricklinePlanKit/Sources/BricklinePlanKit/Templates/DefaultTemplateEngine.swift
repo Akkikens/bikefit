@@ -61,7 +61,7 @@ public struct DefaultTemplateEngine: TemplateEngine {
             sequenceStart: generationStart, earliestDay: requested)
         let specs = SequencePlanner.raceSequence(
             distance: raceDistance, weekCount: n, start: generationStart, outputOffset: 0, raceDate: race,
-            level: athlete.level, benchmarks: benchmarks, calendar: calendar)
+            level: athlete.level, gentle: athlete.gentleStart, benchmarks: benchmarks, calendar: calendar)
         var history: [PlacedRecord] = []
         var warnings = hoursWarnings(distance: raceDistance, athlete: athlete)
         let weeks = assemble(specs, context: context, history: &history, previousLoadHours: nil, warnings: &warnings)
@@ -84,7 +84,8 @@ public struct DefaultTemplateEngine: TemplateEngine {
             distance: reference, athlete: athlete, benchmarks: benchmarks,
             calendar: calendar, sequenceStart: start, earliestDay: requested)
         let specs = SequencePlanner.baseSequence(
-            count: Self.baseBlockWeeks, start: start, outputOffset: 0, benchmarks: benchmarks, calendar: calendar)
+            count: Self.baseBlockWeeks, start: start, outputOffset: 0, gentle: athlete.gentleStart,
+            benchmarks: benchmarks, calendar: calendar)
         var history: [PlacedRecord] = []
         var warnings = hoursWarnings(distance: reference, athlete: athlete)
         let weeks = assemble(specs, context: context, history: &history, previousLoadHours: nil, warnings: &warnings)
@@ -325,13 +326,13 @@ public struct DefaultTemplateEngine: TemplateEngine {
             var specs: [WeekSpec] = []
             if gap > 0 {
                 specs += SequencePlanner.baseSequence(
-                    count: gap, start: currentStart, outputOffset: currentIndex, benchmarks: benchmarks,
-                    calendar: calendar)
+                    count: gap, start: currentStart, outputOffset: currentIndex, gentle: athlete.gentleStart,
+                    benchmarks: benchmarks, calendar: calendar)
             }
             specs += SequencePlanner.raceSequence(
                 distance: distance, weekCount: n, start: calendar.addDays(7 * gap, to: currentStart),
-                outputOffset: currentIndex + gap, raceDate: race, level: athlete.level, benchmarks: benchmarks,
-                calendar: calendar)
+                outputOffset: currentIndex + gap, raceDate: race, level: athlete.level, gentle: athlete.gentleStart,
+                benchmarks: benchmarks, calendar: calendar)
             generated = assemble(
                 specs, context: context, history: &history, previousLoadHours: lastLoadHours(of: prefix),
                 warnings: &warnings)
@@ -343,8 +344,8 @@ public struct DefaultTemplateEngine: TemplateEngine {
                 benchmarks: benchmarks, calendar: calendar, sequenceStart: currentStart)
             var history = records(of: Array(prefix.suffix(2)), context: context)
             let specs = SequencePlanner.baseSequence(
-                count: Self.baseBlockWeeks, start: currentStart, outputOffset: currentIndex, benchmarks: benchmarks,
-                calendar: calendar)
+                count: Self.baseBlockWeeks, start: currentStart, outputOffset: currentIndex,
+                gentle: athlete.gentleStart, benchmarks: benchmarks, calendar: calendar)
             warnings = hoursWarnings(distance: Self.referenceDistance(hours: athlete.weeklyHours), athlete: athlete)
             generated = assemble(
                 specs, context: context, history: &history, previousLoadHours: lastLoadHours(of: prefix),

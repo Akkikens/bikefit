@@ -1,6 +1,8 @@
 # BricklinePlanKit
 
-BricklinePlanKit is the pure Swift engine behind Brickline, a free triathlon training app. It builds Sprint, Olympic and 70.3 plans from templates, adapts them with eight transparent rules that each write a reason line, computes Load, Fitness and Form, produces the race window timeline with pacing and fueling cards, and compiles sessions to a platform neutral workout representation that a WorkoutKit bridge converts on device. It depends on Foundation only, never reads the clock (every function takes dates and a calendar), never traps on input, and builds and tests on macOS with `swift build` and `swift test`. The product spec is `docs/specs/tri-spec.md`; the canonical parameters are in `docs/specs/tri-annex.md`.
+The app is now named TriSpike; this package keeps its old internal name BricklinePlanKit.
+
+BricklinePlanKit is the pure Swift engine behind TriSpike, a free triathlon training app. It builds Sprint, Olympic and 70.3 plans from templates, adapts them with eight transparent rules that each write a reason line, computes Load, Fitness and Form, produces the race window timeline with pacing and fueling cards, and compiles sessions to a platform neutral workout representation that a WorkoutKit bridge converts on device. It depends on Foundation only, never reads the clock (every function takes dates and a calendar), never traps on input, and builds and tests on macOS with `swift build` and `swift test`. The product spec is `docs/specs/tri-spec.md`; the canonical parameters are in `docs/specs/tri-annex.md`.
 
 ## Module map
 

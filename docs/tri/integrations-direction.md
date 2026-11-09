@@ -1,10 +1,10 @@
-# Brickline integrations direction
+# TriSpike integrations direction
 
 Date: 2026-11-08. Decision memo for the owner, companion to `docs/specs/tri-spec.md` (sections 3, 4, 8, 9). Full notes with every URL: `integ-whoop.md`, `integ-oura.md`, `integ-garmin.md`, `integ-apple-health.md`, `integ-adaptation-science.md`, `integ-architecture.md` in this folder. Bracketed ids point at the fact check list. No credentials may ever enter this public repo [whoop:w18].
 
 ## 1. Verdict
 
-Brickline integrates with Apple Watch, WHOOP, Oura and Garmin and adjusts each user's plan from their signals. "Integrates" means three depths.
+TriSpike integrates with Apple Watch, WHOOP, Oura and Garmin and adjusts each user's plan from their signals. "Integrates" means three depths.
 
 **Ships in 1.0, no approvals, no server: the Apple Health path.** HealthKit is the only zero approval route and keeps the label at Data Not Collected [apple-health:f1]. An Apple Watch alone supports a transparent readiness model: HRV as SDNN [apple-health:f3], resting heart rate [apple-health:f4], sleep stages [apple-health:f5], workouts with dense heart rate [apple-health:f15]. Its weakness is accuracy (about 8 ms low, 28.88 percent error against a chest strap [apple-health:f30]), so the app reads only trends against the athlete's own baseline.
 
@@ -12,7 +12,7 @@ For the other three devices Health gives much less. Oura writes sleep with stage
 
 **Needs vendor approval and a thin server: WHOOP and Oura APIs (1.1).** Technically easy, policy gated. Both start capped at 10 users [whoop:w13, oura:oura-5], their terms need written clarification (section 7), and WHOOP review has shown months of silence [whoop:w14]. They ship behind per vendor flags as a small beta, never marketed at scale.
 
-**Blocked: Garmin's API.** Starter is push only with no history [garmin:g01], so Brickline would need a public receiver storing health payloads, which breaks Data Not Collected (analysis). The form is described as for businesses [garmin:g11]. The program closed from March and press says it reopened 2026-10-21, with no Garmin announcement found [garmin:g09, garmin:g08]. The agreement limits use to internal purposes and "format and display" and bars combining the API with other services [garmin:g13]. Pushing structured workouts needs the Training API, which Personal keys lack [garmin:g20]. Garmin users get the Health path and the phone player. Do not build a Garmin connector in 1.x.
+**Blocked: Garmin's API.** Starter is push only with no history [garmin:g01], so TriSpike would need a public receiver storing health payloads, which breaks Data Not Collected (analysis). The form is described as for businesses [garmin:g11]. The program closed from March and press says it reopened 2026-10-21, with no Garmin announcement found [garmin:g09, garmin:g08]. The agreement limits use to internal purposes and "format and display" and bars combining the API with other services [garmin:g13]. Pushing structured workouts needs the Training API, which Personal keys lack [garmin:g20]. Garmin users get the Health path and the phone player. Do not build a Garmin connector in 1.x.
 
 ## 2. Device by signal matrix
 
@@ -121,7 +121,7 @@ Decisions for you:
 
 Written answers needed before connectors go on:
 - **WHOOP:** is a rolling local baseline a "permanent copy" or "derivative" [whoop:w15]? Does a recovery aware plan compete with Strain Target or Coach [whoop:w17]? Are PKCE and a long state accepted [whoop:w5]? What changed in the 2026-10-06 terms?
-- **Oura:** what "strictly necessary" retention allows [oura:oura-13]; whether a rule engine is an "AI Model" [oura:oura-14]; whether feeding adjustments to another service makes Brickline an Aggregator [oura:oura-17], so keep them inside Brickline; whether a future paid tier needs consent [oura:oura-15]; Oura may revoke access at its discretion [oura:oura-18].
+- **Oura:** what "strictly necessary" retention allows [oura:oura-13]; whether a rule engine is an "AI Model" [oura:oura-14]; whether feeding adjustments to another service makes TriSpike an Aggregator [oura:oura-17], so keep them inside TriSpike; whether a future paid tier needs consent [oura:oura-15]; Oura may revoke access at its discretion [oura:oura-18].
 - **Garmin:** which agreement text applies [garmin:g15], approval time, blending with other sources [garmin:g13].
 - **Apple:** whether guideline 5.1.1(ix) applies (assumed no with wellness wording).
 - **Unknown:** vendor bundle ids (detect at runtime), exact vendor naming rules.

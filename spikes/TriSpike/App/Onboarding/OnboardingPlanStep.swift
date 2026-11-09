@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Step 7: a plan preview computed locally from the answers. The "Start training" button lives in the flow's bottom bar.
+/// Step 8: a plan preview computed locally from the answers. The "Start training" button lives in the flow's bottom bar.
 struct OnboardingPlanStep: View {
     @ObservedObject var setup: UserSetup
 
@@ -62,9 +62,15 @@ struct OnboardingPlanStep: View {
 
     /// Honest notes from the engine: why the plan differs from what was asked, and what it changed on the way.
     private var leadTimeNote: String? {
-        guard !data.noRaceYet else { return model.warnings.first }
         var lines: [String] = []
-        if let problem = model.problem { lines.append(problem) }
+        if data.effectiveHours != data.hoursPerWeek {
+            lines.append("Your plan uses \(data.effectiveHours) hours a week to start gently, instead of \(data.hoursPerWeek).")
+        }
+        guard !data.noRaceYet else {
+            lines.append(contentsOf: model.warnings.prefix(1))
+            return lines.isEmpty ? nil : lines.joined(separator: " ")
+        }
+        if let problem = model.problem { lines.insert(problem, at: 0) }
         let w = OBPlan.weeksUntil(data.raceDate)
         if model.problem == nil, w > weeks {
             lines.append("Your race is \(w) weeks away. The plan covers the last \(weeks) weeks. Until then, easy base weeks keep you moving.")

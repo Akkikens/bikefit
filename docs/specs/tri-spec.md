@@ -1,4 +1,4 @@
-# Brickline: triathlon training on iPhone and Apple Watch
+# TriSpike: triathlon training on iPhone and Apple Watch
 
 Product spec, version 0.3, 2026-11-08. Built from a research, brainstorm and verification pass (74 key facts checked: 64 confirmed, 9 corrected; direction and sources in docs/tri), a five lens review of version 0.1 (48 findings applied), and a device integrations study (177 facts: 151 confirmed, 26 corrected; docs/tri/integrations-direction.md). Engineering detail lives in tri-annex.md; numbers quoted here are convenience copies and the annex tables are canonical. The bike fit module is specified by bikefit-spec.md and docs/tri/tri-bikefit-integration.md. Working name only; see section 14. Spec only, no product code yet.
 
@@ -6,7 +6,7 @@ Product spec, version 0.3, 2026-11-08. Built from a research, brainstorm and ver
 
 Runna proved the model: pick a race, get a plan built by coaches and adapted by rules, follow every session on your watch. It holds 35,585 US ratings, grew to a reported 120 to 150 people on roughly 8 to 10 million GBP raised, and sold to Strava in April 2025 (B1, B3, B4). Its "triathlon" plans still cover only the run leg (B2). Every triathlon specific plan app combined holds about 430 US ratings, and all of them paywall the essentials: MOTTIV keeps device sync behind 19.99 USD a month, TriDot runs 14.99 to 99 USD a month self serve (about 249 with a coach) and itself walked away from its Ironman partnership in August 2025, Athletica is 189 USD a year, TrainingPeaks Premium is 134.99 (B5 to B8). Garmin Coach is free but needs a Garmin watch and reportedly stops at Olympic distance (B10). Nobody owns the first triathlon the way Couch to 5K owns the first 5K, and no product is Apple Watch first.
 
-Brickline is the missing shape: pick a race, get an honest swim, bike and run plan, and every session, pool swims included, lands natively in the stock Apple Watch Workout app. Free, private, no account. The plan engine is deterministic templates plus transparent rules, never "AI coach" theater. The reviewed Saddlemark bike fit spec ships inside it as the Bike Fit tab in 1.1, a feature no competitor at any price has.
+TriSpike is the missing shape: pick a race, get an honest swim, bike and run plan, and every session, pool swims included, lands natively in the stock Apple Watch Workout app. Free, private, no account. The plan engine is deterministic templates plus transparent rules, never "AI coach" theater. The reviewed Saddlemark bike fit spec ships inside it as the Bike Fit tab in 1.1, a feature no competitor at any price has.
 
 Why it fits: it reuses hard won assets (HealthKit and Watch experience, a heart rate load engine, share cards, the offline share codec), costs nothing to run, and honors free and private by design.
 
@@ -64,7 +64,7 @@ Session load is computed from power when present (intensity squared times hours 
 
 ### 4.1 WorkoutKit, the wedge
 
-Every planned session becomes a structured workout in the stock Apple Watch Workout app, with Brickline's icon and name, via WorkoutKit scheduling (B12). No watchOS code ships in 1.0. Pool swims are real sets using watchOS 11 custom pool swim workouts with the distance with time goal; the stock app converts distances if the pool length differs (B13). Run intervals carry pace as speed range alerts; bike intervals carry power or heart rate alerts; swim steps accept only heart rate alerts, so CSS pace targets ride on each rep's distance with time goal. Alerts always use explicit ranges (bpm, watts, speed), never zone alerts, because zone alerts follow the watch's own zones rather than the app's. Every goal and alert is gated per device by the runtime supports APIs (B12); the week 1 spike's capability matrix is recorded in spikes/TriSpike/RESULTS.md. Open water custom workouts do not exist in the API, one more reason pool alternatives are first class (B13). Race day is an open goal SwimBikeRunWorkout with automatic transitions; per leg intervals are not expressible in the API, and racing on feel with a plan memorized is the correct advice anyway (B14).
+Every planned session becomes a structured workout in the stock Apple Watch Workout app, with TriSpike's icon and name, via WorkoutKit scheduling (B12). No watchOS code ships in 1.0. Pool swims are real sets using watchOS 11 custom pool swim workouts with the distance with time goal; the stock app converts distances if the pool length differs (B13). Run intervals carry pace as speed range alerts; bike intervals carry power or heart rate alerts; swim steps accept only heart rate alerts, so CSS pace targets ride on each rep's distance with time goal. Alerts always use explicit ranges (bpm, watts, speed), never zone alerts, because zone alerts follow the watch's own zones rather than the app's. Every goal and alert is gated per device by the runtime supports APIs (B12); the week 1 spike's capability matrix is recorded in spikes/TriSpike/RESULTS.md. Open water custom workouts do not exist in the API, one more reason pool alternatives are first class (B13). Race day is an open goal SwimBikeRunWorkout with automatic transitions; per leg intervals are not expressible in the API, and racing on feel with a plan memorized is the correct advice anyway (B14).
 
 Sunday Sync is the ritual: once a week the app pushes the coming week to the watch and shows what landed. The scheduler's maximum count is 50 (measured in the week 1 spike, still read at runtime); its date horizon and on watch reliability remain device questions for the spike (section 11) before anything else is built (B15). The full session to WorkoutKit mapping, per sport alert types and fallbacks, is annex E.
 
@@ -181,7 +181,7 @@ Open questions for Akshay:
 
 1. Owner sign off on the free, serverless posture before launch.
 2. Week 1 spike outcomes, the gate.
-3. Name: Brickline through USPTO search (a Brickline Greenway exists in St. Louis) and full App Store browse; fallbacks Taperline (zero results) and Tricadence (B40).
+3. Name: TriSpike through USPTO search and full App Store browse, not yet run (the old Brickline checks do not carry over); fallbacks Taperline and Tricadence (B40).
 4. Coach reviewer: who, and on what terms?
 5. Is 70.3 in 1.0 worth the QA load? Current answer yes as the flagship wedge; cut order says adaptation depth goes first if weeks slip.
 6. CloudKit sync: does plan only sync (no HealthKit derived data) keep Data Not Collected? Apple is silent; ship local only until answered.
@@ -213,7 +213,7 @@ Success at 90 days uses only observable signals, since the app has no analytics:
 
 ## 14. Name
 
-Brickline is the working favorite: the name leans on the brick (defined in 3.2) and matches the house naming style. Risks: a Brickline Greenway civic project in St. Louis and food businesses of the same name; USPTO search and a full App Store browse are required before anything ships under it (B40). Fallbacks with zero exact App Store results on 2026-11-06: Taperline and Tricadence. Avoid TriPace (two existing triathlon apps), Trivelo, and anything with Openwater or Swim Bike Run. The standalone bike fit app names retire; the module ships as the Bike Fit tab.
+TriSpike is the owner's chosen name, replacing the working name Brickline. Risk: no TriSpike search has run yet; USPTO search and a full App Store browse are required before anything ships under it (B40). Fallbacks with zero exact App Store results on 2026-11-06: Taperline and Tricadence. Avoid TriPace (two existing triathlon apps), Trivelo, and anything with Openwater or Swim Bike Run. The standalone bike fit app names retire; the module ships as the Bike Fit tab.
 
 ## 15. Build plan
 
@@ -274,5 +274,5 @@ Checked 2026-11-06 by the research and verification pass; full notes with every 
 - B37. Strava free users over 95 percent of the base power its engagement engine. https://insider.fitt.co/issue-no-158-tracking-stravas-rise/
 - B38. Plan shapes: 16 week Olympic example with 3 plus 1 blocks; 70.3 at 10 to 14 hours; weekly hour ranges and peak and recovery deltas (coach heuristics). https://www.triathlete.com/training/olympic-triathlon-16-week-training-plan/ and https://www.trainingpeaks.com/training-plans/triathlon/half-ironman/tp-649925/14-week-70-3-plan and https://tri-alliance.com/tools/training-hours/
 - B39. Runna adaptation documentation: skip and shift, realignment after 3 plus misses or a missed week, pace insights ignoring outliers, unwell mode up to 14 days. https://support.runna.com/en/articles/15012850 and https://support.runna.com/en/articles/10026375 and https://intercom.help/runna/en/articles/12809806
-- B40. Name checks, iTunes Search API US, 2026-11-06: Taperline 0 results; Tricadence no exact match; Brickline no fitness app but check the St. Louis Brickline Greenway mark; TriPace taken. Method: https://itunes.apple.com/search?term=NAME&country=US&entity=software
+- B40. Name checks, iTunes Search API US, 2026-11-06: Taperline 0 results; Tricadence no exact match; Brickline (former working name) no fitness app, with a St. Louis Greenway mark; TriSpike not yet checked; TriPace taken. Method: https://itunes.apple.com/search?term=NAME&country=US&entity=software
 - B41. Apple Watch multisport workout type since watchOS 9, auto transitions. https://support.apple.com/en-mn/guide/watch/combine-multiple-workouts-apdf42f22a41/11.0/watchos/11.0

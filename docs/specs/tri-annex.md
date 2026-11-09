@@ -1,4 +1,6 @@
-# Brickline engineering annex
+# TriSpike engineering annex
+
+Note: the app was renamed from Brickline to TriSpike; the Swift package, its folder and the design doc file keep the old internal name BricklinePlanKit (and brickline-design.md).
 
 Companion to tri-spec.md (version 0.2). Implementation detail the spec references. Where the spec and this annex state the same parameter, this annex is canonical; the spec quotes it for readability and is corrected to match on any change. Same rules: no em or en dashes, no forbidden words outside Safety.strings, no TrainingPeaks marks anywhere. B numbers refer to the spec appendix. Glosses: RPE is rate of perceived exertion (1 to 10 feel scale); FTP is functional threshold power; LTHR is lactate threshold heart rate; CSS is critical swim speed; TRIMP is training impulse, a heart rate based load score.
 
@@ -132,7 +134,7 @@ The policy states: what is processed (plans on device, workouts read from Health
 
 ## K. Safety.strings
 
-1. Onboarding acknowledgement: "Brickline builds training plans for sport. It is not medical advice. Check with a doctor before starting a new training program, especially if you have a heart condition, are pregnant, or are returning from injury. Stop training and seek help if you feel chest pain, dizziness or shortness of breath."
+1. Onboarding acknowledgement: "TriSpike builds training plans for sport. It is not medical advice. Check with a doctor before starting a new training program, especially if you have a heart condition, are pregnant, or are returning from injury. Stop training and seek help if you feel chest pain, dizziness or shortness of breath."
 2. Unwell mode line: "Training through illness is how small problems become big ones. Easy days only until you feel right, and see a doctor if it lingers."
 3. Open water safety card: "Open water is the riskiest part of this sport. Never swim alone, use a bright tow float, know the venue and conditions, treat cold water with extra caution, and get out early if anything feels wrong. Every open water session here has a pool alternative."
 

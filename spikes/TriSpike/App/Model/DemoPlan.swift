@@ -34,6 +34,9 @@ struct PlanStep: Identifiable, Hashable {
     var repeatCount: Int? = nil
 
     /// How the step should feel, in plain words, so a target pace always comes with a feel.
+    /// Short coaching in plain words for this step, shown in the phone player.
+    var coaching: String { Coaching.line(kind: kind, level: level) }
+
     var feel: String {
         switch kind {
         case .warm, .cool: return "Easy. You could chat."
@@ -281,7 +284,7 @@ enum Demo {
 
     struct Checklist: Identifiable { let id = UUID(); var title: String; var items: [String] }
     static let checklists: [Checklist] = [
-        .init(title: "Pack for swim, bike and run", items: ["Wetsuit", "Goggles, spare pair", "Swim cap from your race packet", "Bike, helmet, shoes", "Bottles and gels", "Run shoes with elastic laces", "Race belt and number", "Cap and sunglasses"]),
+        .init(title: "Pack for swim, bike and run", items: ["Wetsuit, only if the swim is in cold open water", "Goggles, spare pair", "Swim cap from your race packet", "Bike, helmet, shoes", "Bottles and gels", "Run shoes with elastic laces", "Race belt and number", "Cap and sunglasses"]),
         .init(title: "Bag for the changing area", items: ["Towel to mark your spot", "Bike shoes clipped or ready", "Helmet unbuckled on the bars", "Run shoes, socks rolled", "Gels taped to the top tube", "Spare inner tube and CO2 inflator"]),
         .init(title: "Race morning", items: ["Breakfast 3 hours before the start", "Get your race number marked on your arms and leg", "Check tire pressure", "Walk from the swim exit to your bike", "Walk your bike out and back in", "Warm up with a short swim if allowed"]),
     ]
