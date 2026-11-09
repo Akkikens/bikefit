@@ -5,7 +5,7 @@ import UIKit
 /// Reads and writes `UserSetup.shared` live, so quitting mid flow loses nothing.
 ///
 /// Steps: 0 Welcome, 1 How it works, 2 Safety note, 3 Your race, 4 About you,
-/// 5 How you track workouts, 6 Your fitness numbers, 7 Your plan.
+/// 5 Connect your devices, 6 Your fitness numbers, 7 Your plan.
 struct OnboardingFlow: View {
     var initialStep: Int = 0
     var onFinish: () -> Void
@@ -20,7 +20,7 @@ struct OnboardingFlow: View {
     private static let lastStep = stepCount - 1
     /// Steps where the defaults are fine, so a Skip is offered.
     private static let skippable: Set<Int> = [1, 4, 5, 6]
-    private static let stepNames = ["Welcome", "How it works", "Safety note", "Your race", "Experience and time", "Tracking", "Effort numbers", "Your plan"]
+    private static let stepNames = ["Welcome", "How it works", "Safety note", "Your race", "Experience and time", "Your devices", "Effort numbers", "Your plan"]
 
     init(initialStep: Int = 0, onFinish: @escaping () -> Void) {
         self.initialStep = initialStep
@@ -59,7 +59,7 @@ struct OnboardingFlow: View {
         case 2: OnboardingSafetyStep(setup: setup)
         case 3: OnboardingRaceStep(setup: setup)
         case 4: OnboardingAboutYouStep(setup: setup)
-        case 5: OnboardingTrackerStep(setup: setup)
+        case 5: OnboardingDevicesStep(setup: setup)
         case 6: OnboardingNumbersStep(setup: setup)
         default: OnboardingPlanStep(setup: setup)
         }

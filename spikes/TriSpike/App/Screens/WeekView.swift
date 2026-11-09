@@ -4,7 +4,8 @@ struct WeekView: View {
     @Binding var playerSession: Session?
     @ScaledMetric(relativeTo: .body) private var dayColumn: CGFloat = 56
     @State private var path: [Session] = []
-    private let days = Demo.week
+    @ObservedObject private var engine = EngineAdapter.shared
+    private var days: [PlanDay] { Demo.week }
     private static let weekday: DateFormatter = { let f = DateFormatter(); f.dateFormat = "EEE d"; return f }()
 
     // Footer totals come from the plan, so they always agree with the rows above them.
@@ -12,19 +13,29 @@ struct WeekView: View {
     private var plannedMinutes: Int { allSessions.filter { $0.state != .skipped }.reduce(0) { $0 + $1.minutes } }
     private var doneSessions: [Session] { allSessions.filter { $0.state == .done } }
     private var doneMinutes: Int { doneSessions.reduce(0) { $0 + ($1.doneMinutes ?? $1.minutes) } }
-    /// Sum of the per session placeholder load, so this screen and Session detail agree.
-    private var loadSoFar: Int { doneSessions.reduce(0) { $0 + $1.estimatedLoad } }
+    /// Sum of the engine's Load for the sessions done, so this screen and Session detail agree.
+    private var loadSoFar: Int { doneSessions.reduce(0) { $0 + $1.loadPoints } }
+    private var loadIsEstimated: Bool { doneSessions.contains { $0.loadEstimated } }
     private func hours(_ minutes: Int) -> String { String(format: "%.1f", Double(minutes) / 60) }
 
     var body: some View {
         NavigationStack(path: $path) {
             ScrollView {
                 VStack(alignment: .leading, spacing: BL.Space.m) {
-                Text("Week \(Demo.currentWeek) of \(Demo.totalWeeks)")
+                Text(Demo.weekLabel)
                     .font(.largeTitle.weight(.bold))
                     .accessibilityAddTraits(.isHeader)
                 VStack(alignment: .leading, spacing: BL.Space.sectionGap) {
-                    ArcBar()
+                    if let begins = Demo.model.planBeginsOn {
+                        Text("Your race plan starts on \(begins.formatted(.dateTime.day().month(.wide))). Until then, easy base weeks keep you moving.")
+                            .font(.subheadline)
+                            .foregroundStyle(BL.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .card()
+                    } else {
+                        ArcBar()
+                    }
                     VStack(alignment: .leading, spacing: BL.Space.s) {
                         WeekStrip(days: days) { day in
                             if let s = day.sessions.first { path.append(s) }
@@ -47,7 +58,7 @@ struct WeekView: View {
                     ReadoutGrid(items: [
                         Readout(label: "planned", value: hours(plannedMinutes), unit: "hours"),
                         Readout(label: "done so far", value: hours(doneMinutes), unit: "hours"),
-                        Readout(label: "Training load", value: "\(loadSoFar)", unit: "points", term: .load, estimated: true),
+                        Readout(label: "Training load", value: "\(loadSoFar)", unit: "points", term: .load, estimated: loadIsEstimated),
                     ])
                     .card()
                 }

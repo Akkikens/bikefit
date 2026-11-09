@@ -6,6 +6,7 @@ enum Term: String, CaseIterable, Identifiable {
     case css, ftp, lthr, threshold, brick, rpe, zone, warmUp, coolDown, sweetSpot
     case base, build, peak, taper, recoveryWeek, testWeek
     case load, fitness, form, estimated, transition
+    case hrv, restingHeartRate
 
     var id: String { rawValue }
 
@@ -32,6 +33,8 @@ enum Term: String, CaseIterable, Identifiable {
         case .form: "Form"
         case .estimated: "Estimated"
         case .transition: "Transitions, T1 and T2"
+        case .hrv: "Heart rate variability (HRV)"
+        case .restingHeartRate: "Resting heart rate"
         }
     }
 
@@ -59,6 +62,8 @@ enum Term: String, CaseIterable, Identifiable {
         case .form: "Fitness minus your last week of Load. Higher means fresher."
         case .estimated: "A guess until you do a test. Pace changes never use guesses."
         case .transition: "The switches between swim and bike (T1), then bike and run (T2)."
+        case .hrv: "How much the time between your heartbeats varies, measured while you sleep."
+        case .restingHeartRate: "How fast your heart beats at rest, in beats per minute."
         }
     }
 
@@ -107,6 +112,10 @@ enum Term: String, CaseIterable, Identifiable {
             return "Estimated means the number is a guess, for example because you have not done the test yet. Estimated numbers are labelled everywhere, and Brickline never changes your paces based on them."
         case .transition:
             return "A transition is the time between two parts of the race. T1 is swim to bike: wetsuit off, helmet on. T2 is bike to run: shoes swapped. They count toward your finish time, and they are easy to practise."
+        case .hrv:
+            return "Your heart does not beat like a clock. The gaps between beats change a little, and that change is called heart rate variability, measured in milliseconds. Your watch, band or ring measures it while you sleep. What matters is not the number but how it compares with your own usual range, which Brickline learns over 14 nights. Different devices measure it in different ways, so Brickline never mixes numbers from two devices."
+        case .restingHeartRate:
+            return "Resting heart rate is how many times your heart beats each minute when you are still, often measured overnight. Everyone has a different usual number. Brickline compares last night with your own usual range, never with anyone else's."
         }
     }
 }

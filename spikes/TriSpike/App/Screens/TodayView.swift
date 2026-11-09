@@ -9,17 +9,21 @@ struct TodayView: View {
     @Environment(\.dynamicTypeSize) private var type
     @ScaledMetric(relativeTo: .body) private var profileHeight: CGFloat = 56
     @State private var synced = false
-    @State private var path: [Session] = ProcessInfo.processInfo.arguments.contains("-screenDetail") ? [Demo.cssSwim] : []
-    private let days = Demo.week
+    @ObservedObject private var engine = EngineAdapter.shared
+    @State private var path: [Session] = ProcessInfo.processInfo.arguments.contains("-screenDetail") ? (Demo.smokeSession.map { [$0] } ?? []) : []
+    private var days: [PlanDay] { Demo.week }
 
-    /// Today's session comes from the plan, not from a fixed reference.
-    private var session: Session { days.first(where: { $0.isToday })?.sessions.first ?? Demo.cssSwim }
+    /// Today's sessions come from the engine's plan. A rest day has none.
+    private var todaySessions: [Session] { days.first(where: { $0.isToday })?.sessions ?? [] }
+    private var isRestDay: Bool { todaySessions.isEmpty }
+    /// The session the hero card shows: today's first one, or the next one on a rest day (only read for its name).
+    private var session: Session { todaySessions.first ?? Demo.nextSession ?? Session(sport: .run, name: "Rest day", purpose: "", steps: [], watchLine: "") }
 
     private static let dateFormat: DateFormatter = { let f = DateFormatter(); f.dateFormat = "EEEE, MMMM d"; return f }()
 
     /// What the phone player recorded for today's session, once it has ended.
     private var result: PhonePlayer.Result? {
-        guard let r = player.lastResult, r.name == session.name else { return nil }
+        guard let r = player.lastResult, r.name == session.name, r.engineID == session.engineID else { return nil }
         return r
     }
     private var doneMinutes: Int? { result.map { Int(($0.seconds / 60).rounded()) } }
@@ -33,6 +37,7 @@ struct TodayView: View {
     /// Sessions in the week that a rule changed. The reason line on a session is the signal.
     private var changesThisWeek: Int { days.flatMap(\.sessions).filter { $0.reason != nil }.count }
     private var engineNote: String {
+        if let problem = Demo.planProblem { return problem }
         switch changesThisWeek {
         case 0: return "Your plan has no changes this week."
         case 1: return "Your plan has one change this week. The session says why."
@@ -44,11 +49,17 @@ struct TodayView: View {
         NavigationStack(path: $path) {
             ScrollView {
                 VStack(alignment: .leading, spacing: BL.Space.sectionGap) {
-                    header
-                    VStack(alignment: .leading, spacing: BL.Space.m) {
-                        heroCard
-                        if !pinsActions { actions }
+                    if isRestDay {
+                        restHeader
+                    } else {
+                        header
+                        VStack(alignment: .leading, spacing: BL.Space.m) {
+                            heroCard
+                            if !pinsActions { actions }
+                            alsoToday
+                        }
                     }
+                    readinessSection
                     weekSection
                 }
                 .padding(.horizontal, BL.Space.gutter)
@@ -59,7 +70,7 @@ struct TodayView: View {
             .bottomEdgeSolid()
             // At the largest sizes the buttons would sit screens down, so they stay on screen above the tab bar.
             .safeAreaInset(edge: .bottom) {
-                if pinsActions {
+                if pinsActions && !isRestDay {
                     actions
                         .padding(.horizontal, BL.Space.gutter)
                         .padding(.vertical, BL.Space.s)
@@ -67,12 +78,80 @@ struct TodayView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+            .task { await ReadinessCoordinator.shared.refreshAndSync() }
             .navigationDestination(for: Session.self) { SessionDetailView(session: $0, playerSession: $playerSession) }
         }
     }
 
     /// Pinned only while there are buttons to press; the finished-session summary scrolls with the page.
     private var pinsActions: Bool { type.isAccessibilitySize && result == nil }
+
+    // MARK: Rest day
+
+    /// Rest day (design spec section 5): a moon chip, the words "Rest day", one sentence, and where the next session is.
+    private var restHeader: some View {
+        VStack(alignment: .leading, spacing: BL.Space.s) {
+            Text(Self.dateFormat.string(from: Date()))
+                .font(BLFont.meta)
+                .foregroundStyle(BL.textSecondary)
+            Label("Rest", systemImage: "moon.zzz")
+                .font(BLFont.label)
+                .foregroundStyle(BL.textSecondary)
+            Text("Rest day")
+                .font(BLFont.sessionName)
+                .foregroundStyle(BL.textPrimary)
+                .accessibilityAddTraits(.isHeader)
+            Text("No session today. Your body gets stronger while it rests.")
+                .font(BLFont.purpose)
+                .foregroundStyle(BL.textPrimary)
+                .lineSpacing(2)
+                .fixedSize(horizontal: false, vertical: true)
+            if let next = Demo.nextSession {
+                Button { path.append(next) } label: {
+                    HStack(spacing: BL.Space.s) {
+                        Image(systemName: next.sport.symbol()).foregroundStyle(next.sport.ink)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Next: \(Demo.dayName(of: next) ?? "this week")").font(BLFont.label).foregroundStyle(BL.textSecondary)
+                            Text(next.name).font(.body).foregroundStyle(BL.textPrimary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right").font(.footnote).foregroundStyle(BL.textSecondary)
+                    }
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .card()
+                .accessibilityHint("Opens the session")
+            }
+        }
+    }
+
+    /// A second session on the same day gets its own row under the main one.
+    @ViewBuilder private var alsoToday: some View {
+        let others = Array(todaySessions.dropFirst())
+        if !others.isEmpty {
+            VStack(alignment: .leading, spacing: BL.Space.s) {
+                SectionLabel(text: "Also today")
+                ForEach(others) { other in
+                    Button { path.append(other) } label: {
+                        HStack(spacing: BL.Space.s) {
+                            Image(systemName: other.sport.symbol()).foregroundStyle(other.sport.ink)
+                            Text(other.name).font(.body).foregroundStyle(BL.textPrimary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Spacer(minLength: 0)
+                            Text("\(other.minutes) min").font(BLFont.label).foregroundStyle(BL.textSecondary)
+                        }
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .card()
+                }
+            }
+        }
+    }
 
     // MARK: Header
 
@@ -150,7 +229,7 @@ struct TodayView: View {
             .accessibilityHint("Opens the session")
             if let r = session.reason {
                 Divider().overlay(BL.separator)
-                ReasonLine(text: r)
+                if let rule = session.reasonRule { ReasonLine(text: r, rule: rule) } else { ReasonLine(text: r) }
             }
         }
         .card()
@@ -192,7 +271,7 @@ struct TodayView: View {
                 ReadoutGrid(items: [
                     Readout(label: "planned", value: "\(session.minutes)", unit: "min"),
                     Readout(label: "done", value: "\(done)", unit: "min"),
-                    Readout(label: "Training load", value: "\(Session.loadEstimate(minutes: done))", unit: "points", term: .load, estimated: true),
+                    Readout(label: "Training load", value: "\(session.loadPoints)", unit: "points", term: .load, estimated: session.loadEstimated),
                 ])
                 .card()
                 Text(resultNote)
@@ -241,10 +320,23 @@ struct TodayView: View {
                 Label("Start on phone", systemImage: "iphone")
             }
             .buttonStyle(PrimaryButtonStyle())
-            Text(FollowCard.short(for: setup.tracker))
+            Text(FollowCard.short(for: setup.followDevice))
                 .font(.footnote)
                 .foregroundStyle(BL.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // MARK: Readiness
+
+    /// One plain line about last night. Hidden when no connected device can supply sleep or heart data.
+    @ViewBuilder private var readinessSection: some View {
+        let m = engine.model
+        if let line = ReadinessPlainCopy.line(assessment: m.readiness, event: m.readinessEvent, kept: m.readinessKept,
+                                              hasSources: setup.data.hasRecoverySource) {
+            ReadinessLineView(model: line) {
+                ReadinessCoordinator.shared.keepPlannedSession(on: Demo.today)
+            }
         }
     }
 
@@ -254,7 +346,7 @@ struct TodayView: View {
     private var weekSection: some View {
         VStack(alignment: .leading, spacing: BL.Space.m) {
             VStack(alignment: .leading, spacing: 8) {
-                SectionLabel(text: "This week", trailing: "Week \(Demo.currentWeek) of \(Demo.totalWeeks)")
+                SectionLabel(text: "This week", trailing: Demo.weekLabel)
                 WeekStrip(days: days) { day in
                     if let s = day.sessions.first { path.append(s) }
                 }

@@ -29,6 +29,8 @@ final class PhonePlayer: ObservableObject {
     /// What the last session amounted to, for Today to close the loop. Cleared by the next start.
     struct Result: Equatable {
         var name: String
+        /// The engine id of the planned session, so the result is credited to the right day. Nil for test runs.
+        var engineID: String? = nil
         /// Active time: wall clock from start to end minus paused time. Skipped steps are not counted as done.
         var seconds: TimeInterval
         var completed: Bool
@@ -52,6 +54,7 @@ final class PhonePlayer: ObservableObject {
     @Published private(set) var lastResult: Result?
 
     private(set) var sessionName = ""
+    private(set) var engineID: String?
     private(set) var sport: Sport = .run
     private var startDate = Date()
     /// The real start. `startDate` is shifted by skips so `elapsed` follows the plan; this one never moves.
@@ -88,8 +91,9 @@ final class PhonePlayer: ObservableObject {
         return max(0, boundaries[stepIndex].timeIntervalSince(reference))
     }
 
-    func start(name: String, sport: Sport, steps: [Step], smoke: Bool = false) async {
+    func start(name: String, sport: Sport, steps: [Step], engineID: String? = nil, smoke: Bool = false) async {
         guard !isRunning, !steps.isEmpty else { return }
+        self.engineID = engineID
         self.smoke = smoke
         sessionName = name
         self.sport = sport
@@ -174,7 +178,7 @@ final class PhonePlayer: ObservableObject {
         let end = min(pausedAt ?? Date(), boundaries.last ?? Date())
         let done = max(0, end.timeIntervalSince(originalStart) - pausedTotal)
         // Published before isRunning flips, so Today already has the result when the player dismisses.
-        lastResult = Result(name: sessionName, seconds: done, completed: stepIndex >= steps.count)
+        lastResult = Result(name: sessionName, engineID: engineID, seconds: done, completed: stepIndex >= steps.count)
         if !legs.isEmpty { legs[legs.count - 1].end = end }
         isRunning = false
         isPaused = false

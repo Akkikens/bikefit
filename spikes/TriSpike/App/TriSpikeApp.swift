@@ -60,6 +60,7 @@ struct TriSpikeApp: App {
             case .active:
                 SpikeLog.shared.record("lifecycle", "scene", "active")
                 player.resyncAfterForeground()
+                Task { await ReadinessCoordinator.shared.refreshAndSync() }
             case .background:
                 SpikeLog.shared.record("lifecycle", "scene", "background")
             default:

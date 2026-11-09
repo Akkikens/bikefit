@@ -6,6 +6,8 @@ struct MethodsView: View {
     @Binding var playerSmoke: Bool
     @ObservedObject private var setup = UserSetup.shared
     @State private var confirmRedo = false
+    /// Set by -screenConnections: opens the Connections screen on appear.
+    @State private var showConnections = LaunchArgs.hasFlag("-screenConnections")
 
     var body: some View {
         NavigationStack {
@@ -16,6 +18,7 @@ struct MethodsView: View {
                         .accessibilityAddTraits(.isHeader)
                     VStack(alignment: .leading, spacing: BL.Space.sectionGap) {
                         setupCard
+                        connectionsLink
                         glossaryLink
                         section("How your effort ranges are set") {
                             introRow
@@ -79,6 +82,7 @@ struct MethodsView: View {
             .background(BL.background.ignoresSafeArea())
             .bottomEdgeSolid()
             .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(isPresented: $showConnections) { ConnectionsView() }
         }
     }
 
@@ -94,7 +98,8 @@ struct MethodsView: View {
                 rule
                 setupRow(symbol: "clock", label: "Training time", value: hoursValue, details: [daysDetail])
                 rule
-                setupRow(symbol: setup.data.tracker.symbol, label: "How you track", value: setup.data.tracker.title, details: [setup.data.tracker.blurb])
+                setupRow(symbol: setup.data.followDevice.symbol, label: "Your devices", value: setup.data.orderedDevices.map(\.title).joined(separator: ", "),
+                         details: [setup.canSendToWatch ? "Sessions can go to your watch." : "You follow sessions on your phone."])
                 Button { confirmRedo = true } label: {
                     Label("Redo setup", systemImage: "arrow.counterclockwise")
                 }
@@ -105,10 +110,10 @@ struct MethodsView: View {
             .card()
         }
         .confirmationDialog("Redo your setup?", isPresented: $confirmRedo, titleVisibility: .visible) {
-            Button("Start setup again", role: .destructive) { setup.reset() }
+            Button("Start setup again", role: .destructive) { setup.reset(); ReadinessCoordinator.shared.reset(); EngineAdapter.shared.clearCompletions() }
             Button("Keep my setup", role: .cancel) {}
         } message: {
-            Text("This clears your answers and walks you through setup again.")
+            Text("This clears your answers and your completed sessions, and walks you through setup again.")
         }
     }
 
@@ -171,6 +176,30 @@ struct MethodsView: View {
     }
 
     // MARK: Glossary
+
+    private var connectionsLink: some View {
+        NavigationLink {
+            ConnectionsView()
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "link").foregroundStyle(BL.textSecondary).frame(width: 24)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Connections").font(.headline).foregroundStyle(BL.textPrimary)
+                    Text("Your devices, what each is used for, and how to change them.")
+                        .font(.subheadline).foregroundStyle(BL.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 8)
+                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(BL.textSecondary)
+                    .accessibilityHidden(true)
+            }
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .card()
+    }
 
     private var glossaryLink: some View {
         NavigationLink {

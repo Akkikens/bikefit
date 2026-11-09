@@ -5,6 +5,7 @@ struct ContentView: View {
     enum Tab: String { case today, week, race, methods }
 
     @ObservedObject private var setup = UserSetup.shared
+    @EnvironmentObject private var player: PhonePlayer
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var tab: Tab
@@ -19,7 +20,7 @@ struct ContentView: View {
         let launch = LaunchConfig.shared
         _tab = State(initialValue: launch.tab)
         _playerSmoke = State(initialValue: launch.playerSmoke)
-        _playerSession = State(initialValue: launch.playerSmoke ? Demo.thresholdRun : nil)
+        _playerSession = State(initialValue: launch.playerSmoke ? Demo.smokeSession : nil)
         _forcedOnboardingStep = State(initialValue: launch.onboardingStep)
         _glossaryTerm = State(initialValue: launch.glossaryTerm)
     }
@@ -64,6 +65,11 @@ struct ContentView: View {
         }
         .sheet(item: $glossaryTerm) { term in
             GlossarySheet(term: term)
+        }
+        // A session the phone player ended counts as done, whichever screen started it: its Load joins Fitness and Form.
+        .onChange(of: player.lastResult) { _, new in
+            guard let r = new, r.seconds >= 60, let id = r.engineID else { return }
+            EngineAdapter.shared.recordCompletion(engineID: id, minutes: Int((r.seconds / 60).rounded()))
         }
     }
 
@@ -115,11 +121,13 @@ enum LaunchArgs {
 /// Creating it also applies the arguments that change saved setup, in this order: -resetSetup, -tracker, -skipOnboarding.
 ///
 ///   -screen today|week|race|methods   open that tab
-///   -screenPlayer                     open the phone player on the demo threshold run
+///   -screenPlayer                     open the phone player on today's session (or the first one with intervals)
 ///   -screenDetail                     handled by TodayView
 ///   -screenOnboarding N               show onboarding at step N (0 based), even if setup is done
 ///   -screenGlossary <term>            glossary sheet for a Term raw value, over Today
-///   -tracker appleWatch|whoop|garmin|otherWatch|phoneOnly
+///   -screenConnections                open the Connections screen (Learn tab)
+///   -tracker appleWatch|whoop|oura|garmin|otherWatch|phoneOnly   (a comma list picks several: -tracker appleWatch,oura)
+///   -readinessFixture none|calibrating|onTrack|below|stale        made up nights for the simulator
 ///   -resetSetup                       clear setup, so onboarding shows
 ///   -skipOnboarding                   go straight to the tabs. Saves hasOnboarded = true, which is harmless on a test device.
 ///
@@ -137,7 +145,7 @@ final class LaunchConfig {
         let setup = UserSetup.shared
 
         // Tab.
-        let tabValue = LaunchArgs.value("-screen")?.lowercased() ?? ""
+        let tabValue = LaunchArgs.value("-screen")?.lowercased() ?? (LaunchArgs.hasFlag("-screenConnections") ? "methods" : "")
         let requestedTab = ContentView.Tab(rawValue: tabValue)
         tab = requestedTab ?? .today
 
@@ -165,12 +173,12 @@ final class LaunchConfig {
         if LaunchArgs.hasFlag("-resetSetup") {
             setup.reset()
             Demo.clearPlanStart()
+            EngineAdapter.shared.clearCompletions()
+            ReadinessCoordinator.shared.reset()
         }
         if let v = LaunchArgs.value("-tracker") {
-            let wanted = LaunchArgs.normalized(v)
-            if let chosen = TrackerChoice.allCases.first(where: { LaunchArgs.normalized($0.rawValue) == wanted }) {
-                setup.data.tracker = chosen
-            }
+            let chosen = Self.devices(fromList: v)
+            if !chosen.isEmpty { setup.data.devices = DeviceSelection.normalized(chosen) }
         }
         // Frames of the later steps are taken as if the safety note was already read.
         if let step, step > 2 { setup.data.acknowledged = true }
@@ -178,9 +186,16 @@ final class LaunchConfig {
             || requestedTab != nil
             || playerSmoke
             || LaunchArgs.hasFlag("-screenDetail")
+            || LaunchArgs.hasFlag("-screenConnections")
             || glossaryTerm != nil
         if skips && step == nil && !setup.data.hasOnboarded {
             setup.data.hasOnboarded = true
         }
+    }
+
+    /// Devices named in a launch argument. Words are separated by commas or spaces; unknown words are ignored.
+    static func devices(fromList list: String) -> Set<DeviceChoice> {
+        let words = list.split(whereSeparator: { $0 == "," || $0 == " " }).map { LaunchArgs.normalized(String($0)) }
+        return Set(words.compactMap { word in DeviceChoice.allCases.first { LaunchArgs.normalized($0.rawValue) == word } })
     }
 }

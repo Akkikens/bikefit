@@ -5,8 +5,13 @@ struct OnboardingPlanStep: View {
     @ObservedObject var setup: UserSetup
 
     private var data: SetupData { setup.data }
-    private var weeks: Int { OBPlan.planWeeks(data) }
-    private var sessions: Int { OBPlan.sessionsPerWeek(hours: data.hoursPerWeek, days: data.trainingDays.count) }
+    private var model: EngineModel { OBPlan.model(data) }
+    private var weeks: Int { model.totalWeeks }
+    private var sessions: Int { model.sessionsPerWeek }
+    private var hoursText: String {
+        let h = model.hoursPerWeek
+        return h == h.rounded() ? String(Int(h)) : String(format: "%.1f", h)
+    }
     private var phases: [OBPhase] { OBPlan.phases(for: data) }
     private var firstWeek: [OBFirstWeekItem] { OBPlan.firstWeek(data) }
 
@@ -33,7 +38,7 @@ struct OnboardingPlanStep: View {
                 .fixedSize(horizontal: false, vertical: true)
             ReadoutGrid(items: [
                 Readout(label: "Length", value: "\(weeks)", unit: "weeks"),
-                Readout(label: "Hours", value: "\(data.hoursPerWeek)", unit: "per week"),
+                Readout(label: "Hours", value: hoursText, unit: "per week"),
                 Readout(label: "Sessions", value: "\(sessions)", unit: "per week")
             ])
             if let note = leadTimeNote {
@@ -48,24 +53,24 @@ struct OnboardingPlanStep: View {
     }
 
     private var headline: String {
-        if data.noRaceYet { return "A 12 week start, with no race date yet" }
+        if data.noRaceYet { return "A \(weeks) week start, with no race date yet" }
         let name = data.raceName.trimmingCharacters(in: .whitespaces)
         let race = name.isEmpty ? data.raceChoice.title : name
         let date = data.raceDate.formatted(.dateTime.day().month(.wide).year())
         return "\(race), \(date)"
     }
 
-    /// Honest note when the date is outside the 8 to 24 week range the preview is drawn for.
+    /// Honest notes from the engine: why the plan differs from what was asked, and what it changed on the way.
     private var leadTimeNote: String? {
-        guard !data.noRaceYet else { return nil }
+        guard !data.noRaceYet else { return model.warnings.first }
+        var lines: [String] = []
+        if let problem = model.problem { lines.append(problem) }
         let w = OBPlan.weeksUntil(data.raceDate)
-        if w < 8 {
-            return "Your race is \(OBFormat.plural(w, "week", "weeks")) away, so the plan will be short and focused. This preview shows the usual 8 week shape."
+        if model.problem == nil, w > weeks {
+            lines.append("Your race is \(w) weeks away. The plan covers the last \(weeks) weeks. Until then, easy base weeks keep you moving.")
         }
-        if w > 24 {
-            return "Your race is \(w) weeks away. The plan covers the last 24 weeks. Until then, keep moving at an easy, comfortable level."
-        }
-        return nil
+        lines.append(contentsOf: model.warnings.prefix(2))
+        return lines.isEmpty ? nil : lines.joined(separator: " ")
     }
 
     // MARK: Phases
@@ -159,7 +164,7 @@ struct OnboardingPlanStep: View {
         return VStack(alignment: .leading, spacing: BL.Space.m) {
             OBSectionLabel(text: "Your first week")
             VStack(alignment: .leading, spacing: BL.Space.m) {
-                Text("A little lighter than a full week on purpose, and every session is easy.")
+                Text(firstWeekNote)
                     .font(.subheadline)
                     .foregroundStyle(BL.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -204,18 +209,39 @@ struct OnboardingPlanStep: View {
         }
     }
 
+    private var firstWeekNote: String {
+        var note = model.firstWeekIsPartial
+            ? "Your first week starts part way through, so it is short."
+            : "A first look at a normal week of your plan."
+        if firstWeek.contains(where: \.isTest) { note += " It includes a short test that sets your own paces." }
+        return note
+    }
+
     // MARK: How sessions reach you
+
+    private var deviceLine: String {
+        var line = data.canSendToWatch
+            ? "Each session can go to your watch, or you can follow it on your phone."
+            : "You follow each session on your phone with voice cues."
+        if data.hasHRVSource {
+            line += " After 14 nights of sleep and heart data, a hard session can be eased when you are below your usual range. You can always keep the planned one."
+        }
+        if data.hasRecoverySource, !data.hasHRVSource {
+            line += " Sleep and resting heart rate are shown as notes. Your plan does not change from them."
+        }
+        return line
+    }
 
     private var trackerNote: some View {
         HStack(alignment: .top, spacing: BL.Space.m) {
-            Image(systemName: data.tracker.symbol)
+            Image(systemName: data.followDevice.symbol)
                 .font(.title3)
                 .foregroundStyle(BL.textPrimary)
                 .frame(width: 28)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: BL.Space.xs) {
-                Text(data.tracker.title).font(.subheadline.weight(.semibold)).foregroundStyle(BL.textPrimary)
-                Text(data.tracker.blurb).font(.subheadline).foregroundStyle(BL.textSecondary)
+                Text(data.orderedDevices.map(\.title).joined(separator: ", ")).font(.subheadline.weight(.semibold)).foregroundStyle(BL.textPrimary)
+                Text(deviceLine).font(.subheadline).foregroundStyle(BL.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }

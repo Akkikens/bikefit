@@ -13,6 +13,9 @@ settings:
     MARKETING_VERSION: "0.1"
     CURRENT_PROJECT_VERSION: "1"
     TARGETED_DEVICE_FAMILY: "1"
+packages:
+  BricklinePlanKit:
+    path: ../../packages/BricklinePlanKit
 targets:
   TriSpike:
     type: application
@@ -28,8 +31,8 @@ targets:
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIBackgroundModes: [audio]
         NSSupportsLiveActivities: true
-        NSHealthShareUsageDescription: "TriSpike reads your workouts to test how completed sessions match the plan that scheduled them."
-        NSHealthUpdateUsageDescription: "TriSpike saves workouts recorded by its phone interval player so they appear in Health."
+        NSHealthShareUsageDescription: "Brickline reads your sleep, resting heart rate and heart rate variability to compare each night with your own usual range. It all stays on your phone."
+        NSHealthUpdateUsageDescription: "Brickline saves workouts you record with its phone player so they appear in Health."
     entitlements:
       path: App/TriSpike.entitlements
       properties:
@@ -40,6 +43,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.akkikens.trispike
     dependencies:
       - target: TriSpikeWidget
+      - package: BricklinePlanKit
   TriSpikeWidget:
     type: app-extension
     platform: iOS
@@ -62,6 +66,7 @@ targets:
       - Tests
     dependencies:
       - target: TriSpike
+      - package: BricklinePlanKit
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.akkikens.trispike.tests

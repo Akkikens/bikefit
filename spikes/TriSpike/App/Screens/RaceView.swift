@@ -100,7 +100,7 @@ struct RaceView: View {
             Label("No race date yet", systemImage: "calendar.badge.plus")
                 .font(.headline)
                 .foregroundStyle(BL.textPrimary)
-            Text("Your plan is 12 weeks of mostly easy training. When you sign up for a race, choose Redo setup under Learn and setup to add the date. Below is what race day looks like for the distance you picked.")
+            Text("Your plan is \(Demo.totalWeeks) weeks of mostly easy training, and a new block starts when it ends. When you sign up for a race, choose Redo setup under Learn and setup to add the date. Below is what race day looks like for the distance you picked.")
                 .font(.subheadline)
                 .foregroundStyle(BL.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -171,10 +171,24 @@ struct RaceView: View {
                     }
                 }
             }
-            Text("Targets are ranges. On a hilly or windy course they can be off by several percent, so go by how it feels\u{00A0}first.")
+            Text(Demo.raceModel.caveat)
                 .font(.subheadline).foregroundStyle(BL.textSecondary)
+            if !Demo.raceModel.typicalLegs.isEmpty {
+                Text("Times for \(typicalWords) are typical for your level, not a prediction. A test turns them into your own.")
+                    .font(.subheadline).foregroundStyle(BL.textSecondary)
+            }
         }
         .card()
+    }
+
+    private var typicalWords: String {
+        let names = [Sport.swim, .bike, .run].filter { Demo.raceModel.typicalLegs.contains($0) }.map { $0.word.lowercased() }
+        switch names.count {
+        case 0: return ""
+        case 1: return "the " + names[0]
+        case 2: return "the " + names.joined(separator: " and ")
+        default: return "the swim, bike and run"
+        }
     }
 
     private func legLabel(_ leg: PlanStep) -> String {
@@ -258,11 +272,14 @@ struct RaceView: View {
         VStack(alignment: .leading, spacing: 8) {
             SectionLabel(text: "Fueling")
             VStack(alignment: .leading, spacing: BL.Space.m) {
-                fuelRow(.swim, "Swim, \(duration(legSeconds(.swim)))", "Nothing needed. Breakfast carries you.")
-                Divider().overlay(BL.separator)
-                fuelRow(.bike, "Bike, \(duration(legSeconds(.bike)))", "About 30 to 45 g of carbohydrate per hour. Practice it in training first.")
-                Divider().overlay(BL.separator)
-                fuelRow(.run, "Run, \(duration(legSeconds(.run)))", "Fluids to thirst. A gel at the start is optional.")
+                let rows = Demo.raceModel.fueling
+                ForEach(Array(rows.enumerated()), id: \.element.id) { i, row in
+                    fuelRow(row.sport, "\(row.sport.word), \(duration(row.seconds))", row.text)
+                    if i < rows.count - 1 { Divider().overlay(BL.separator) }
+                }
+                Text(Demo.raceModel.stomachLine)
+                    .font(.footnote).foregroundStyle(BL.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .card()
         }
@@ -352,7 +369,7 @@ struct RaceView: View {
     /// No watch to send to: say plainly how race day works with the way the athlete records.
     private var raceTrackingNote: some View {
         HStack(alignment: .top, spacing: 12) {
-            Image(systemName: setup.tracker.symbol).font(.title3).foregroundStyle(BL.textSecondary)
+            Image(systemName: setup.followDevice.symbol).font(.title3).foregroundStyle(BL.textSecondary)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
                 Text("Recording the race").font(BLFont.label).foregroundStyle(BL.textSecondary)
@@ -367,8 +384,8 @@ struct RaceView: View {
     }
 
     private var raceTrackingCopy: String {
-        switch setup.tracker {
-        case .whoop: "Your band records your heart rate. You will not carry your phone in the race, so learn your targets before the start."
+        switch setup.followDevice {
+        case .whoop, .oura: "Your band records your heart rate. You will not carry your phone in the race, so learn your targets before the start."
         case .garmin, .otherWatch: "Your watch records the race. You will not carry your phone in the race, so learn your targets before the start."
         default: "You will not carry your phone in the race, so learn your targets before the start."
         }

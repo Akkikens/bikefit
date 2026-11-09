@@ -654,13 +654,15 @@ struct WatchCard: View {
 // MARK: Follow card: how the athlete follows a session when there is no Apple Watch
 
 struct FollowCard: View {
-    var tracker: TrackerChoice
+    var tracker: DeviceChoice
 
     /// One plain paragraph per way of tracking. No watch means no "Send to watch" anywhere; the phone guides the session.
-    static func copy(for tracker: TrackerChoice) -> String {
+    static func copy(for tracker: DeviceChoice) -> String {
         switch tracker {
         case .whoop:
-            return "This app guides the session with voice cues on your phone. Your WHOOP keeps recording on its own. Brickline does not read your WHOOP data."
+            return "This app guides the session with voice cues on your phone. Your WHOOP keeps recording on its own. Brickline reads your sleep and recovery from it through Apple Health, never your workout."
+        case .oura:
+            return "This app guides the session with voice cues on your phone. Your Oura ring keeps recording on its own."
         case .garmin:
             return "This app guides the session with voice cues on your phone. Start your recording on your Garmin as usual."
         case .otherWatch:
@@ -673,9 +675,10 @@ struct FollowCard: View {
     }
 
     /// A short version for tight places, such as under the Start button.
-    static func short(for tracker: TrackerChoice) -> String {
+    static func short(for tracker: DeviceChoice) -> String {
         switch tracker {
-        case .whoop: return "Voice cues on your phone guide the session. Your WHOOP keeps recording on its own."
+        case .whoop: return "Voice cues on your phone guide the session. Your WHOOP keeps recording on its own. Sleep and recovery come in through Apple Health."
+        case .oura: return "Voice cues on your phone guide the session. Your Oura ring keeps recording on its own."
         case .garmin, .otherWatch: return "Voice cues on your phone guide the session. Your watch keeps recording on its own."
         case .phoneOnly: return "Voice cues on your phone. No gear needed."
         case .appleWatch: return "Follow it on your phone with voice cues, or send it to your watch."

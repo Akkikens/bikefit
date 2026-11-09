@@ -76,6 +76,7 @@ struct PlayerView: View {
                                steps: session.steps.enumerated().map { i, s in
                                    PhonePlayer.Step(name: s.name, seconds: s.seconds, target: s.target, sport: s.sport, cue: cue(at: i))
                                },
+                               engineID: session.engineID,
                                smoke: smoke)
         }
         .confirmationDialog("End this session?", isPresented: $confirmEnd, titleVisibility: .visible) {

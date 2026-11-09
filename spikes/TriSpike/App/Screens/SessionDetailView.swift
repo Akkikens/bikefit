@@ -67,7 +67,7 @@ struct SessionDetailView: View {
                 if setup.canSendToWatch {
                     WatchCard(line: session.watchLine)
                 } else {
-                    FollowCard(tracker: setup.tracker)
+                    FollowCard(tracker: setup.followDevice)
                 }
 
                 VStack(spacing: BL.Space.m) {
@@ -99,7 +99,7 @@ struct SessionDetailView: View {
     private var phaseLine: some View {
         HStack(spacing: BL.Space.s) {
             CompactJargon(term: Demo.currentPhase.glossaryTerm, font: BLFont.meta, ink: BL.textSecondary, textHeight: 20)
-            Text("Week \(Demo.currentWeek) of \(Demo.totalWeeks)").font(BLFont.meta).foregroundStyle(BL.textSecondary)
+            Text(Demo.weekLabel).font(BLFont.meta).foregroundStyle(BL.textSecondary)
             Spacer(minLength: 0)
         }
     }
@@ -111,8 +111,8 @@ struct SessionDetailView: View {
             items.append(Readout(label: "distance", value: "\(m)", unit: "m"))
         }
         items.append(Readout(label: "duration", value: "\(session.minutes)", unit: "min"))
-        items.append(Readout(label: session.targetLabel, value: session.headlineTarget?.value ?? "easy", unit: session.headlineTarget?.unit ?? "", ink: session.sport.ink))
-        items.append(Readout(label: "Training load", value: "\(session.estimatedLoad)", unit: "points", term: .load, estimated: true))
+        items.append(Readout(label: session.targetLabel, value: session.headlineTarget?.value ?? "easy", unit: session.headlineTarget?.unit ?? "", ink: session.sport.ink, estimated: session.targetsEstimated))
+        items.append(Readout(label: session.state == .done ? "Training load" : "Planned load", value: "\(session.loadPoints)", unit: "points", term: .load, estimated: session.loadEstimated))
         return items
     }
 

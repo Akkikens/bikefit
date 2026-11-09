@@ -21,9 +21,9 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>TriSpike reads your workouts to test how completed sessions match the plan that scheduled them.</string>
+	<string>Brickline reads your sleep, resting heart rate and heart rate variability to compare each night with your own usual range. It all stays on your phone.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>TriSpike saves workouts recorded by its phone interval player so they appear in Health.</string>
+	<string>Brickline saves workouts you record with its phone player so they appear in Health.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIBackgroundModes</key>

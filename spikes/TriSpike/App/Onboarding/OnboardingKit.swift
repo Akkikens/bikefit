@@ -244,8 +244,12 @@ struct OBFirstWeekItem: Identifiable {
     let sport: Sport
     let name: String
     let minutes: Int
+    let isTest: Bool
 }
 
+/// The plan preview. Every number comes from the engine through `EngineAdapter.preview`, so the preview, Today and
+/// Week agree: the same plan is built from the same answers.
+@MainActor
 enum OBPlan {
     static var dateRange: ClosedRange<Date> {
         let cal = Calendar.current
@@ -261,124 +265,47 @@ enum OBPlan {
         return max(0, days / 7)
     }
 
-    static let noRaceWeeks = 12
+    static func model(_ d: SetupData) -> EngineModel { EngineAdapter.shared.preview(for: d) }
 
-    /// Weeks shown in the preview: weeks to race clamped to 8 to 24, or a 12 week block with no race.
-    static func planWeeks(_ d: SetupData) -> Int {
-        d.noRaceYet ? noRaceWeeks : min(max(weeksUntil(d.raceDate), 8), 24)
-    }
+    /// Weeks in the plan the engine builds for these answers.
+    static func planWeeks(_ d: SetupData) -> Int { model(d).totalWeeks }
 
-    /// Phase lengths in weeks. Roughly 45 percent base, 30 build, 15 peak, 10 taper. Taper is at least 1 week and peak at least 1.
-    /// With no race there is one base phase. The demo plan reads the same numbers, so every screen agrees.
-    static func phaseWeeks(total w: Int, noRace: Bool) -> [(Phase, Int)] {
-        if noRace { return [(.base, w)] }
-        let taper = max(1, Int((Double(w) * 0.10).rounded()))
-        let base = Int((Double(w) * 0.45).rounded())
-        let build = Int((Double(w) * 0.30).rounded())
-        let peak = max(1, w - base - build - taper)
-        return [(.base, base), (.build, build), (.peak, peak), (.taper, taper)]
-    }
+    /// Phase lengths in weeks, from the engine's plan.
+    static func phaseWeeks(_ d: SetupData) -> [(Phase, Int)] { model(d).phases }
 
     static func phases(for d: SetupData) -> [OBPhase] {
-        let w = planWeeks(d)
-        let lengths = phaseWeeks(total: w, noRace: d.noRaceYet)
+        let list = phaseWeeks(d)
         if d.noRaceYet {
-            return [OBPhase(id: 0, term: .base, name: "Base", weeks: w,
+            return [OBPhase(id: 0, term: .base, name: "Base", weeks: planWeeks(d),
                             blurb: "Mostly easy swimming, riding and running to build a steady habit. When you pick a race, the plan grows from here.",
                             opacity: 0.45)]
         }
-        let weeks = Dictionary(uniqueKeysWithValues: lengths.map { ($0.0, $0.1) })
-        return [
-            OBPhase(id: 0, term: .base, name: "Base", weeks: weeks[.base] ?? 0,
-                    blurb: "Easy building. Mostly easy training that builds a steady habit.", opacity: 0.25),
-            OBPhase(id: 1, term: .build, name: "Build", weeks: weeks[.build] ?? 0,
-                    blurb: "Harder sessions are added. Your weekly time stays steady.", opacity: 0.5),
-            OBPhase(id: 2, term: .peak, name: "Peak", weeks: weeks[.peak] ?? 0,
-                    blurb: "Your biggest weeks, with sessions that feel like race day.", opacity: 0.75),
-            OBPhase(id: 3, term: .taper, name: "Taper", weeks: weeks[.taper] ?? 0,
-                    blurb: "Lighter weeks, so you arrive fresh.", opacity: 1.0)
-        ]
+        func blurb(_ p: Phase) -> String {
+            switch p {
+            case .base: "Easy building. Mostly easy training that builds a steady habit."
+            case .build: "Harder sessions are added. Your weekly time stays steady."
+            case .peak: "Your biggest weeks, with sessions that feel like race day."
+            case .taper: "Lighter weeks, so you arrive fresh."
+            }
+        }
+        func opacity(_ p: Phase) -> Double {
+            switch p { case .base: 0.25; case .build: 0.5; case .peak: 0.75; case .taper: 1.0 }
+        }
+        return list.enumerated().map { i, entry in
+            OBPhase(id: i, term: entry.0.glossaryTerm, name: entry.0.displayName, weeks: entry.1, blurb: blurb(entry.0), opacity: opacity(entry.0))
+        }
     }
 
-    /// Average session is about 65 minutes. Never fewer than 3, never more than the days plus 2, at most 12.
-    static func sessionsPerWeek(hours: Int, days: Int) -> Int {
-        let estimate = Int((Double(hours) * 60 / 65).rounded())
-        return min(12, min(max(estimate, 3), max(3, days + 2)))
-    }
+    /// Sessions in an average full week of the engine's plan.
+    static func sessionsPerWeek(_ d: SetupData) -> Int { model(d).sessionsPerWeek }
 
-    /// A short list of plain named sessions for week one. All easy, about 80 percent of the weekly hours.
+    /// The sessions of the first week with at least three sessions, as the engine placed them.
     static func firstWeek(_ d: SetupData) -> [OBFirstWeekItem] {
-        let days = OBDays.order.filter { d.trainingDays.contains($0) }
-        guard !days.isEmpty else { return [] }
-        let count = sessionsPerWeek(hours: d.hoursPerWeek, days: days.count)
-
-        // Sport order for the week. Swims are limited to the pool days you can reach.
-        let cycle: [Sport] = [.swim, .bike, .run, .swim, .bike, .run, .bike, .run, .swim, .bike, .run, .bike]
-        let poolDays = days.filter { d.poolDays.contains($0) }
-        let swimCap = poolDays.isEmpty ? 1 : poolDays.count
-        var sports: [Sport] = []
-        var swims = 0
-        var swapToBike = true
-        for s in cycle.prefix(count) {
-            if s == .swim {
-                if swims < swimCap { swims += 1; sports.append(.swim) }
-                else { sports.append(swapToBike ? .bike : .run); swapToBike.toggle() }
-            } else {
-                sports.append(s)
-            }
-        }
-        let longRide: Int? = count >= 4 ? sports.lastIndex(of: .bike) : nil
-
-        // Minutes: weights per session scaled to 80 percent of the weekly hours.
-        func weight(_ i: Int) -> Double {
-            if i == longRide { return 1.8 }
-            switch sports[i] { case .swim: return 0.8; case .bike: return 1.1; case .run: return 0.9 }
-        }
-        let weights = (0..<count).map(weight)
-        let totalWeight = weights.reduce(0, +)
-        let weekMinutes = Double(d.hoursPerWeek) * 60 * 0.8
-        let minutes: [Int] = weights.map { w in
-            let raw = w / totalWeight * weekMinutes
-            return max(20, Int((raw / 5).rounded()) * 5)
-        }
-
-        // Days: the long ride on a weekend day, swims on pool days, the rest spread out.
-        var counts: [Int: Int] = [:]
-        func pick(from candidates: [Int]) -> Int {
-            if let free = candidates.first(where: { counts[$0, default: 0] == 0 }) { return free }
-            if let free = days.first(where: { counts[$0, default: 0] == 0 }) { return free }
-            return days.min(by: { counts[$0, default: 0] < counts[$1, default: 0] }) ?? days[0]
-        }
-        func rank(_ i: Int) -> Int { i == longRide ? 0 : (sports[i] == .swim ? 1 : 2) }
-        var assigned = [Int](repeating: days[0], count: count)
-        for i in (0..<count).sorted(by: { (rank($0), $0) < (rank($1), $1) }) {
-            let candidates: [Int]
-            if i == longRide { candidates = [7, 1].filter { days.contains($0) } }
-            else if sports[i] == .swim { candidates = poolDays }
-            else { candidates = days }
-            let day = pick(from: candidates)
-            assigned[i] = day
-            counts[day, default: 0] += 1
-        }
-
-        // Names, in plain words.
-        var seen: [Sport: Int] = [:]
-        var items: [OBFirstWeekItem] = []
-        for i in 0..<count {
-            let sport = sports[i]
-            let nth = seen[sport, default: 0]
-            seen[sport] = nth + 1
-            let name: String
-            switch sport {
-            case .swim: name = nth == 0 ? "Easy swim with technique drills" : "Easy swim, steady laps"
-            case .bike: name = i == longRide ? "Long easy ride" : (nth == 0 ? "Easy ride" : "Comfortable ride")
-            case .run: name = d.experience == .firstTimer ? "Easy run and walk" : "Easy run"
-            }
-            items.append(OBFirstWeekItem(id: i, day: assigned[i], sport: sport, name: name, minutes: minutes[i]))
-        }
-        return items.sorted {
-            let a = OBDays.order.firstIndex(of: $0.day) ?? 0, b = OBDays.order.firstIndex(of: $1.day) ?? 0
-            return a == b ? $0.id < $1.id : a < b
+        let m = model(d)
+        let cal = m.calendar
+        return m.firstWeekSessions.enumerated().map { i, s in
+            let day = s.scheduledDate.map { cal.component(.weekday, from: $0) } ?? 2
+            return OBFirstWeekItem(id: i, day: day, sport: s.sport, name: s.name, minutes: s.minutes, isTest: s.isTest)
         }
     }
 }
